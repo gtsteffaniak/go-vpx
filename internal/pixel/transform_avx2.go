@@ -45,3 +45,6 @@ func LoadPixels8(s []byte) archsimd.Int32x8 {
 }
 func StorePixels8(s []byte, v archsimd.Int32x8) { store8(s, v.GetLo(), v.GetHi()) }
 func Max8(v archsimd.Int32x8) int32             { return Max4(v.GetLo().Max(v.GetHi())) }
+
+// FinishWide ends an AVX2 kernel before ordinary Go/SSE register moves.
+func FinishWide() { archsimd.ClearAVXUpperBits() }

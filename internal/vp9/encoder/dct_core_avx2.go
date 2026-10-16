@@ -17,6 +17,7 @@ func forwardDCT8AVX2(input []int16, stride int, output []int16) bool {
 	if !pixel.Enabled || stride < 8 || len(input) < 7*stride+8 || len(output) < 64 {
 		return false
 	}
+	defer pixel.FinishWide()
 	col := 0
 	lane0 := pixel.Load8(input[0*stride+col:])
 	lane1 := pixel.Load8(input[1*stride+col:])
@@ -121,6 +122,7 @@ func forwardDCT16AVX2(input []int16, stride int, output []int16) bool {
 	if !pixel.Enabled || stride < 16 || len(input) < 15*stride+16 || len(output) < 256 {
 		return false
 	}
+	defer pixel.FinishWide()
 	var tmp [256]int32
 	for col := 0; col < 16; col += 8 {
 		lane0 := pixel.Load8(input[0*stride+col:])

@@ -60,8 +60,23 @@ func packRows8(p []byte, off, stride int) archsimd.Uint8x16 {
 	return archsimd.BroadcastUint64x2(lo).SetElem(1, hi).ReshapeToUint8s()
 }
 
+// Four exact four-byte row loads fill one byte vector, eliminating the
+// per-row widening/setup of the 4x4 and 4x8 variance hot paths.
+func packRows4(p []byte, off, stride int) archsimd.Uint8x16 {
+	return archsimd.Uint32x4{}.SetElem(0, binary.LittleEndian.Uint32(p[off:])).SetElem(1, binary.LittleEndian.Uint32(p[off+stride:])).SetElem(2, binary.LittleEndian.Uint32(p[off+2*stride:])).SetElem(3, binary.LittleEndian.Uint32(p[off+3*stride:])).ReshapeToUint8s()
+}
+func pixelStatsQuads4(src []byte, ss int, ref []byte, rs, h int) (uint32, int32) {
+	var sse, sum archsimd.Int32x4
+	for y := 0; y < h; y += 4 {
+		sse, sum = pixelDiffAcc(sse, sum, packRows4(src, y*ss, ss), packRows4(ref, y*rs, rs))
+	}
+	return uint32(sum32(sse)), sum32(sum)
+}
+
 func pixelStatsSIMD(src []byte, srcStride int, ref []byte, refStride int, w, h int) (sse uint32, sum int32) {
 	switch {
+	case w == 4 && h%4 == 0:
+		return pixelStatsQuads4(src, srcStride, ref, refStride, h)
 	case w == 8:
 		return pixelStatsPairs8(src, srcStride, ref, refStride, h)
 	case w >= 16 && w&15 == 0:

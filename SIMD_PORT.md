@@ -107,6 +107,11 @@ unchanged; the independent 720p baseline now has L1=0 and EOB ratio=1.
 Adaptive-control coverage remains in the other oracle tests. CI retains
 the complete parity log as an artifact for future failed assertions.
 
+The [complete hosted CI run at `b9badbe3`](https://github.com/thesyncim/govpx/actions/runs/38950894545)
+passes all production gates, including native/purego suites, decoder
+conformance, encoder quality, libvpx oracles, exact encoder byte parity,
+and the 18/18 parity regression report.
+
 ## Performance and remaining limits
 
 The migration removes architecture-specific assembly maintenance; it does
@@ -238,7 +243,76 @@ unsafe row I/O; the block-limit-255 case retains exact int16 arithmetic.
 Local ARM64 comparisons reduced VP8 720p from 18.74 to 14.40 ms/frame with
 the narrow-register filter, then to 13.71 ms/frame with the copied byte
 pipeline before the final bounded row-I/O tuning. These are intermediate
-comparisons; the assembly baseline remains faster. Native x64 results for
-this checkpoint are pending. Variance64x64 improved from 508 to 309 ns,
+comparisons; the assembly baseline remains faster. Variance64x64 improved from 508 to 309 ns,
 and a fused SAD/sum/SSE pass reduced bottom-edge source metrics from 915
 to 203 ns. All measured kernels retain zero allocations.
+
+### Native amd64 measurements at `b9badbe3`
+
+The next [native workflow run](https://github.com/thesyncim/govpx/actions/runs/38950894532)
+used an AMD EPYC 7763 with AVX2 and no AVX512, rather than the EPYC 9V74
+used at `bb1a6ef3`. Both variants in this run use the same compiler and
+runner settings described above. Compare each SIMD result with its paired
+assembly baseline; the different hosts prevent attributing changes between
+these checkpoints solely to the code.
+
+| Operation | Assembly-era dispatch | Go SIMD dispatch | Time change |
+| --- | ---: | ---: | ---: |
+| VP8 loop filter, horizontal luma edges | 34.94 ns | 452.95 ns | +1,196.6% |
+| VP8 loop filter, vertical luma edges | 116.90 ns | 1,257.00 ns | +975.3% |
+| VP8 fast quantization | 6.864 ns | 39.955 ns | +482.1% |
+| VP8 forward DCT 4x4 | 8.770 ns | 15.370 ns | +75.3% |
+| VP9 inverse DCT 4x4 | 70.805 ns | 22.570 ns | -68.1% |
+| VP9 inverse DCT 8x8 | 373.75 ns | 185.10 ns | -50.5% |
+| VP9 forward DCT 16x16 | 1,281.50 ns | 242.25 ns | -81.1% |
+| VP9 horizontal filter 16x16 | 287.60 ns | 98.555 ns | -65.7% |
+| VP9 vertical filter 16x16 | 802.85 ns | 98.190 ns | -87.8% |
+| VP9 realtime 320x180 | 7.112 ms/frame | 5.504 ms/frame | -22.6% |
+| VP8 realtime 720p | 23.784 ms/frame | 121.698 ms/frame | +411.7% |
+| VP9 realtime 720p | 60.948 ms/frame | 43.964 ms/frame | -27.9% |
+
+All six VP8 encoder pairs take 409.6–418.9% more time with SIMD. The VP9
+paired ranges are 22.0–23.1% less time at 320x180 and 27.3–29.2% less time
+at 720p. VP8 remains a major unresolved performance gap. Every sample
+retains the output byte counts, encoded/dropped frame counts, and quantizer
+statistics/histograms listed above. VP8 and the smaller VP9 workload also
+retain their allocation counts. One of six VP9 720p SIMD samples records
+76 allocations over 60 input frames rather than the 75 in all other
+SIMD and assembly samples; the median remains 1.25 allocations per frame.
+All kernel samples report zero allocations.
+
+Separate profiles, captured after the timing pairs, retain raw `.pgo` files
+and flat/cumulative top tables for both codecs and variants. In the SIMD
+VP8 profile, loop filtering accounts for 48.9% cumulative CPU time;
+`packBytes` and `wideBytes` account for 18.9% and 13.1% flat time.
+`storeNarrowEdge16` accounts for 28.8% cumulative time, including packing.
+Fast quantization accounts for 9.0% cumulative time. These profiles point
+to byte packing, edge I/O, and quantization for the next optimization pass;
+their timings are excluded from the encoder comparison above.
+
+### SIMD width boundaries and VP8 quantization
+
+The next optimization restores fused VP8 quantization/dequantization/EOB,
+using unsigned high-half products for the full signed coefficient domain.
+ARM64 full-block quantization measures 2.46 ns versus 16.11 ns for the
+separate quantize/EOB walk. Full signed coefficient/table tests use the
+independent scalar encoder; negative rounding/quant tables retain fallback.
+VP8 720p improves from 14.225 to 12.820 ms/frame in six alternating pairs,
+with matching counts, quantizer statistics and zero allocations. The
+assembly baseline remains faster on ARM64.
+
+Four-byte row packing improves variance4x4 from 8.12 to 6.04 ns and
+variance4x8 from 15.62 to 9.15 ns. Eight-lane nonnegative two-tap prediction
+improves 16x16 bilinear prediction from 328 to 105 ns. Shape specialization
+removes four/eight-byte load branches from subpixel variance's inner loop,
+uses stride increments and integer multiply-adds: 16x16 improves from 72.7
+to 50.5 ns, 64x64 from 1,138 to 770 ns. All kernels report zero allocations.
+
+The EPYC7763 profile exposed legacy SSE register moves while AVX2 upper
+halves remained live. Go1.27.2's archsimd explicitly provides
+ClearAVXUpperBits for this boundary. Wide kernels now clear on scalar/memory
+return; loop-filter stores hand off six VEX memory stores to a 128-bit
+callee which clears before loading them. Packing uses a VEX zero load.
+Generated-code inspection confirms no legacy MOVUPS in the AVX2 arithmetic
+body before that handoff. ARM64 and live AVX2 parity pass; native x64 timing
+is required to establish the performance effect of this transition repair.

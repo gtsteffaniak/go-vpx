@@ -24,7 +24,7 @@ func mac(lo, hi archsimd.Int32x4, v, c archsimd.Int16x8) (archsimd.Int32x4, arch
 	return lo.Add(v.ExtendLo4ToInt32().Mul(c32)), hi.Add(high4(v).Mul(c32))
 }
 func packBytes(v archsimd.Int16x8) archsimd.Uint8x16 {
-	return v.Max(archsimd.Int16x8{}).Min(archsimd.BroadcastInt16x8(255)).ToBits().ReshapeToUint8s().PermuteOrZero(archsimd.LoadInt8x16Array(&packByteIndices))
+	return v.Max(archsimd.LoadInt16x8Array(&packZero16)).Min(archsimd.BroadcastInt16x8(255)).ToBits().ReshapeToUint8s().PermuteOrZero(archsimd.LoadInt8x16Array(&packByteIndices))
 }
 func store8(b []byte, lo, hi archsimd.Int32x4) {
 	storeBytes8(b, packBytes(lo.SaturateToInt16Concat(hi)))
@@ -36,6 +36,10 @@ func sumSquares(v archsimd.Int32x4) uint64 {
 	s := sqSumInt32(archsimd.Int64x2{}, v)
 	return uint64(s.GetElem(0)) + uint64(s.GetElem(1))
 }
+
+// A VEX load avoids Go 1.27's legacy MOVUPS from its zero XMM register
+// while a caller still has live AVX2 vectors.
+var packZero16 [8]int16
 
 var packByteIndices = [16]int8{0, 2, 4, 6, 8, 10, 12, 14, -128, -128, -128, -128, -128, -128, -128, -128}
 var packInt16Indices = [16]int8{0, 1, 4, 5, 8, 9, 12, 13, -128, -128, -128, -128, -128, -128, -128, -128}
@@ -101,3 +105,5 @@ func sumDiff16(v archsimd.Int16x8) archsimd.Int32x4 {
 
 func lfShift3(v archsimd.Int16x8) archsimd.Int16x8 { return v.ShiftAllRight(3) }
 func lfShift1(v archsimd.Int16x8) archsimd.Int16x8 { return v.ShiftAllRight(1) }
+
+func vp8MulHighU16(a, b archsimd.Uint16x8) archsimd.Uint16x8 { return a.MulHigh(b) }

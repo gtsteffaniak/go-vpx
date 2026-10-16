@@ -473,6 +473,7 @@ func vecWrap8(v archsimd.Int32x8)archsimd.Int32x8{return v.ShiftAllLeft(16).Shif
 		} else {
 			out += fmt.Sprintf("func inverseDCT%dAVX2(input []int16,dst []byte,stride,rows int)bool{\nif !pixel.Enabled||stride<%d||len(input)<%d*rows||len(dst)<%d*stride+%d{return false}\n", n, n, n, n-1, n)
 		}
+		out += "defer pixel.FinishWide()\n"
 		if n > 8 {
 			out += fmt.Sprintf("var tmp [%d]int32\n", n*n)
 			if pkg == "encoder" {

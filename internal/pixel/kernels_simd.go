@@ -33,7 +33,7 @@ func Stats(src []byte, ss int, ref []byte, rs, w, h int) (int, uint32) {
 		return StatsScalar(src, ss, ref, rs, w, h)
 	}
 
-	if (w == 8 || w >= 16 && w%16 == 0) && w <= 64 && h <= 64 {
+	if (w == 4 && h%4 == 0 || w == 8 || w >= 16 && w%16 == 0) && w <= 64 && h <= 64 {
 		sse, sum := pixelStatsSIMD(src, ss, ref, rs, w, h)
 		return int(sum), sse
 	}
@@ -94,6 +94,10 @@ func Subtract(src []byte, ss int, pred []byte, ps int, out []int16, os, w, h int
 func Filter(src []byte, ss int, dst []byte, ds, w, h, step int, taps []int16) {
 	if !Enabled {
 		FilterScalar(src, ss, dst, ds, w, h, step, taps)
+		return
+	}
+
+	if len(taps) == 2 && filterLinear8(src, ss, dst, ds, w, h, step, taps) {
 		return
 	}
 
@@ -360,6 +364,19 @@ func SubpelStats(src []byte, ss int, ref []byte, rs, w, h int, fx, fy [2]int16) 
 		return SubpelStatsScalar(src, ss, ref, rs, w, h, fx, fy)
 	}
 
+	if w == 4 {
+		return subpelStatsKernel[[4]byte](src, ss, ref, rs, w, h, fx, fy)
+	}
+	return subpelStatsKernel[[8]byte](src, ss, ref, rs, w, h, fx, fy)
+}
+
+// Fixed array shapes specialize exact four/eight-byte loads at compile time,
+// following goav1's sample-width specialization. No lane-size branch remains
+// in the selected row loop.
+func subpelStatsKernel[Packet interface{ [4]byte | [8]byte }](src []byte, ss int, ref []byte, rs, w, h int, fx, fy [2]int16) (int, uint32) {
+	var packet Packet
+	n := int(unsafe.Sizeof(packet))
+
 	// Each read is exactly n bytes. These endpoints prove all source and
 	// reference accesses, including the extra bilinear row and column, stay
 	// in the original allocations. Neither input is written or retained.
@@ -369,20 +386,19 @@ func SubpelStats(src []byte, ss int, ref []byte, rs, w, h int, fx, fy [2]int16) 
 	x0, x1, y0, y1 := archsimd.BroadcastInt16x8(fx[0]), archsimd.BroadcastInt16x8(fx[1]), archsimd.BroadcastInt16x8(fy[0]), archsimd.BroadcastInt16x8(fy[1])
 	round := archsimd.BroadcastInt16x8(64)
 	var sum, sse archsimd.Int32x4
-	n := 8
-	if w == 4 {
-		n = 4
-	}
 	for x := 0; x < w; x += n {
-		a := filterShift7(widen8(loadNPtr(unsafe.Add(sp, x), n)).Mul(x0).Add(widen8(loadNPtr(unsafe.Add(sp, x+1), n)).Mul(x1)).Add(round))
-		for y := range h {
-			p := unsafe.Add(sp, (y+1)*ss+x)
-			b := filterShift7(widen8(loadNPtr(p, n)).Mul(x0).Add(widen8(loadNPtr(unsafe.Add(p, 1), n)).Mul(x1)).Add(round))
-			v := filterShift7(a.Mul(y0).Add(b.Mul(y1)).Add(round))
+		a := filterShift7(mulAdd16(widen8(loadNPtr(unsafe.Add(sp, x), n)).Mul(x0).Add(round), widen8(loadNPtr(unsafe.Add(sp, x+1), n)), x1))
+		srcOff, refOff := ss+x, x
+		for range h {
+			p := unsafe.Add(sp, srcOff)
+			b := filterShift7(mulAdd16(widen8(loadNPtr(p, n)).Mul(x0).Add(round), widen8(loadNPtr(unsafe.Add(p, 1), n)), x1))
+			v := filterShift7(mulAdd16(a.Mul(y0).Add(round), b, y1))
 			a = b
-			d := v.Sub(widen8(loadNPtr(unsafe.Add(rp, y*rs+x), n)))
+			d := v.Sub(widen8(loadNPtr(unsafe.Add(rp, refOff), n)))
 			sum = sum.Add(sumDiff16(d))
 			sse = sse.Add(square8(d))
+			srcOff += ss
+			refOff += rs
 		}
 	}
 	return int(sum32(sum)), uint32(sum32(sse))

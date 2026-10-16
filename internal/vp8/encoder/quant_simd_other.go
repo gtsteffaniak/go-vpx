@@ -15,14 +15,7 @@ func fastQuantizeBlockSIMD(coeff *[16]int16, quant *BlockQuant, qcoeff *[16]int1
 	if !pixel.Enabled {
 		return fastQuantizeBlockScalar(coeff, quant, qcoeff, dqcoeff)
 	}
-	pixel.VP8Quant(coeff[:], quant.Round[:], quant.QuantFast[:], quant.Dequant[:], qcoeff[:], dqcoeff[:])
-	eob := 0
-	for i, rc := range tables.DefaultZigZag1D {
-		if qcoeff[rc] != 0 {
-			eob = i + 1
-		}
-	}
-	return eob
+	return pixel.QuantizeVP8Block(coeff, &quant.Round, &quant.QuantFast, &quant.Dequant, qcoeff, dqcoeff, &tables.DefaultInvZigZag)
 }
 
 func forwardDCT4x4SIMD(input []int16, stride int, output *[16]int16) {

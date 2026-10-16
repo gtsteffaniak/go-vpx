@@ -18,7 +18,9 @@ Copied from goav1 commit `ff46346e73f063ff1ea3a8d7f06ee26cd9baaad4`:
 
 ARM64 transform rounding also follows goav1's fixed register-shift technique
 from `fdct_gosimd_vec_arm64.go`; local wrapping uses truncation instead of
-AV1 saturation to preserve VP9 arithmetic.
+AV1 saturation to preserve VP9 arithmetic. Fixed sample-width specialization
+also follows `internal/av1/loopfilter/filter_lanes_gosimd.go`; the local
+subpixel kernel specializes four/eight-byte loads without row-loop branches.
 
 The adjacent checked entry points provide feature dispatch, dimensions,
 codec-specific rounding and clipping, tails and scalar fallbacks. AV1's

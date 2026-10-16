@@ -18,6 +18,7 @@ func filterWide8(src []byte, ss int, dst []byte, ds, w, h, step int, taps []int1
 	if mode == 0 {
 		return false
 	}
+	defer archsimd.ClearAVXUpperBits()
 	_ = src[(h-1)*ss+w-1+7*step]
 	_ = dst[(h-1)*ds+w-1]
 	sp, dp := unsafe.Pointer(unsafe.SliceData(src)), unsafe.Pointer(unsafe.SliceData(dst))

@@ -192,3 +192,9 @@ var lfRight1 = archsimd.BroadcastInt16x8(-1)
 
 func lfShift3(v archsimd.Int16x8) archsimd.Int16x8 { return v.Shift(lfRight3) }
 func lfShift1(v archsimd.Int16x8) archsimd.Int16x8 { return v.Shift(lfRight1) }
+
+func vp8MulHighU16(a, b archsimd.Uint16x8) archsimd.Uint16x8 {
+	lo := a.MulWidenLo(b).ReshapeToUint16s()
+	hi := a.HiToLo().MulWidenLo(b.HiToLo()).ReshapeToUint16s()
+	return lo.ConcatOdd(hi)
+}

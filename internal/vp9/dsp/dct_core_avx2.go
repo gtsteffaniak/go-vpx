@@ -17,6 +17,7 @@ func inverseDCT8AVX2(input []int16, dst []byte, stride, rows int) bool {
 	if !pixel.Enabled || stride < 8 || len(input) < 8*rows || len(dst) < 7*stride+8 {
 		return false
 	}
+	defer pixel.FinishWide()
 	row := 0
 	var lane0, lane1, lane2, lane3, lane4, lane5, lane6, lane7 archsimd.Int32x8
 	{
@@ -170,6 +171,7 @@ func inverseDCT16AVX2(input []int16, dst []byte, stride, rows int) bool {
 	if !pixel.Enabled || stride < 16 || len(input) < 16*rows || len(dst) < 15*stride+16 {
 		return false
 	}
+	defer pixel.FinishWide()
 	var tmp [256]int32
 	for row := 0; row < rows; row += 8 {
 		var lane0, lane1, lane2, lane3, lane4, lane5, lane6, lane7, lane8, lane9, lane10, lane11, lane12, lane13, lane14, lane15 archsimd.Int32x8
