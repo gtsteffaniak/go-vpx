@@ -9,6 +9,41 @@ import (
 	"testing"
 )
 
+func TestLoopFilterByteArithmetic(t *testing.T) {
+	if !Enabled {
+		t.Skip("native SIMD unavailable")
+	}
+	for base := -128; base < 128; base += 16 {
+		var values [16]int8
+		for i := range values {
+			values[i] = int8(base + i)
+		}
+		v := archsimd.LoadInt8x16Array(&values)
+		var one, three [16]int8
+		lfByteShift1(v).StoreArray(&one)
+		lfByteShift3(v).StoreArray(&three)
+		for i, x := range values {
+			if one[i] != x>>1 || three[i] != x>>3 {
+				t.Fatalf("byte shift %d: %d %d", x, one[i], three[i])
+			}
+		}
+		for delta := -255; delta <= 255; delta++ {
+			p, q := -128, -128+delta
+			if delta < 0 {
+				p, q = 127, 127+delta
+			}
+			var got [16]int8
+			lfFilterDelta(v, archsimd.BroadcastInt8x16(int8(p)), archsimd.BroadcastInt8x16(int8(q))).StoreArray(&got)
+			for i, outer := range values {
+				want := int8(max(-128, min(127, int(outer)+3*delta)))
+				if got[i] != want {
+					t.Fatalf("outer=%d delta=%d: %d, want %d", outer, delta, got[i], want)
+				}
+			}
+		}
+	}
+}
+
 func TestLoopFilterEdgeTileBoundsAndWrites(t *testing.T) {
 	if !Enabled {
 		t.Skip("native SIMD unavailable")

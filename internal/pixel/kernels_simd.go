@@ -33,9 +33,12 @@ func Stats(src []byte, ss int, ref []byte, rs, w, h int) (int, uint32) {
 		return StatsScalar(src, ss, ref, rs, w, h)
 	}
 
-	if (w == 4 && h%4 == 0 || w == 8 || w >= 16 && w%16 == 0) && w <= 64 && h <= 64 {
-		sse, sum := pixelStatsSIMD(src, ss, ref, rs, w, h)
-		return int(sum), sse
+	if (w == 4 && h%4 == 0 || w == 8 || w >= 16 && w%16 == 0) && w <= 64 {
+		if h <= 4096 {
+			sse, sum := pixelStatsSIMD(src, ss, ref, rs, w, h)
+			return int(sum), sse
+		}
+		return statsTallSIMD(src, ss, ref, rs, w, h)
 	}
 
 	var sums, squares archsimd.Int32x4
@@ -46,10 +49,8 @@ func Stats(src []byte, ss int, ref []byte, rs, w, h int) (int, uint32) {
 		x := 0
 		for ; x+8 <= w; x += 8 {
 			d := widen8(load8(a[x:])).Sub(widen8(load8(b[x:])))
-			lo := d.ExtendLo4ToInt32()
-			hi := high4(d)
-			sums = sums.Add(lo).Add(hi)
-			squares = squares.Add(lo.Mul(lo)).Add(hi.Mul(hi))
+			sums = sums.Add(sumDiff16(d))
+			squares = squares.Add(square8(d))
 		}
 		if x+4 <= w {
 			d := LoadPixels4(a[x:]).Sub(LoadPixels4(b[x:]))
@@ -619,4 +620,21 @@ func Mul16(a, b, out []int16, n int) {
 	for ; i < n; i++ {
 		out[i] = a[i] * b[i]
 	}
+}
+
+// Batch exceptionally tall strips to keep the signed vector sum exact in
+// int32. Width is at most 64, so a batch sums at most 64*4096*255. SSE
+// intentionally wraps modulo 2^32, matching StatsScalar.
+func statsTallSIMD(src []byte, ss int, ref []byte, rs, w, h int) (int, uint32) {
+	var totalSum int
+	var totalSSE uint32
+	for h > 4096 {
+		sse, sum := pixelStatsSIMD(src, ss, ref, rs, w, 4096)
+		totalSum += int(sum)
+		totalSSE += sse
+		src, ref = src[4096*ss:], ref[4096*rs:]
+		h -= 4096
+	}
+	sse, sum := pixelStatsSIMD(src, ss, ref, rs, w, h)
+	return totalSum + int(sum), totalSSE + sse
 }

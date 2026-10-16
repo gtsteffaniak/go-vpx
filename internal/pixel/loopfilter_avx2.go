@@ -7,6 +7,12 @@ import (
 )
 
 func loopFilterWide(p []byte, q0, step, outer, n, blimit, limit, thresh, kind int) bool {
+	if loopFilterByteWide(p, q0, step, outer, n, blimit, limit, thresh, kind) {
+		return true
+	}
+	return loopFilterWide16(p, q0, step, outer, n, blimit, limit, thresh, kind)
+}
+func loopFilterWide16(p []byte, q0, step, outer, n, blimit, limit, thresh, kind int) bool {
 	if (kind != 2 && kind != 4 && kind != 6) || n < 16 || (step != 1 && outer != 1) {
 		return false
 	}
@@ -84,3 +90,27 @@ func storeNarrowEdge16Memory(p []byte, off, step, outer, count int, words *[96]i
 		wideBytes(packBytes(archsimd.LoadInt16x8(words[80:])), packBytes(archsimd.LoadInt16x8(words[88:]))).Store(p[off+5*step:])
 	}
 }
+
+// Masking a word shift removes bits arriving from the adjacent byte.
+// Shifting biased unsigned bytes and subtracting the shifted bias gives
+// exact signed rounding without widening either half of the packet.
+func lfByteShift1(v archsimd.Int8x16) archsimd.Int8x16 {
+	u := v.ToBits().Xor(archsimd.BroadcastUint8x16(128)).ReshapeToUint16s().ShiftAllRight(1).ReshapeToUint8s()
+	return u.And(archsimd.BroadcastUint8x16(127)).Sub(archsimd.BroadcastUint8x16(64)).BitsToInt8()
+}
+func lfByteShift3(v archsimd.Int8x16) archsimd.Int8x16 {
+	u := v.ToBits().Xor(archsimd.BroadcastUint8x16(128)).ReshapeToUint16s().ShiftAllRight(3).ReshapeToUint8s()
+	return u.And(archsimd.BroadcastUint8x16(31)).Sub(archsimd.BroadcastUint8x16(16)).BitsToInt8()
+}
+func lfByteHalf(v archsimd.Uint8x16) archsimd.Uint8x16 {
+	return v.ReshapeToUint16s().ShiftAllRight(1).ReshapeToUint8s().And(archsimd.BroadcastUint8x16(127))
+}
+func lfByteLE(a, b archsimd.Uint8x16) archsimd.Mask8x16 {
+	return a.SubSaturated(b).Equal(archsimd.Uint8x16{})
+}
+func lfByteGT(a, b archsimd.Uint8x16) archsimd.Mask8x16 { return lfByteNot(lfByteLE(a, b)) }
+func lfTruncSigned(v archsimd.Int16x8) archsimd.Int8x16 {
+	return v.ToBits().ReshapeToUint8s().PermuteOrZero(archsimd.LoadInt8x16Array(&packByteIndices)).BitsToInt8()
+}
+
+func lfByteNot(v archsimd.Mask8x16) archsimd.Mask8x16 { return v.ToInt8x16().Equal(archsimd.Int8x16{}) }

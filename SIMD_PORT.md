@@ -290,6 +290,49 @@ Fast quantization accounts for 9.0% cumulative time. These profiles point
 to byte packing, edge I/O, and quantization for the next optimization pass;
 their timings are excluded from the encoder comparison above.
 
+### Native amd64 measurements at `6a7b0345`
+
+The next checkpoint fuses VP8 quantization/EOB, specializes small statistics
+and bilinear/subpixel shapes, and repairs AVX/legacy-SSE transitions around
+wide kernels. The Go 1.27.2 compiler emits legacy 128-bit register moves in
+some mixed-width code. Wide return boundaries now clear upper vector bits;
+the loop-filter handoff stores its wide results before entering 128-bit
+packing, with the clear before the callee's loads.
+
+The [native run](https://github.com/thesyncim/govpx/actions/runs/38953587137)
+uses an AMD EPYC 9V45 with AVX2 and AVX512, a different CPU from the preceding
+EPYC 7763 run. It cannot isolate the transition repair on that older CPU.
+Within-run baseline/compiler/settings and the six alternating pairs remain
+the same as above.
+
+| Operation | Assembly-era dispatch | Go SIMD dispatch | Time change |
+| --- | ---: | ---: | ---: |
+| VP8 horizontal luma loop-filter edges | 28.325 ns | 58.755 ns | +107.4% |
+| VP8 vertical luma loop-filter edges | 88.310 ns | 177.950 ns | +101.5% |
+| VP8 fast quantization | 3.603 ns | 5.174 ns | +43.6% |
+| VP9 inverse DCT 8x8 | 221.950 ns | 40.205 ns | -81.9% |
+| VP9 forward DCT 16x16 | 806.950 ns | 150.800 ns | -81.3% |
+| VP9 subpixel variance 16x16 | 114.500 ns | 54.475 ns | -52.4% |
+| VP9 realtime 320x180 | 4.587 ms/frame | 2.656 ms/frame | -42.1% |
+| VP8 realtime 720p | 12.271 ms/frame | 20.485 ms/frame | +66.9% |
+| VP9 realtime 720p | 39.922 ms/frame | 21.715 ms/frame | -45.6% |
+
+The VP8 encoder still takes 64.0–73.3% more time in every pair. The VP9
+paired ranges are 39.7–43.3% less time at 320x180 and 44.9–47.2% less time
+at 720p. Counts, encoded/dropped frames, and quantizer statistics agree in
+every sample. VP8 and VP9 320x180 allocations agree in every sample; one
+VP9 720p assembly sample records one extra allocation over 60 input frames,
+while all six SIMD samples retain 1.25 allocations per input frame.
+All kernel samples allocate zero bytes.
+
+The separate VP8 profile attributes 33.1% cumulative time to loop filtering,
+26.7% to the sixteen-position narrow filter, and 12.7% to statistics.
+`packBytes` accounts for 2.1% flat time; `wideBytes` no longer appears in
+the top 40. These profiles and the changed CPU do not establish how much
+each individual optimization contributes. Full raw timing/profile evidence,
+CPU metadata, a summary, and exact count/allocation details are retained in
+[the dated checkpoint directory](benchmarks/baselines/go127-simd-amd64/2026-10-16-6a7b0345).
+
 ### SIMD width boundaries and VP8 quantization
 
 The next optimization restores fused VP8 quantization/dequantization/EOB,
@@ -316,3 +359,31 @@ callee which clears before loading them. Packing uses a VEX zero load.
 Generated-code inspection confirms no legacy MOVUPS in the AVX2 arithmetic
 body before that handoff. ARM64 and live AVX2 parity pass; native x64 timing
 is required to establish the performance effect of this transition repair.
+
+
+### Byte filters and full-height statistics
+
+VP8 filter scoring compares full-height16-pixel strips. The old64-row
+statistics dispatch limit sent those strips to a slower loop. Native
+statistics now accept tall strips and batch at4096rows to bound signed
+accumulators while preserving modulo2^32 SSE. The generic tail also uses
+native widening square/dot-product helpers. Extreme signed sums and SSE
+wraparound are checked against the independent scalar loop.
+
+Exact2/4/6-column stores keep transposed values in registers and avoid the
+row array. Two/four-column filters use smaller transposes. The central
+filter correction uses monotone saturated byte additions instead of widened
+multiplication; all130,816 outer/delta combinations match scalar clamp
+arithmetic. Rounded macroblock corrections fit int8 before narrowing.
+The shared byte-domain path now also serves amd64, using128-bit vectors and
+AVX2-safe shifts/narrowing, avoiding the AVX2 wide-vector memory handoff for
+ordinary thresholds. The full int16 path retains the255-threshold boundary.
+Native ARM and Rosetta AVX2 pixel/DSP/encoder suites pass; native x64 timing
+of this alternative is pending.
+
+Six fresh ARM encoder pairs improve VP8720p from12.443 to11.202ms/frame
+(-10.0%) versus6a7b0345. VP9 varies+0.8% at320x180 and+0.6% at720p; those
+small differences do not establish an improvement. Counts, quantizers and
+allocations match in every sample. The original ARM assembly baseline
+remains faster. [Raw pairs and kernel evidence](benchmarks/baselines/go127-simd-arm64/2026-10-16-byte-filters)
+retain the workload and compiler context.

@@ -222,3 +222,34 @@ func TestDiffMetricsAndStatsExtremeSums(t *testing.T) {
 		}
 	}
 }
+
+func TestStatsTallStrips(t *testing.T) {
+	for _, w := range []int{4, 8, 16, 48, 64} {
+		for _, h := range []int{65, 720, 4096, 4101} {
+			ss, rs := w+3, w+7
+			for _, pair := range [][2]byte{{0, 255}, {255, 0}, {255, 255}} {
+				a := bytes.Repeat([]byte{pair[0]}, (h-1)*ss+w+1)
+				b := bytes.Repeat([]byte{pair[1]}, (h-1)*rs+w+3)
+				gotSum, gotSSE := Stats(a[1:], ss, b[3:], rs, w, h)
+				wantSum, wantSSE := StatsScalar(a[1:], ss, b[3:], rs, w, h)
+				if gotSum != wantSum || gotSSE != wantSSE {
+					t.Fatalf("%dx%d %v: (%d,%d), want (%d,%d)", w, h, pair, gotSum, gotSSE, wantSum, wantSSE)
+				}
+			}
+		}
+	}
+}
+
+func BenchmarkStatsTallStrip(b *testing.B) {
+	a, ref := make([]byte, 720*1312), make([]byte, 720*1344)
+	for i := range a {
+		a[i] = byte(i*37 + 11)
+	}
+	for i := range ref {
+		ref[i] = byte(i*19 + 53)
+	}
+	b.ReportAllocs()
+	for b.Loop() {
+		Stats(a, 1312, ref, 1344, 16, 720)
+	}
+}
