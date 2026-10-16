@@ -66,3 +66,6 @@ func SAD16Limit(src []byte, ss int, ref []byte, rs, h, limit int) (sum int) {
 func SAD16x4(src []byte, ss int, r0, r1, r2, r3 []byte, rs, h int, out *[4]uint32) {
 	SAD16x4Scalar(src, ss, r0, r1, r2, r3, rs, h, out)
 }
+
+func ProjectionCols16(src []byte, ss, w, rows, norm int, out []int16) bool { return false }
+func AverageQuad16(src []byte, ss int, out *[4]int32) bool                 { return false }

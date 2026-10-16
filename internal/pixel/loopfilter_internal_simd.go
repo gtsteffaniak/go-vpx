@@ -21,6 +21,12 @@ func LoopFilterInternal16(p []byte, step, outer, blimit, limit, thresh int) bool
 	if step > span || outer > span-step {
 		return false
 	}
+	if internalVerticalGeneric && step == 1 {
+		loopFilterBytes(p, 4, 1, outer, 16, blimit, limit, thresh, 4)
+		loopFilterBytes(p, 8, 1, outer, 16, blimit, limit, thresh, 4)
+		loopFilterBytes(p, 12, 1, outer, 16, blimit, limit, thresh, 4)
+		return true
+	}
 	loopFilterInternalEdge(p, 4*step, step, outer, blimit, limit, thresh)
 	loopFilterInternalEdge(p, 8*step, step, outer, blimit, limit, thresh)
 	loopFilterInternalEdge(p, 12*step, step, outer, blimit, limit, thresh)

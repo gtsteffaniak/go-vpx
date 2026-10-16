@@ -4054,5 +4054,5 @@
   "cpu": "AMD EPYC 7763 64-Core Processor (AVX2, no AVX512)",
   "toolchain": "go1.27.2 linux/amd64",
   "comparison_note": "All three variants measured on the same runner with all six order permutations; historical runs on different hosts do not isolate code changes.",
-  "ci_note": "Original3792 CI rejected a stale PGO fingerprint caused solely by two comment-spacing edits.4409 fully refreshes PGO/fingerprint without runtime source changes; its complete production CI is recorded separately."
+  "ci_note": "Original 3792 CI rejected a stale PGO fingerprint caused solely by two comment-spacing edits. 4409 fully refreshes PGO/fingerprint without runtime source changes. Its hosted CI passed source/PGO, native/purego, decoder conformance, quality, libvpx oracle and strict byte parity, then the next pushed checkpoint superseded it during the parity report."
 }

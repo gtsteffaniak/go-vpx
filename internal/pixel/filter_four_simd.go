@@ -10,6 +10,9 @@ import (
 // Odd VP8 interpolation phases have zero outer taps. The six-tap caller
 // proves the coefficient signs/bounds before omitting those unused inputs.
 func filterFourNarrow8(src []byte, ss int, dst []byte, ds, w, h, step int, taps []int16) {
+	if w != 4 && h > 1 && step == ss && filterVerticalFour8(src, ss, dst, ds, w, h, taps) {
+		return
+	}
 	c0, c1 := archsimd.BroadcastInt16x8(taps[0]), archsimd.BroadcastInt16x8(taps[1])
 	c2, c3 := archsimd.BroadcastInt16x8(taps[2]), archsimd.BroadcastInt16x8(taps[3])
 	bias := archsimd.BroadcastInt16x8(64)

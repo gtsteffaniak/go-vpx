@@ -25,7 +25,7 @@ jobs:
   benchmark:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.number == 23
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v6
         with:

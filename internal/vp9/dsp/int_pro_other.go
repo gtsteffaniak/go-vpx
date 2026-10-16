@@ -16,6 +16,9 @@ func intProRowStripsAsm(hbuf []int16, ref []byte, off, stride, height, strips in
 	return true
 }
 func intProColsAsm(vbuf []int16, ref []byte, off, stride, width, rows, norm int) bool {
+	if pixel.ProjectionCols16(ref[off:], stride, width, rows, norm, vbuf) {
+		return true
+	}
 	if !pixel.Enabled {
 		return false
 	}

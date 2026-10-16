@@ -785,3 +785,65 @@ keep the evidence and rejected variants.
 The final internal-filter sources also pass a full PGO refresh and pre-commit;
 the exact-source fingerprint is recorded with the profile. Broader final
 local/hosted validation is in progress.
+
+The 649237be internal-filter checkpoint passes full local native/purego,
+five-package race/checkptr1, strict byte parity, the 18/18 report and all
+source/architecture/PGO gates. Hosted CI is fully green as well. Native x64
+timing of the internal-filter change is still running.
+
+### Batched VP9 reductions and rolling VP8 prediction
+
+Copied goav1 four-row column projections replace repeated generic Sum calls;
+safe reads, VP9 normalization and remainder rows preserve exact int16
+semantics. Local x64 adaptation uses PSADBW. Four rounded 8x8 averages share
+sixteen-byte row loads: ARM accumulates four uint16 packets, x64 two PSADBW
+packets. These kernels remain self-contained. VP8 vertical six/four-tap
+prediction reuses five/three rows in registers; aliasing and overlapping
+output layouts retain previous eight-pixel sequencing. Small four-pixel
+blocks retain the existing path after an initial helper-call regression.
+
+Fresh six-pair ARM DSP comparisons improve averages 82.99%, tall column
+projections 68.63–76.87%, vertical 16x16 prediction 62.85%, both-axis dense
+16x16 40.31% and odd-phase 35.66%, all zero allocations. Four-pixel cases
+remain within roughly 1.2%. Ten balanced VP9 public quintets compare assembly,
+parent, isolated changes and their combination; combined time improves
+2.517%, nine of ten pairs faster. Six fresh final triples confirm
+12.550→12.188 ms (-2.887%), every pair faster (2.36–7.20%). VP8's fresh final
+-1.167% median has mixed paired results, so no stable whole-encoder VP8 gain
+is claimed from that set. All 104 public samples retain every recorded
+non-timing/allocation field within their codec/workload.
+
+Original ARM assembly still leads: the same-run prototype comparisons show
+30.76% extra VP8 time and 42.80% extra VP9 time. Profiles prove the new
+projection/average/rolling kernels execute; ARM and Rosetta five-package
+suites, three-package experiment-off and native-selection/span tests pass.
+LLVM confirms native NEON and x64 PSADBW generation. Native x64 performance
+of this checkpoint is pending. [Raw comparisons, rejected guard, final code,
+profiles and disassembly](benchmarks/baselines/go127-simd-arm64/2026-10-16-projection-average-rolling)
+retain the evidence.
+
+The exact final sources pass a full PGO refresh and pre-commit. Full final
+local/hosted validation is in progress; the native benchmark timeout now
+allows 25 minutes for the expanded matrix without changing acceptance gates.
+
+### Native x64 internal-filter result and architecture scope
+
+Hosted and native 649237be runs are fully green. EPYC 7763 horizontal
+internal filtering improves 51.540→44.795 ns (-13.09%, every pair faster),
+while vertical filtering regresses 124.550→128.100 ns (+2.85%, every pair
+slower). VP8 720p changes -0.61% with mixed pairs; VP9 +0.62% at 320p and
++0.35% at 720p are also mixed. No stable whole-encoder gain is established
+by these samples. Recorded output/quantizer fields match. VP9 720p has one
+extra-allocation sample in assembly and one in current (1.2667 versus usual
+1.25 allocations/input); parent samples remain 1.25. These are disclosed
+rather than described as exact allocation parity.
+[Raw native comparison and profiles](benchmarks/baselines/go127-simd-amd64/2026-10-16-649237be)
+keep the evidence. The next checkpoint scopes direct internal vertical
+stores to ARM and restores the measured general vertical body on x64,
+retaining x64's faster horizontal specialization. Its native timing is pending.
+
+After scoping the x64 vertical path, five-package ARM/Rosetta tests and a
+fresh PGO/pre-commit pass again. The complete ARM instruction region is
+byte-identical before/after this architecture-only choice (excluding its
+embedded 112-byte Go build-ID header), preserving the final ARM timing
+comparison. Raw hashes and disassembly are retained in the reduction evidence.

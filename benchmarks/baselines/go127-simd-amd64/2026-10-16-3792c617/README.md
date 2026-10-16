@@ -5,7 +5,7 @@
 - Current SIMD: `3792c61706a100f22e993636a6ba697fa4c091c6`.
 - Runtime-equivalent PGO/CI metadata repair: `44090994360fe6d441cb09c0d5b0262004c42f2e`.
 - [Native benchmark](https://github.com/thesyncim/govpx/actions/runs/38970557378) succeeded.
-- [Repaired hosted CI](https://github.com/thesyncim/govpx/actions/runs/38971105373) is tracked separately.
+- [Repaired hosted CI](https://github.com/thesyncim/govpx/actions/runs/38971105373) passed all gates through strict byte parity, then was superseded during the parity report by the next pushed checkpoint.
 
 Original 3792 CI rejected a stale PGO fingerprint after two comment-spacing
 changes made after profiling. Reverting only those spaces in an independent
