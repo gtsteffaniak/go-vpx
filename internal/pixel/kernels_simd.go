@@ -383,6 +383,9 @@ func SubpelStats(src []byte, ss int, ref []byte, rs, w, h int, fx, fy [2]int16) 
 	if w == 4 {
 		return subpelStatsKernel[[4]byte](src, ss, ref, rs, w, h, fx, fy)
 	}
+	if w%16 == 0 {
+		return subpelStats16(src, ss, ref, rs, w, h, fx, fy)
+	}
 	return subpelStatsKernel[[8]byte](src, ss, ref, rs, w, h, fx, fy)
 }
 

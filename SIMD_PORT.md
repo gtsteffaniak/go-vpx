@@ -642,3 +642,51 @@ samples. Original assembly still leads on ARM (new path +43.84% time).
 [Raw designs, public comparisons and live profiles](benchmarks/baselines/go127-simd-arm64/2026-10-16-paired-chroma-dc)
 retain the complete evidence. ARM and Rosetta AVX2 pixel/DSP/encoder suites
 pass; native x64 timing of the paired kernels is pending.
+
+The native ef35b4ba comparison resolves the paired-kernel timing on one
+EPYC 7763 runner (Go 1.27.2, SIMD, one thread, PGO off; all six variant
+orders). VP8 720p improves from parent 25.100→23.595ms (-5.99%), every pair
+faster (-6.65..-4.99%); assembly is 23.064ms, leaving a 2.30% gap. Paired DC
+improves 61.10% (56.89% exact in-place), and UV filters improve 42.70–55.29%,
+all allocation-free. VP9 320p/720p changes +0.13%/+1.36% versus parent have
+paired ranges crossing zero; versus assembly, time remains 35.93%/41.43%
+lower. Every byte count, encoded/dropped count, quantizer statistic/histogram,
+frame-size statistic and allocation count matches across all 18 samples
+per workload. [Raw three-variant evidence and profiles](benchmarks/baselines/go127-simd-amd64/2026-10-16-ef35b4ba)
+retain all samples; separate-host absolute timings do not isolate changes.
+Full local native/purego, five-package race/checkptr1, strict byte parity,
+18/18 report and source/selection/PGO gates pass; hosted CI and native
+three-variant benchmarks are both green.
+
+### Wider subpixel variance and non-flat VP9 packets
+
+Subpixel variance now processes sixteen pixels per iteration: two NEON
+int16 packets share complete row loads on ARM; AVX2 handles sixteen int16
+lanes and pairwise signed/squared reductions on amd64. Horizontal rows stay
+in registers. Safe slice reads preserve exact minimal bounds; four/eight
+pixel widths retain their prior path. All bilinear phases and byte extrema,
+zero/overlapping strides and misalignment match independent scalar results.
+ARM16x16/32x32/64x64 microbenchmarks improve about20%, with zero allocations.
+An unsafe ARM variant showed only0.64–1.15% extra median change and was not
+retained. A separate uint64-broadcast load experiment regressed10–12% and
+was discarded after disassembly showed additional VDUP instructions.
+
+VP9 eight/sixteen-tap filter entry points can use the existing byte-domain
+narrow arithmetic when no active position requires flat filtering. Any
+flat lane rejects the untouched packet into the original7/15-tap path;
+minimal windows, sparse-flat masks, overlap order and255 thresholds retain
+parity. Generated arithmetic shares the canonical copied goav1 network.
+Non-flat kernels improve43–53% in six initial ARM pairs; specializing the
+eight-position packet saves another2.9–6.7%. True flat packets pay for the
+extra test, measured explicitly in the attached final-code benchmark.
+
+Ten balanced quintets compare assembly, parent ef35b4ba, each isolated
+change and the final combination. ARM VP9 improves13.825→12.754ms/frame
+(-7.745%), all ten pairs faster (-9.65..-5.87%). VP8 remains within noise
+(+0.503% median, paired range -7.34..+11.74%). Every non-timing field and
+allocation count matches across100 samples. Assembly still leads on ARM:
+VP8 +43.33%, VP9 +46.86% time. These remaining gaps are unresolved.
+[Raw public/kernel comparisons, rejected design, live profile and code](benchmarks/baselines/go127-simd-arm64/2026-10-16-wide-subpel-nonflat)
+preserve the evidence. Five pixel/DSP/encoder packages pass natively and
+under Rosetta AVX2; PGO is refreshed and pre-commit passes. Native x64
+performance of the new wider/filter paths is pending.

@@ -25,7 +25,9 @@ func LoopFilter(p []byte, q0, step, outer, n, blimit, limit, thresh, kind int) b
 		return true
 	}
 	for base := 0; base < n; base += 8 {
-		loopFilter8(p, q0+base*outer, step, outer, blimit, limit, thresh, kind)
+		if !loopFilterNonFlat(p, q0+base*outer, step, outer, blimit, limit, thresh) {
+			loopFilter8(p, q0+base*outer, step, outer, blimit, limit, thresh, kind)
+		}
 	}
 	return true
 }
