@@ -2,10 +2,8 @@ package dsp
 
 import "github.com/thesyncim/govpx/internal/pixel"
 
-// Scalar dispatchers for the non-arm64 / purego build path. These
-// expose the canonical Idct/Iwht/Iht entry points used by the VP9
-// decoder. On arm64 (non-purego) builds, idct_dispatch_arm64.go
-// replaces these with NEON-accelerated implementations.
+// Shared Idct/Iwht/Iht dispatchers use Go SIMD when available and
+// retain the independent scalar transforms for fallback builds.
 
 // Idct4x4_16Add applies the full 4x4 inverse DCT to a 16-coefficient
 // block and adds the result onto dest.

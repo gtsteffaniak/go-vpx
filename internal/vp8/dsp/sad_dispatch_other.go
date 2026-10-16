@@ -5,21 +5,20 @@ import (
 	"unsafe"
 )
 
-// Pure-Go fallback for the SAD primitives on architectures without a SIMD
-// port. Mirrors libvpx v1.16.0 vpx_dsp/sad.c semantics.
+// Shared SAD dispatch mirrors libvpx v1.16.0 vpx_dsp/sad.c semantics.
+// The pixel package selects Go SIMD or its scalar fallback.
 
 func sadBlock16x16(src []byte, srcStride int, ref []byte, refStride int) int {
 	return pixel.SAD16(src, srcStride, ref, refStride, 16)
 }
 
-// SAD16x16PtrFast is the pointer-form fallback used when callers have
-// already validated bounds. See sad_dispatch_arm64.go for the contract.
+// SAD16x16PtrFast requires readable 16x16 blocks at the supplied strides.
 func SAD16x16PtrFast(src *byte, srcStride int, ref *byte, refStride int) int {
 	return pixel.SAD16(unsafe.Slice(src, 15*srcStride+16), srcStride, unsafe.Slice(ref, 15*refStride+16), refStride, 16)
 }
 
-// SAD16x16LimitPtrFast is the limited pointer-form fallback. See
-// sad_dispatch_arm64.go for the contract.
+// SAD16x16LimitPtrFast returns after the first row exceeding limit.
+// Both pointers must address readable 16x16 blocks.
 func SAD16x16LimitPtrFast(src *byte, srcStride int, ref *byte, refStride int, limit int) int {
 	return sadBlockLimitScalarPtr(src, srcStride, ref, refStride, 16, 16, limit)
 }
@@ -29,7 +28,7 @@ func SAD16x16x4PtrFast(src *byte, srcStride int, ref0 *byte, ref1 *byte, ref2 *b
 	pixel.SAD16x4(unsafe.Slice(src, 15*srcStride+16), srcStride, unsafe.Slice(ref0, 15*refStride+16), unsafe.Slice(ref1, 15*refStride+16), unsafe.Slice(ref2, 15*refStride+16), unsafe.Slice(ref3, 15*refStride+16), refStride, 16, out)
 }
 
-// SAD16x16x4LimitPtrFast is the pointer-form x4 limited fallback.
+// SAD16x16x4LimitPtrFast evaluates each reference with its own row limit.
 func SAD16x16x4LimitPtrFast(src *byte, srcStride int, ref0 *byte, ref1 *byte, ref2 *byte, ref3 *byte, refStride int, limits *[4]int32, out *[4]uint32) {
 	out[0] = uint32(sadBlockLimitScalarPtr(src, srcStride, ref0, refStride, 16, 16, int(limits[0])))
 	out[1] = uint32(sadBlockLimitScalarPtr(src, srcStride, ref1, refStride, 16, 16, int(limits[1])))

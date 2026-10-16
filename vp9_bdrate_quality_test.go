@@ -203,7 +203,12 @@ func TestVP9BDRateARNR(t *testing.T) {
 			o.RateControlModeSet = true
 			o.RateControlMode = govpx.RateControlVBR
 			o.AutoAltRef = true
-			o.ARNRMaxFrames = 0
+			// Keep the one-pass ARF reference-selection policy identical:
+			// ARNRMaxFrames > 1 also controls group reference selection,
+			// independently of temporal filtering. Toggle only strength.
+			o.ARNRMaxFrames = 5
+			o.ARNRStrength = 0
+			o.ARNRType = 3
 		},
 		Test: func(o *govpx.VP9EncoderOptions) {
 			o.Deadline = govpx.DeadlineRealtime

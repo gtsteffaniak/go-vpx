@@ -2,13 +2,7 @@ package dsp
 
 import "github.com/thesyncim/govpx/internal/pixel"
 
-// Scalar size-specialized variance helpers. Architectures with SIMD
-// support override these via variance_amd64.go / variance_arm64.go.
-
-// varWindowOK, finalVariance, varianceSimd* are defined in the SIMD
-// variants; the scalar build doesn't need them. The size-specialized
-// helpers below shadow the SIMD-build versions when the platform isn't
-// supported (or purego is requested).
+// Size-specialized variance helpers share Go SIMD and scalar kernels.
 
 func varianceStatsStandard(w, h int, src []uint8, srcOff, srcStride int,
 	ref []uint8, refOff, refStride int,

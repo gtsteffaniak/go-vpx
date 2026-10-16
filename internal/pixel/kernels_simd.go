@@ -97,6 +97,10 @@ func Filter(src []byte, ss int, dst []byte, ds, w, h, step int, taps []int16) {
 		return
 	}
 
+	if step == ss && filterVertical8(src, ss, dst, ds, w, h, taps) {
+		return
+	}
+
 	if w == 4 {
 		bias := archsimd.BroadcastInt32x4(64)
 		var c [8]archsimd.Int32x4

@@ -1,6 +1,7 @@
 package benchcmd
 
 import (
+	"errors"
 	"math"
 	"testing"
 )
@@ -27,6 +28,37 @@ func TestBDRateZeroOnIdenticalCurves(t *testing.T) {
 	}
 	if math.Abs(psnr) > 1e-6 {
 		t.Fatalf("BDPSNR(identical) = %g, want ~0", psnr)
+	}
+}
+
+func TestBDMetricsAllowDuplicateDependentValues(t *testing.T) {
+	// Duplicate encoded byte counts do not make PSNR -> log(rate)
+	// singular. Scaling every rate by two still has an exact +100% delta.
+	ref := []QualityPoint{{100, 30}, {100, 33}, {200, 36}, {400, 39}}
+	test := make([]QualityPoint, len(ref))
+	for i, p := range ref {
+		test[i] = QualityPoint{p.Rate * 2, p.PSNR}
+	}
+	bd, err := BDRate(ref, test)
+	if err != nil || math.Abs(bd-100) > 0.01 {
+		t.Fatalf("BDRate with repeated rates = %g, %v; want +100%%", bd, err)
+	}
+	if _, err := BDPSNR(ref, test); !errors.Is(err, errBDRateDuplicateAxis) {
+		t.Fatalf("BDPSNR with repeated rates: got %v, want duplicate-axis error", err)
+	}
+
+	// Conversely, repeated qualities are valid dependent values for
+	// log(rate) -> PSNR. A constant quality shift integrates to +3 dB.
+	ref = []QualityPoint{{100, 30}, {200, 30}, {400, 36}, {800, 39}}
+	for i, p := range ref {
+		test[i] = QualityPoint{p.Rate, p.PSNR + 3}
+	}
+	psnr, err := BDPSNR(ref, test)
+	if err != nil || math.Abs(psnr-3) > 0.001 {
+		t.Fatalf("BDPSNR with repeated qualities = %g, %v; want +3 dB", psnr, err)
+	}
+	if _, err := BDRate(ref, test); !errors.Is(err, errBDRateDuplicateAxis) {
+		t.Fatalf("BDRate with repeated qualities: got %v, want duplicate-axis error", err)
 	}
 }
 
@@ -118,7 +150,7 @@ func TestBDRateVCEGCanonical(t *testing.T) {
 }
 
 // TestBDRateRejectsBadInputs: degenerate inputs (too few points,
-// duplicate rates, NaN, Inf) must be reported as errors instead of
+// duplicate independent values, NaN, Inf) must be reported as errors instead of
 // silently producing nonsense.
 func TestBDRateRejectsBadInputs(t *testing.T) {
 	good := []QualityPoint{
@@ -138,7 +170,7 @@ func TestBDRateRejectsBadInputs(t *testing.T) {
 			test: good,
 		},
 		{
-			name: "duplicate rates",
+			name: "duplicate points",
 			ref:  good,
 			test: []QualityPoint{good[0], good[0], good[1], good[2]},
 		},

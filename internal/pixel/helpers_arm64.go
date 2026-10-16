@@ -57,3 +57,47 @@ func highBytes(v archsimd.Uint8x16) archsimd.Uint8x16 { return v.HiToLo() }
 func permute16(v, i archsimd.Uint8x16) archsimd.Uint8x16 { return v.LookupOrZero(i) }
 
 func highU16(v archsimd.Uint16x8) archsimd.Uint16x8 { return v.HiToLo() }
+
+// Keep the eight-tap vertical window in registers. Adjacent output rows
+// share seven input rows; only the incoming row needs another memory load.
+func filterVertical8(src []byte, ss int, dst []byte, ds, w, h int, taps []int16) bool {
+	if len(taps) != 8 || w <= 0 || w%8 != 0 || h <= 0 || ss < 0 || ds < 0 {
+		return false
+	}
+	_ = src[(h+6)*ss+w-1]
+	_ = dst[(h-1)*ds+w-1]
+	sp := unsafe.Pointer(unsafe.SliceData(src))
+	c0 := archsimd.BroadcastInt16x8(taps[0])
+	c1 := archsimd.BroadcastInt16x8(taps[1])
+	c2 := archsimd.BroadcastInt16x8(taps[2])
+	c3 := archsimd.BroadcastInt16x8(taps[3])
+	c4 := archsimd.BroadcastInt16x8(taps[4])
+	c5 := archsimd.BroadcastInt16x8(taps[5])
+	c6 := archsimd.BroadcastInt16x8(taps[6])
+	c7 := archsimd.BroadcastInt16x8(taps[7])
+	bias := archsimd.BroadcastInt32x4(64)
+	for x := 0; x < w; x += 8 {
+		p0 := widen8(loadNPtr(unsafe.Add(sp, 0*ss+x), 8))
+		p1 := widen8(loadNPtr(unsafe.Add(sp, 1*ss+x), 8))
+		p2 := widen8(loadNPtr(unsafe.Add(sp, 2*ss+x), 8))
+		p3 := widen8(loadNPtr(unsafe.Add(sp, 3*ss+x), 8))
+		p4 := widen8(loadNPtr(unsafe.Add(sp, 4*ss+x), 8))
+		p5 := widen8(loadNPtr(unsafe.Add(sp, 5*ss+x), 8))
+		p6 := widen8(loadNPtr(unsafe.Add(sp, 6*ss+x), 8))
+		for y := 0; y < h; y++ {
+			p7 := widen8(loadNPtr(unsafe.Add(sp, (y+7)*ss+x), 8))
+			lo, hi := bias, bias
+			lo, hi = mac(lo, hi, p0, c0)
+			lo, hi = mac(lo, hi, p1, c1)
+			lo, hi = mac(lo, hi, p2, c2)
+			lo, hi = mac(lo, hi, p3, c3)
+			lo, hi = mac(lo, hi, p4, c4)
+			lo, hi = mac(lo, hi, p5, c5)
+			lo, hi = mac(lo, hi, p6, c6)
+			lo, hi = mac(lo, hi, p7, c7)
+			store8(dst[y*ds+x:], lo.ShiftAllRight(7), hi.ShiftAllRight(7))
+			p0, p1, p2, p3, p4, p5, p6 = p1, p2, p3, p4, p5, p6, p7
+		}
+	}
+	return true
+}

@@ -69,3 +69,5 @@ func permute16(v, i archsimd.Uint8x16) archsimd.Uint8x16 { return v.PermuteOrZer
 func highU16(v archsimd.Uint16x8) archsimd.Uint16x8 {
 	return v.ReshapeToUint32s().PermuteScalars(2, 3, 0, 1).ReshapeToUint16s()
 }
+
+func filterVertical8(src []byte, ss int, dst []byte, ds, w, h int, taps []int16) bool { return false }

@@ -2,9 +2,8 @@ package dsp
 
 import "github.com/thesyncim/govpx/internal/pixel"
 
-// Pure-Go fallback for VP8 4x4 intra-prediction primitives. Mirrors
-// libvpx v1.16.0 vp8/common/reconintra4x4.c semantics. The amd64/arm64
-// build tags carry SIMD-accelerated kernels with byte-identical output.
+// Shared VP8 4x4 intra-prediction dispatch mirrors libvpx v1.16.0
+// vp8/common/reconintra4x4.c, using Go SIMD when enabled.
 
 func intra4x4DCPredict(dst []byte, dstStride int, above []byte, left []byte) {
 	if pixel.Enabled {

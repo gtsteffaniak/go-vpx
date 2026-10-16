@@ -2,9 +2,8 @@ package dsp
 
 import "github.com/thesyncim/govpx/internal/pixel"
 
-// Scalar size-specialized sub-pixel variance helpers. Architectures
-// with SIMD support override these via subpel_variance_amd64.go /
-// subpel_variance_arm64.go.
+// Size-specialized subpixel variance dispatchers share Go SIMD and scalar
+// implementations through the pixel package.
 
 func subPixelVariance64x64(src []uint8, srcOff, srcStride, xOffset, yOffset int, ref []uint8, refOff, refStride int, sse *uint32) uint32 {
 	return subPixelVarianceGo(64, 64, src, srcOff, srcStride, xOffset, yOffset, ref, refOff, refStride, sse)

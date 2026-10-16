@@ -40,6 +40,8 @@ encode/decode.
 
 ## Performance
 
+Historical assembly baseline (before the Go 1.27 SIMD migration; see
+[SIMD_PORT.md](SIMD_PORT.md) for current measurements and limitations):
 720p realtime, 30 fps, 2.5 Mbps CBR, `cpu-used=8`, Apple M4 Max, Go 1.26.3,
 measured 2026-07-16 against libvpx v1.16.0's own reported encode times
 (identical output bytes and drop topology in every encode row):
