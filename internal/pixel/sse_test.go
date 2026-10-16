@@ -54,3 +54,34 @@ func TestSquaredErrorOnly(t *testing.T) {
 		}
 	}
 }
+
+// Read-only rows may overlap, including a zero stride. SIMD must preserve
+// the scalar sum for those layouts without reading beyond the last window.
+func TestSquaredErrorOverlappingRows(t *testing.T) {
+	for _, w := range []int{8, 16} {
+		for _, h := range []int{1, 3, 65, 8193} {
+			for _, ss := range []int{0, 1, w - 1} {
+				for _, rs := range []int{0, 2, w - 2} {
+					a, b := make([]byte, (h-1)*ss+w+3), make([]byte, (h-1)*rs+w+5)
+					a, b = a[3:], b[5:]
+					for i := range a {
+						a[i] = byte(i*19 + 53)
+					}
+					for i := range b {
+						b[i] = byte(i*37 + 11)
+					}
+					_, want := StatsScalar(a, ss, b, rs, w, h)
+					var got uint32
+					if w == 8 {
+						got = SSE8(a, ss, b, rs, h)
+					} else {
+						got = SSE16(a, ss, b, rs, h)
+					}
+					if got != want {
+						t.Fatalf("%dx%d strides %d/%d: %d != %d", w, h, ss, rs, got, want)
+					}
+				}
+			}
+		}
+	}
+}

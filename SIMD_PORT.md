@@ -24,13 +24,13 @@ are outside the repository's assembly exclusion check.
 | Prediction/filtering | VP8 six-tap and bilinear, VP9 eight-tap and averaging, DC/TM/V/H and directional intra, VP8/VP9 loop filters |
 | Residuals | Subtraction, nonzero detection, VP8 block-scan gather, coefficient error/energy/absolute sums |
 | VP8 transforms | Forward/inverse DCT and Walsh, DC-only and paired reconstruction, dequantization and quantization |
-| VP9 transforms | Forward DCT/ADST 4/8/16, inverse DCT 4/8/16/32 and ADST hybrids, sparse/DC variants, lossless Walsh, Hadamard and quantization |
+| VP9 transforms | Forward DCT 4/8/16/32 and ADST 4/8/16, inverse DCT 4/8/16/32 and ADST hybrids, sparse/DC variants, lossless Walsh, Hadamard and quantization |
 | Temporal processing | ARNR accumulation and VP8 denoiser first pass |
 | Bitstream packing | Serial Go bit-packing replaces the former assembly helper; its bit-order contract remains independently tested |
 
 The new 32-point inverse DCT and directional intra paths extend SIMD
-coverage beyond the former assembly dispatch. Forward 32-point transforms,
-scaled-coordinate convolution, and other existing scalar operations retain
+coverage beyond the former assembly dispatch. Scaled-coordinate convolution
+and other existing scalar operations retain
 Go implementations.
 
 The self-contained `internal/pixel` package holds copied goav1 SAD,
@@ -559,3 +559,44 @@ ms/frame in the same run, so the new path still trails by 42.48%.
 retains all variants. ARM and Rosetta AVX2 pixel/DSP/encoder suites pass.
 Native x64 CI now compares the parent commit in the same runner alongside
 head and the original baseline, with balanced execution order.
+
+
+### Same-runner parent comparison
+
+The 5a0cc122 native x64 run on EPYC 7763 compares the parent bd25795a and
+current kernels alongside original main. VP8 720p improves 27.003→25.051ms
+(-7.23%), with all six pairs faster; assembly is 23.191ms (current +8.02%).
+VP9 320 improves 0.33% and 720 varies+0.75%, small/noisy changes, while remaining
+36.09% and41.73% faster than the original baseline. Every output/count,
+quantizer and allocation field matches across all 18 samples per workload.
+[Raw three-variant evidence](benchmarks/baselines/go127-simd-amd64/2026-10-16-5a0cc122)
+includes balanced order and environment. Full local native/purego,
+race/checkptr1, strict byte parity, 18/18 report and hosted CI all pass.
+
+### Additional forward32 coverage and full-width x64 scoring
+
+Both VP9 32x32 forward variants now select four-lane native SIMD on ARM64
+and x64 for 8-bit residuals. The generated network retains the scalar
+rounding stage; the RD form rounds after stage 2, while precision rounds at
+the final store. Full-signed inputs retain the independent scalar function.
+1424 native differential cases include every cosine-sign frequency pair,
+minimal/misaligned buffers and exact in-place operation. Pinned libvpx
+fixtures and codec caller tests pass. Conservative affine bounds including
+each rounding error keep intermediate int32 arithmetic below its limit.
+
+Six ARM pairs improve precise 32 from 4699.5→2084.5ns (-55.64%) and RD from
+4709.5→1953.5ns (-58.52%), with zero allocations. Realtime public encoder
+measurements do not establish a speedup from this added coverage.
+Fixed four/eight-byte filter column tiles also remove repeated row-width
+branches and unused simple-filter transpose outputs. Two independent six-pair
+runs improve vertical internal edges by 2.40% and1.57%; public changes remain
+noise. A fixed-shift32 variant was rejected for lack of a measured gain.
+[Raw evidence and bounds](benchmarks/baselines/go127-simd-arm64/2026-10-16-dct32-filter-loads)
+retain all accepted/rejected variants and public output statistics.
+
+The x64 sixteen-pixel SSE kernel now widens each full row to AVX2 int16
+lanes and uses a full-width pairwise dot product. Safe slice loads preserve
+exact bounds, including overlapping read-only rows and zero strides.
+AVX2 upper bits clear at return; generated-code inspection finds no legacy
+XMM moves in the YMM loop. Full pixel/DSP/encoder suites pass on ARM and
+Rosetta AVX2. Native x64 performance of this candidate is pending.

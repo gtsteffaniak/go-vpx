@@ -45,19 +45,39 @@ func loadLFByte(p []byte, off, lanes int) archsimd.Uint8x16 {
 	}
 	return archsimd.LoadUint8x16Array((*[16]byte)(ptr))
 }
-func loadLFColumnTile(p []byte, off, pitch, width int) (archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16) {
+
+// The filter entry point has already proved the complete tile. Each shape
+// reads only its exact four/eight bytes, with no per-row width dispatch.
+func loadLFColumnTile[Size [4]byte | [8]byte](p []byte, off, pitch int) (archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16) {
 	ptr := unsafe.Add(unsafe.Pointer(unsafe.SliceData(p)), off)
-	return transposeBytes8(loadNPtr(ptr, width), loadNPtr(unsafe.Add(ptr, pitch), width), loadNPtr(unsafe.Add(ptr, 2*pitch), width), loadNPtr(unsafe.Add(ptr, 3*pitch), width), loadNPtr(unsafe.Add(ptr, 4*pitch), width), loadNPtr(unsafe.Add(ptr, 5*pitch), width), loadNPtr(unsafe.Add(ptr, 6*pitch), width), loadNPtr(unsafe.Add(ptr, 7*pitch), width))
+	row := func(y int) archsimd.Uint8x16 {
+		at := unsafe.Add(ptr, y*pitch)
+		var size Size
+		if unsafe.Sizeof(size) == 4 {
+			return archsimd.Uint32x4{}.SetElem(0, *(*uint32)(at)).ReshapeToUint8s()
+		}
+		return archsimd.Uint64x2{}.SetElem(0, *(*uint64)(at)).ReshapeToUint8s()
+	}
+	var size Size
+	if unsafe.Sizeof(size) == 4 {
+		a0, a1 := zipBytesLo(row(0), row(1)), zipBytesLo(row(2), row(3))
+		a2, a3 := zipBytesLo(row(4), row(5)), zipBytesLo(row(6), row(7))
+		b0, b2 := a0.InterleaveLo(a1).ReshapeToUint32s(), a2.InterleaveLo(a3).ReshapeToUint32s()
+		c01, c23 := b0.InterleaveLo(b2).ReshapeToUint8s(), b0.InterleaveHi(b2).ReshapeToUint8s()
+		z := archsimd.Uint8x16{}
+		return c01, highBytes(c01), c23, highBytes(c23), z, z, z, z
+	}
+	return transposeBytes8(row(0), row(1), row(2), row(3), row(4), row(5), row(6), row(7))
 }
 func joinLFBytes(a, b archsimd.Uint8x16) archsimd.Uint8x16 {
 	return a.ReshapeToUint64s().InterleaveLo(b.ReshapeToUint64s()).ReshapeToUint8s()
 }
-func loadLFColumns(p []byte, off, pitch, width, lanes int) (archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16) {
-	a0, a1, a2, a3, a4, a5, a6, a7 := loadLFColumnTile(p, off, pitch, width)
+func loadLFColumns[Size [4]byte | [8]byte](p []byte, off, pitch, lanes int) (archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16) {
+	a0, a1, a2, a3, a4, a5, a6, a7 := loadLFColumnTile[Size](p, off, pitch)
 	if lanes == 8 {
 		return a0, a1, a2, a3, a4, a5, a6, a7
 	}
-	b0, b1, b2, b3, b4, b5, b6, b7 := loadLFColumnTile(p, off+8*pitch, pitch, width)
+	b0, b1, b2, b3, b4, b5, b6, b7 := loadLFColumnTile[Size](p, off+8*pitch, pitch)
 	return joinLFBytes(a0, b0), joinLFBytes(a1, b1), joinLFBytes(a2, b2), joinLFBytes(a3, b3), joinLFBytes(a4, b4), joinLFBytes(a5, b5), joinLFBytes(a6, b6), joinLFBytes(a7, b7)
 }
 func lfAbsByte(a, b archsimd.Uint8x16) archsimd.Uint8x16 { return a.Max(b).Sub(a.Min(b)) }
@@ -74,15 +94,11 @@ func lfMacroCorrection(f archsimd.Int8x16, c int16) archsimd.Int8x16 {
 func loopFilterBytes(p []byte, off, step, outer, lanes, blimit, limit, thresh, kind int) {
 	var p3, p2, p1, p0, q0, q1, q2, q3 archsimd.Uint8x16
 	if step == 1 && outer > 1 {
-		start, width := off-4, 8
 		if kind == 2 {
-			start, width = off-2, 4
-		}
-		a0, a1, a2, a3, a4, a5, a6, a7 := loadLFColumns(p, start, outer, width, lanes)
-		if kind == 2 {
+			a0, a1, a2, a3, _, _, _, _ := loadLFColumns[[4]byte](p, off-2, outer, lanes)
 			p1, p0, q0, q1 = a0, a1, a2, a3
 		} else {
-			p3, p2, p1, p0, q0, q1, q2, q3 = a0, a1, a2, a3, a4, a5, a6, a7
+			p3, p2, p1, p0, q0, q1, q2, q3 = loadLFColumns[[8]byte](p, off-4, outer, lanes)
 		}
 	} else {
 		p1, p0, q0, q1 = loadLFByte(p, off-2*step, lanes), loadLFByte(p, off-step, lanes), loadLFByte(p, off, lanes), loadLFByte(p, off+step, lanes)

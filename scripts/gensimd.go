@@ -83,6 +83,8 @@ func vec(e ast.Expr) string {
 			return a[0]
 		case "int16":
 			return "vecWrap(" + a[0] + ")"
+		case "fdctHalfRoundShift":
+			return "vecHalfRound(" + a[0] + ")"
 		case "fdctRoundShift", "dctConstRoundShift":
 			return "vecRound(" + a[0] + ")"
 		}
@@ -118,6 +120,9 @@ func stmt(s ast.Stmt) string {
 	case *ast.ExprStmt:
 		return vec(v.X) + "\n"
 	case *ast.IfStmt:
+		if raw(v.Cond) == "round" {
+			return "if round " + block(v.Body)
+		}
 		// Zero-input fast exits save no work when other vector lanes are live.
 		if strings.Contains(raw(v.Cond), "== 0") {
 			return ""
@@ -163,7 +168,11 @@ func generate(pkg string, paths, names []string) {
 			args := []string{}
 			for _, a := range fn.Type.Params.List {
 				for _, n := range a.Names {
-					args = append(args, n.Name+" []archsimd.Int32x4")
+					if raw(a.Type) == "bool" {
+						args = append(args, n.Name+" bool")
+					} else {
+						args = append(args, n.Name+" []archsimd.Int32x4")
+					}
 				}
 			}
 			out += "func " + fn.Name.Name + "Vec(" + strings.Join(args, ",") + ") " + block(fn.Body) + "\n"
@@ -610,6 +619,6 @@ func main() {
 	generateWideCores("dsp")
 	generateIDCTCores()
 	generateDCTCores()
-	generate("encoder", []string{"internal/vp9/encoder/transform_quant.go"}, []string{"forwardDCT4", "forwardDCT8", "forwardDCT16", "forwardADST4", "forwardADST8", "forwardADST16"})
+	generate("encoder", []string{"internal/vp9/encoder/transform_quant.go"}, []string{"forwardDCT4", "forwardDCT8", "forwardDCT16", "forwardDCT32", "forwardADST4", "forwardADST8", "forwardADST16"})
 	generate("dsp", []string{"internal/vp9/dsp/idct4.go", "internal/vp9/dsp/idct8.go", "internal/vp9/dsp/idct16.go", "internal/vp9/dsp/idct32.go", "internal/vp9/dsp/iadst4.go", "internal/vp9/dsp/iadst8.go", "internal/vp9/dsp/iadst16.go"}, []string{"idct4", "idct8", "idct16", "idct32", "Iadst4", "iadst8", "iadst16"})
 }

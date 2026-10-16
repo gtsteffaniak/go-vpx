@@ -38,10 +38,16 @@ func forwardHT16x16Dispatch(input []int16, stride int, txType common.TxType, out
 }
 
 func forwardDCT32x32Dispatch(input []int16, stride int, output []int16) {
+	if forwardDCT32Go(input, stride, output, false) {
+		return
+	}
 	forwardDCT32x32Scalar(input, stride, output)
 }
 
 func forwardDCT32x32RDDispatch(input []int16, stride int, output []int16) {
+	if forwardDCT32Go(input, stride, output, true) {
+		return
+	}
 	forwardDCT32x32RDScalar(input, stride, output)
 }
 
