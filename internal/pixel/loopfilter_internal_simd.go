@@ -21,6 +21,14 @@ func LoopFilterInternal16(p []byte, step, outer, blimit, limit, thresh int) bool
 	if step > span || outer > span-step {
 		return false
 	}
+	if internalFused {
+		if outer == 1 {
+			loopFilterInternalFusedHorizontal(p, step, blimit, limit, thresh)
+		} else {
+			loopFilterInternalFusedVertical(p, outer, blimit, limit, thresh)
+		}
+		return true
+	}
 	if internalVerticalGeneric && step == 1 {
 		loopFilterBytes(p, 4, 1, outer, 16, blimit, limit, thresh, 4)
 		loopFilterBytes(p, 8, 1, outer, 16, blimit, limit, thresh, 4)

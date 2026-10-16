@@ -8,3 +8,6 @@ const Enabled = true
 // Native 649237be timing selects the general vertical internal-filter body
 // on x64; ARM retains its measured exact-width store specialization.
 const internalVerticalGeneric = false
+
+// M4 measurements select three-edge row/column reuse.
+const internalFused = true

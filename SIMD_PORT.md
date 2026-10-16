@@ -847,3 +847,56 @@ fresh PGO/pre-commit pass again. The complete ARM instruction region is
 byte-identical before/after this architecture-only choice (excluding its
 embedded 112-byte Go build-ID header), preserving the final ARM timing
 comparison. Raw hashes and disassembly are retained in the reduction evidence.
+
+### Three-edge ARM loop-filter reuse
+
+The three internal VP8 edges now retain four neighboring rows/columns in
+registers. New inputs are loaded after each sequential store, preserving
+cross-row aliases at pitches 8/9/15. Input traffic falls 384→256 bytes per
+tile. Generated code shares canonical goav1 byte arithmetic; an inline copy
+of its four-column transpose avoids spilling retained vectors across loader
+calls. Six design triples compare the previous path, reuse with calls and
+reuse with the inline transpose. Eight balanced public quartets select
+inline reuse: ARM VP8 720p improves 9.214→8.667 ms (-5.942%), every pair faster
+(4.20–6.73%). Reuse with calls already improves 4.622%; inline reuse improves
+another 1.384% against that stronger alternative.
+
+Six fresh final triples confirm 9.192→8.629 ms (-6.124%), every pair faster
+(4.22–6.69%). Final kernel pairs improve horizontal 7.19% and vertical
+35.82%, all zero allocations. All 62 public/design/control samples preserve
+every recorded non-timing/allocation field within their codec/workload.
+VP9 control differences are mixed and establish no stable change. The same-run
+original assembly comparison still leaves 27.31% extra ARM VP8 time.
+
+Five-package ARM/Rosetta suites, 3456 additional exact-window cases against
+the independent int16 network, PGO refresh and pre-commit pass. LLVM shows
+fourteen static vector stack load/store instructions in the call design and
+none in the selected vertical body; a live profile confirms both fused bodies.
+Fusion is ARM-only. The x64 VP8 DSP test instruction region remains
+byte-identical to dff92311 after excluding the Go build-ID header, preserving
+its measured architecture-specific paths.
+[Raw designs, final comparisons, controls, profiles and generated code evidence](benchmarks/baselines/go127-simd-arm64/2026-10-16-fused-internal)
+retain the results. Final broader local/hosted checks are in progress.
+
+### Native x64 batched-reduction result
+
+Hosted and native dff92311 runs both pass. On EPYC 7763, VP9 320p improves
+4.389→4.324 ms (-1.481%) from parent, every pair faster (0.98–2.12%). VP9
+720p improves 33.117→32.097 ms (-3.081%), every pair faster (2.46–3.43%),
+and uses 46.62% less time than original assembly's 60.133 ms. VP8 changes
++0.373% from parent with mixed pairs; it uses 3.577% less time than assembly.
+The restored vertical path improves 128.250→124.450 ns (-2.96%); horizontal
+43.295 ns improves 3.33%. Quad averages improve 108.850→20.055 ns (-81.58%),
+and projection 64x128 1879.500→588.400 ns (-68.69%), all zero allocations.
+
+All recorded output and quantizer fields match. VP9 720p current round two
+has one extra allocation total (1.2667 versus usual 1.25 allocations/input);
+the other current samples remain 1.25. No exact allocation-parity claim is
+made for that public workload. [Raw native samples and profiles](benchmarks/baselines/go127-simd-amd64/2026-10-16-dff92311)
+preserve the evidence. ARM-only fusion keeps these selected x64 paths.
+
+Final fused ARM full native, five-package race/checkptr1, strict byte parity,
+18/18 report and source/architecture/fmt/PGO gates all pass. Prior full purego
+coverage remains valid because its selected sources are unchanged; hosted CI
+also reruns that suite. Latest upstream main and the PR base remain 691cd051,
+and the draft PR is mergeable without conflicts.
