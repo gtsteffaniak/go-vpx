@@ -39,13 +39,11 @@ func sumSquares(v archsimd.Int32x4) uint64 {
 	return uint64(s.GetElem(0)) + uint64(s.GetElem(1))
 }
 func Store4(s []int16, v archsimd.Int32x4) {
-	v = v.ShiftAllLeft(16).ShiftAllRight(16)
-	v.SaturateToInt16().StorePart(s[:4])
+	put4(s, v.TruncToInt16().ToBits().ReshapeToUint64s().GetElem(0))
 }
 func StorePixels4(s []byte, v archsimd.Int32x4) {
-	v.SaturateToInt16().SaturateToUint8().StorePart(s[:4])
+	binary.LittleEndian.PutUint32(s, v.SaturateToInt16().SaturateToUint8().ReshapeToUint32s().GetElem(0))
 }
-
 func sum32(v archsimd.Int32x4) int32    { return v.ReduceSum() }
 func sumU32(v archsimd.Uint32x4) uint32 { return v.ReduceSum() }
 func Max4(v archsimd.Int32x4) int32     { return v.ReduceMax() }
@@ -53,3 +51,5 @@ func Max4(v archsimd.Int32x4) int32     { return v.ReduceMax() }
 // Four int16 outputs occupy precisely the eight bytes written here. This
 // store is unaligned-safe on amd64 and arm64 and stays within the Go slice.
 func put4(out []int16, v uint64) { _ = out[3]; *(*uint64)(unsafe.Pointer(&out[0])) = v }
+
+func highBytes(v archsimd.Uint8x16) archsimd.Uint8x16 { return v.HiToLo() }

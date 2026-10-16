@@ -1,5 +1,7 @@
 package dsp
 
+import "github.com/thesyncim/govpx/internal/pixel"
+
 // Pure-Go fallback for VP8 4x4 intra-prediction primitives. Mirrors
 // libvpx v1.16.0 vp8/common/reconintra4x4.c semantics. The amd64/arm64
 // build tags carry SIMD-accelerated kernels with byte-identical output.
@@ -9,7 +11,11 @@ func intra4x4DCPredict(dst []byte, dstStride int, above []byte, left []byte) {
 }
 
 func intra4x4TMPredict(dst []byte, dstStride int, above []byte, left []byte, topLeft byte) {
-	intra4x4TMPredictScalar(dst, dstStride, above, left, topLeft)
+	if pixel.Enabled {
+		pixel.TMPredict(dst, dstStride, above, left, topLeft, 4)
+	} else {
+		intra4x4TMPredictScalar(dst, dstStride, above, left, topLeft)
+	}
 }
 
 func intra4x4VEPredict(dst []byte, dstStride int, above []byte, topLeft byte) {

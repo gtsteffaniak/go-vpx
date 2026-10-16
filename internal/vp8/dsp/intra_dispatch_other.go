@@ -1,5 +1,7 @@
 package dsp
 
+import "github.com/thesyncim/govpx/internal/pixel"
+
 // Pure-Go fallback for VP8 intra-prediction primitives. Mirrors
 // libvpx v1.16.0 vp8/common/reconintra.c and vpx_dsp/intrapred.c
 // semantics.
@@ -29,9 +31,17 @@ func intraHorizontalPredict8x8(dst []byte, dstStride int, left []byte) {
 }
 
 func intraTMPredict16x16(dst []byte, dstStride int, above []byte, left []byte, topLeft byte) {
-	intraTMPredictScalar(dst, dstStride, above, left, topLeft, 16)
+	if pixel.Enabled {
+		pixel.TMPredict(dst, dstStride, above, left, topLeft, 16)
+	} else {
+		intraTMPredictScalar(dst, dstStride, above, left, topLeft, 16)
+	}
 }
 
 func intraTMPredict8x8(dst []byte, dstStride int, above []byte, left []byte, topLeft byte) {
-	intraTMPredictScalar(dst, dstStride, above, left, topLeft, 8)
+	if pixel.Enabled {
+		pixel.TMPredict(dst, dstStride, above, left, topLeft, 8)
+	} else {
+		intraTMPredictScalar(dst, dstStride, above, left, topLeft, 8)
+	}
 }

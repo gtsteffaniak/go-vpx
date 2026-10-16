@@ -97,7 +97,7 @@ VP9_DSP_TESTDATA := internal/vp9/dsp/testdata/dsp_oracle.bin
 
 all: ci
 
-ci: test-noasm fmtcheck pgo-check test test-purego test-trace test-conformance test-quality
+ci: test-noasm test-simd-selection fmtcheck pgo-check test test-purego test-trace test-conformance test-quality
 
 pre-commit: fmtcheck pgo-check
 
@@ -197,7 +197,7 @@ test:
 	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) test ./... -count=1
 
 test-purego:
-	sfiles="$$(GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) list -tags purego -f '{{if .SFiles}}{{.ImportPath}} {{.SFiles}}{{end}}' ./...)"; \
+	sfiles="$$(GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) list -tags purego -f '{{if .SFiles}}{{.ImportPath}} {{.SFiles}}{{end}}' ./...)" || exit $$?; \
 	if [ -n "$$sfiles" ]; then \
 		printf 'purego selected assembly files:\n%s\n' "$$sfiles"; \
 		exit 1; \
@@ -476,9 +476,12 @@ fetch-encoder-test-data: oracle-tools
 	done
 
 # Both optimized and purego builds must be free of repository assembly.
-.PHONY: test-noasm
+.PHONY: test-noasm test-simd-selection
+test-simd-selection:
+	GO="$(GO)" sh scripts/check-build-selection.sh
+
 test-noasm:
 	@for tags in '' purego; do \
-	  sfiles="$$($(GO_CMD) list -tags "$$tags" -f '{{if .SFiles}}{{.ImportPath}} {{.SFiles}}{{end}}' ./...)"; \
+	  sfiles="$$($(GO_CMD) list -tags "$$tags" -f '{{if .SFiles}}{{.ImportPath}} {{.SFiles}}{{end}}' ./...)" || exit $$?; \
 	  if [ -n "$$sfiles" ]; then printf 'assembly selected:\n%s\n' "$$sfiles"; exit 1; fi; \
 	done

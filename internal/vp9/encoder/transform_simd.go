@@ -35,6 +35,17 @@ func forwardNetwork(in, out []archsimd.Int32x4, n int, adst bool) {
 	}
 }
 func forwardTransformGo(input []int16, stride int, output []int16, n int, tx common.TxType) bool {
+	if tx == common.DctDct {
+		switch n {
+		case 4:
+			return forwardDCT4Go(input, stride, output)
+		case 8:
+			return forwardDCT8Go(input, stride, output)
+		case 16:
+			return forwardDCT16Go(input, stride, output)
+		}
+	}
+
 	if !pixel.Enabled || stride < n || len(input) < (n-1)*stride+n || len(output) < n*n {
 		return false
 	}

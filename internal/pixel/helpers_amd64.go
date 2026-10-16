@@ -41,12 +41,13 @@ func sumSquares(v archsimd.Int32x4) uint64 {
 
 var packByteIndices = [16]int8{0, 2, 4, 6, 8, 10, 12, 14, -128, -128, -128, -128, -128, -128, -128, -128}
 
+var packInt16Indices = [16]int8{0, 1, 4, 5, 8, 9, 12, 13, -128, -128, -128, -128, -128, -128, -128, -128}
+
 func Store4(s []int16, v archsimd.Int32x4) {
-	v = v.ShiftAllLeft(16).ShiftAllRight(16)
-	v.SaturateToInt16Concat(v).StorePart(s[:4])
+	put4(s, v.ToBits().ReshapeToUint8s().PermuteOrZero(archsimd.LoadInt8x16Array(&packInt16Indices)).ReshapeToUint64s().GetElem(0))
 }
 func StorePixels4(s []byte, v archsimd.Int32x4) {
-	packBytes(v.SaturateToInt16Concat(v)).StorePart(s[:4])
+	binary.LittleEndian.PutUint32(s, packBytes(v.SaturateToInt16Concat(v)).ReshapeToUint32s().GetElem(0))
 }
 func sum32(v archsimd.Int32x4) int32 {
 	v = v.Add(v.PermuteScalars(2, 3, 0, 1))
@@ -61,3 +62,7 @@ func Max4(v archsimd.Int32x4) int32 {
 // Four int16 outputs occupy precisely the eight bytes written here. This
 // store is unaligned-safe on amd64 and arm64 and stays within the Go slice.
 func put4(out []int16, v uint64) { _ = out[3]; *(*uint64)(unsafe.Pointer(&out[0])) = v }
+
+func highBytes(v archsimd.Uint8x16) archsimd.Uint8x16 {
+	return v.ReshapeToUint32s().PermuteScalars(2, 3, 0, 1).ReshapeToUint8s()
+}

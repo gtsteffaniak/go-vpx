@@ -133,3 +133,105 @@ func TMPredict(dst []byte, ds int, above, left []byte, top byte, w int) {
 		}
 	}
 }
+
+func SubpelStats(src []byte, ss int, ref []byte, rs, w, h int, fx, fy [2]int16) (sum int, sse uint32) {
+	for y := range h {
+		for x := range w {
+			a := (int(src[y*ss+x])*int(fx[0]) + int(src[y*ss+x+1])*int(fx[1]) + 64) >> 7
+			b := (int(src[(y+1)*ss+x])*int(fx[0]) + int(src[(y+1)*ss+x+1])*int(fx[1]) + 64) >> 7
+			v := (a*int(fy[0]) + b*int(fy[1]) + 64) >> 7
+			d := v - int(ref[y*rs+x])
+			sum += d
+			sse += uint32(d * d)
+		}
+	}
+	return
+}
+func BilinearFirst(src []byte, ss int, dst []uint16, w, h int, f [2]int16) {
+	for y := range h {
+		for x := range w {
+			dst[y*w+x] = uint16((int(src[y*ss+x])*int(f[0]) + int(src[y*ss+x+1])*int(f[1]) + 64) >> 7)
+		}
+	}
+}
+func BilinearSecond(src []uint16, dst []byte, w, h int, f [2]int16) {
+	for y := range h {
+		for x := range w {
+			i := y*w + x
+			dst[i] = byte((int(src[i])*int(f[0]) + int(src[i+w])*int(f[1]) + 64) >> 7)
+		}
+	}
+}
+
+func Sum(src []byte, ss, w, h int) (sum int) {
+	for y := range h {
+		for x := range w {
+			sum += int(src[y*ss+x])
+		}
+	}
+	return
+}
+func Energy(src []int16) (sum uint64) {
+	for _, s := range src {
+		v := int64(s)
+		sum += uint64(v * v)
+	}
+	return
+}
+func AbsSum(src []int16, n int) (sum int) {
+	for _, s := range src[:n] {
+		v := int(s)
+		sum += max(v, -v)
+	}
+	return
+}
+func ProjectionRow(src []byte, ss, h int, out []int16, shift uint64) {
+	for x := range 16 {
+		v := 0
+		for y := range h {
+			v += int(src[y*ss+x])
+		}
+		out[x] = int16(v >> shift)
+	}
+}
+func VectorVariance(ref, src []int16, n, shift int) int {
+	sum, sse := 0, 0
+	for i := range n {
+		d := int(ref[i]) - int(src[i])
+		sum += d
+		sse += d * d
+	}
+	return sse - (sum * sum >> uint(shift))
+}
+func DenoiseFirst(mc []byte, ms int, avg []byte, as int, sig []byte, ss, w, inc, level int) int {
+	var columns [16]int
+	for y := range w {
+		for x := range w {
+			d := int(mc[y*ms+x]) - int(sig[y*ss+x])
+			a := max(d, -d)
+			adj := level + 3
+			if a <= 15 {
+				adj = level + 1
+			}
+			if a <= 7 {
+				adj = level
+			}
+			if a <= 3+inc {
+				adj = a
+			}
+			if d < 0 {
+				adj = -adj
+			}
+			avg[y*as+x] = byte(min(max(int(sig[y*ss+x])+adj, 0), 255))
+			columns[x] += adj
+		}
+	}
+	sum := 0
+	for _, v := range columns[:w] {
+		if w == 16 {
+			v = min(v, 127)
+		}
+		sum += v
+	}
+	return sum
+}

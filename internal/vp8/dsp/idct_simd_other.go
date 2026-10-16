@@ -1,15 +1,23 @@
 package dsp
 
+import "github.com/thesyncim/govpx/internal/pixel"
+
 // Pure-Go fallback dispatchers for the IDCT SIMD entry points. They
 // mirror the libvpx v1.16.0 vp8/common/idctllm.c scalar references
 // exactly.
 
 func idct4x4AddSIMD(input *[16]int16, pred []byte, predStride int, dst []byte, dstStride int) {
-	idct4x4AddScalar(input, pred, predStride, dst, dstStride)
+	if !inverse4Go(input, pred, predStride, dst, dstStride, false, nil) {
+		idct4x4AddScalar(input, pred, predStride, dst, dstStride)
+	}
 }
 
 func dcOnlyIDCT4x4AddSIMD(inputDC int16, pred []byte, predStride int, dst []byte, dstStride int) {
-	dcOnlyIDCT4x4AddScalar(inputDC, pred, predStride, dst, dstStride)
+	if pixel.Enabled {
+		pixel.AddConstant(pred, predStride, dst, dstStride, 4, 4, int((inputDC+4)>>3))
+	} else {
+		dcOnlyIDCT4x4AddScalar(inputDC, pred, predStride, dst, dstStride)
+	}
 }
 
 func dcOnlyIDCT4x4AddPairSIMD(delta0 int16, delta1 int16, pred []byte, predStride int, dst []byte, dstStride int) {

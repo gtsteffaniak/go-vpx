@@ -36,5 +36,29 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y nasm yasm
 
-      - name: Exhaustive VP8 parity gate
-        run: make verify-production
+      - name: Source and PGO checks
+        run: make test-noasm test-simd-selection fmtcheck pgo-check
+
+      - name: Native SIMD tests
+        run: make test
+
+      - name: Scalar fallback tests
+        run: make test-purego
+
+      - name: Oracle trace build
+        run: make test-trace
+
+      - name: VP9 decoder conformance
+        run: make test-conformance
+
+      - name: Encoder quality gates
+        run: make test-quality
+
+      - name: Libvpx oracle tests
+        run: make test-oracle
+
+      - name: Encoder byte parity
+        run: make test-byte-parity
+
+      - name: Parity regression report
+        run: make test-parity-report

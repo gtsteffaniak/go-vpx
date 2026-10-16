@@ -2,7 +2,10 @@
 
 package pixel
 
-import "simd/archsimd"
+import (
+	"encoding/binary"
+	"simd/archsimd"
+)
 
 func SAD(src []byte, ss int, ref []byte, rs, w, h int) int {
 	var acc archsimd.Uint32x4
@@ -241,4 +244,150 @@ func TMPredict(dst []byte, ds int, above, left []byte, top byte, w int) {
 			StorePixels4(dst[y*ds+x:], LoadPixels4(above[x:]).Add(v))
 		}
 	}
+}
+
+func loadN(b []byte, n int) archsimd.Uint8x16 {
+	if n == 4 {
+		return archsimd.Uint32x4{}.SetElem(0, binary.LittleEndian.Uint32(b)).ReshapeToUint8s()
+	}
+	return load8(b)
+}
+
+// SubpelStats fuses two bilinear passes with variance accumulation. Horizontal
+// rows stay in vector registers, and each is reused by the next output row.
+func SubpelStats(src []byte, ss int, ref []byte, rs, w, h int, fx, fy [2]int16) (int, uint32) {
+	x0, x1, y0, y1 := archsimd.BroadcastInt16x8(fx[0]), archsimd.BroadcastInt16x8(fx[1]), archsimd.BroadcastInt16x8(fy[0]), archsimd.BroadcastInt16x8(fy[1])
+	round := archsimd.BroadcastInt16x8(64)
+	var sum, sse archsimd.Int32x4
+	n := 8
+	if w == 4 {
+		n = 4
+	}
+	for x := 0; x < w; x += n {
+		a := widen8(loadN(src[x:], n)).Mul(x0).Add(widen8(loadN(src[x+1:], n)).Mul(x1)).Add(round).ShiftAllRight(7)
+		for y := range h {
+			p := src[(y+1)*ss+x:]
+			b := widen8(loadN(p, n)).Mul(x0).Add(widen8(loadN(p[1:], n)).Mul(x1)).Add(round).ShiftAllRight(7)
+			v := a.Mul(y0).Add(b.Mul(y1)).Add(round).ShiftAllRight(7)
+			a = b
+			d := v.Sub(widen8(loadN(ref[y*rs+x:], n)))
+			lo, hi := d.ExtendLo4ToInt32(), high4(d)
+			sum = sum.Add(lo).Add(hi)
+			sse = sse.Add(lo.Mul(lo)).Add(hi.Mul(hi))
+		}
+	}
+	return int(sum32(sum)), uint32(sum32(sse))
+}
+func BilinearFirst(src []byte, ss int, dst []uint16, w, h int, f [2]int16) {
+	c0, c1, r := archsimd.BroadcastInt32x4(int32(f[0])), archsimd.BroadcastInt32x4(int32(f[1])), archsimd.BroadcastInt32x4(64)
+	for y := range h {
+		for x := 0; x < w; x += 4 {
+			v := LoadPixels4(src[y*ss+x:]).Mul(c0).Add(LoadPixels4(src[y*ss+x+1:]).Mul(c1)).Add(r).ShiftAllRight(7)
+			storeU16(dst[y*w+x:], v)
+		}
+	}
+}
+func BilinearSecond(src []uint16, dst []byte, w, h int, f [2]int16) {
+	c0, c1, r := archsimd.BroadcastInt32x4(int32(f[0])), archsimd.BroadcastInt32x4(int32(f[1])), archsimd.BroadcastInt32x4(64)
+	for y := range h {
+		for x := 0; x < w; x += 4 {
+			i := y*w + x
+			v := loadU16(src[i:]).Mul(c0).Add(loadU16(src[i+w:]).Mul(c1)).Add(r).ShiftAllRight(7)
+			StorePixels4(dst[i:], v)
+		}
+	}
+}
+
+func Sum(src []byte, ss, w, h int) int {
+	var a archsimd.Int32x4
+	tail := 0
+	for y := range h {
+		x := 0
+		for ; x+8 <= w; x += 8 {
+			v := widen8(load8(src[y*ss+x:]))
+			a = a.Add(v.ExtendLo4ToInt32()).Add(high4(v))
+		}
+		for ; x < w; x++ {
+			tail += int(src[y*ss+x])
+		}
+	}
+	return int(sum32(a)) + tail
+}
+func Energy(src []int16) uint64 {
+	sum := uint64(0)
+	i := 0
+	for ; i+8 <= len(src); i += 8 {
+		v := archsimd.LoadInt16x8(src[i:])
+		sum += sumSquares(v.ExtendLo4ToInt32()) + sumSquares(high4(v))
+	}
+	for ; i < len(src); i++ {
+		v := int64(src[i])
+		sum += uint64(v * v)
+	}
+	return sum
+}
+func AbsSum(src []int16, n int) int {
+	var a archsimd.Int32x4
+	i := 0
+	for ; i+8 <= n; i += 8 {
+		v := archsimd.LoadInt16x8(src[i:])
+		a = a.Add(v.ExtendLo4ToInt32().Abs()).Add(high4(v).Abs())
+	}
+	sum := int(sum32(a))
+	for ; i < n; i++ {
+		v := int(src[i])
+		sum += max(v, -v)
+	}
+	return sum
+}
+func ProjectionRow(src []byte, ss, h int, out []int16, shift uint64) {
+	var a, b archsimd.Int16x8
+	for y := range h {
+		v := archsimd.LoadUint8x16(src[y*ss:])
+		a = a.Add(widen8(v))
+		b = b.Add(widen8(highBytes(v)))
+	}
+	a.ShiftAllRight(shift).Store(out)
+	b.ShiftAllRight(shift).Store(out[8:])
+}
+func VectorVariance(ref, src []int16, n, shift int) int {
+	var sum, sse archsimd.Int32x4
+	for i := 0; i < n; i += 4 {
+		d := Load4(ref[i:]).Sub(Load4(src[i:]))
+		sum = sum.Add(d)
+		sse = sse.Add(d.Mul(d))
+	}
+	m := int(sum32(sum))
+	return int(sum32(sse)) - (m * m >> uint(shift))
+}
+
+// DenoiseFirst keeps per-column signed adjustment sums (upper-clamped to
+// 127 for luma), matching libvpx's first denoising pass before its decision.
+func DenoiseFirst(mc []byte, ms int, avg []byte, as int, sig []byte, ss, w, inc, level int) int {
+	var columns [2]archsimd.Int16x8
+	l1, l2, l3 := archsimd.BroadcastInt16x8(int16(level)), archsimd.BroadcastInt16x8(int16(level+1)), archsimd.BroadcastInt16x8(int16(level+3))
+	zero := archsimd.Int16x8{}
+	threshold := archsimd.BroadcastInt16x8(int16(3 + inc))
+	for y := range w {
+		for x := 0; x < w; x += 8 {
+			m, s := widen8(load8(mc[y*ms+x:])), widen8(load8(sig[y*ss+x:]))
+			d := m.Sub(s)
+			a := d.Abs()
+			adj := l2.IfElse(a.LessEqual(archsimd.BroadcastInt16x8(15)), l3)
+			adj = l1.IfElse(a.LessEqual(archsimd.BroadcastInt16x8(7)), adj)
+			adj = a.IfElse(a.LessEqual(threshold), adj)
+			adj = zero.Sub(adj).IfElse(d.Less(zero), adj)
+			columns[x/8] = columns[x/8].Add(adj)
+			storeBytes8(avg[y*as+x:], packBytes(s.Add(adj)))
+		}
+	}
+	total := 0
+	for i := range w / 8 {
+		v := columns[i]
+		if w == 16 {
+			v = v.Min(archsimd.BroadcastInt16x8(127))
+		}
+		total += int(sum32(v.ExtendLo4ToInt32().Add(high4(v))))
+	}
+	return total
 }

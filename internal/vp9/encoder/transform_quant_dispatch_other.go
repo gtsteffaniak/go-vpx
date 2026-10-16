@@ -47,7 +47,9 @@ func forwardDCT32x32RDDispatch(input []int16, stride int, output []int16) {
 }
 
 func forwardWHT4x4Dispatch(input []int16, stride int, output []int16) {
-	forwardWHT4x4Scalar(input, stride, output)
+	if !forwardWHTGo(input, stride, output) {
+		forwardWHT4x4Scalar(input, stride, output)
+	}
 }
 
 func quantizeFPDispatch(coeff []int16, dequant [2]int16, scan []int16, dqcoeff []int16) int {
