@@ -10,7 +10,9 @@ permissions:
 
 concurrency:
   group: simd-amd64-bench-${{ github.ref }}
-  cancel-in-progress: true
+  # Preserve the active measurement when a newer checkpoint is pushed.
+  # GitHub keeps only the newest pending run in this group.
+  cancel-in-progress: false
 
 env:
   GOEXPERIMENT: simd

@@ -740,3 +740,9 @@ After integration, six fresh balanced parent/prototype/final triples measure
 faster 2.32–4.12%; its 0.243% prototype difference is within noise. All 18
 samples preserve recorded semantic/allocation fields. Final ARM/Rosetta
 five-package suites, PGO refresh and pre-commit pass.
+
+The first3792 hosted run rejected a stale PGO fingerprint caused solely
+by two comment-space edits after refresh. A full refresh against the exact
+committed source and pre-commit now pass with fingerprint b2f0317c. Native
+benchmark concurrency preserves the active run while queueing the newest
+checkpoint, allowing fixes to be pushed without discarding measurements.

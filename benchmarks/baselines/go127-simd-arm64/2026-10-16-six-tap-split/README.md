@@ -77,3 +77,12 @@ build improves 3.184% versus parent, with every pair faster 2.32–4.12%; its
 timing/allocation samples agree. Final native/Rosetta five-package suites,
 PGO refresh and pre-commit pass. ARM disassembly records the live vector
 multiply, saturating-add and narrowing bodies in the retained code.
+
+The first3792 hosted CI caught a PGO fingerprint mismatch after two
+comment-space edits followed the original refresh. Reconstructing only
+those prior comment bytes reproduces the original fingerprint exactly;
+there was no arithmetic change. A full refresh and pre-commit against the
+committed source now record b2f0317c395de105dbdd0767ba7dbed70a9dd06d.
+The native benchmark workflow preserves an active measurement while
+retaining only the newest pending checkpoint, so CI fixes can be pushed
+without discarding measurements. See [GitHub concurrency semantics](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency).
