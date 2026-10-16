@@ -33,14 +33,11 @@ func sadAdd(acc archsimd.Uint32x4, a, b archsimd.Uint8x16) archsimd.Uint32x4 {
 	return acc.Add(a.SumOf8AbsDiff(b).ReshapeToUint32s())
 }
 func sumSquares(v archsimd.Int32x4) uint64 {
-	a := v.MulWidenEven(v)
-	v = v.PermuteScalars(1, 0, 3, 2)
-	s := a.Add(v.MulWidenEven(v))
+	s := sqSumInt32(archsimd.Int64x2{}, v)
 	return uint64(s.GetElem(0)) + uint64(s.GetElem(1))
 }
 
 var packByteIndices = [16]int8{0, 2, 4, 6, 8, 10, 12, 14, -128, -128, -128, -128, -128, -128, -128, -128}
-
 var packInt16Indices = [16]int8{0, 1, 4, 5, 8, 9, 12, 13, -128, -128, -128, -128, -128, -128, -128, -128}
 
 func Store4(s []int16, v archsimd.Int32x4) {
@@ -65,4 +62,10 @@ func put4(out []int16, v uint64) { _ = out[3]; *(*uint64)(unsafe.Pointer(&out[0]
 
 func highBytes(v archsimd.Uint8x16) archsimd.Uint8x16 {
 	return v.ReshapeToUint32s().PermuteScalars(2, 3, 0, 1).ReshapeToUint8s()
+}
+
+func permute16(v, i archsimd.Uint8x16) archsimd.Uint8x16 { return v.PermuteOrZero(i.BitsToInt8()) }
+
+func highU16(v archsimd.Uint16x8) archsimd.Uint16x8 {
+	return v.ReshapeToUint32s().PermuteScalars(2, 3, 0, 1).ReshapeToUint16s()
 }

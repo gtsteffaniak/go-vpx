@@ -39,6 +39,20 @@ func inverseTransformGo(input []int16, dst []byte, stride, n, rows, tx int) bool
 	if !pixel.Enabled || len(input) < n*rows || stride < n || len(dst) < (n-1)*stride+n {
 		return false
 	}
+	if tx == 0 {
+		switch n {
+		case 4:
+			return inverseDCT4Go(input, dst, stride, rows)
+		case 8:
+			return inverseDCT8Go(input, dst, stride, rows)
+		case 16:
+			return inverseDCT16Go(input, dst, stride, rows)
+		}
+	}
+	return inverseTransformGenericGo(input, dst, stride, n, rows, tx)
+}
+
+func inverseTransformGenericGo(input []int16, dst []byte, stride, n, rows, tx int) bool {
 	var tmp [1024]int32
 	var in, out [32]archsimd.Int32x4
 	for row := 0; row < rows; row += 4 {
@@ -72,5 +86,38 @@ func inverseTransformGo(input []int16, dst []byte, stride, n, rows, tx int) bool
 			pixel.StorePixels4(d, v)
 		}
 	}
+	return true
+}
+
+// Inverse lossless WHT uses reversible lifting and wraps after the row pass.
+func inverseWHTGo(input []int16, dst []byte, stride int, dc bool) bool {
+	if !pixel.Enabled {
+		return false
+	}
+	var onlyDC [16]int16
+	if dc {
+		onlyDC[0] = input[0]
+		input = onlyDC[:]
+	}
+	a, c, d, b := pixel.Transpose4(pixel.Load4(input).ShiftAllRight(2), pixel.Load4(input[4:]).ShiftAllRight(2), pixel.Load4(input[8:]).ShiftAllRight(2), pixel.Load4(input[12:]).ShiftAllRight(2))
+	a = a.Add(c)
+	d = d.Sub(b)
+	e := a.Sub(d).ShiftAllRight(1)
+	b = e.Sub(b)
+	c = e.Sub(c)
+	a = a.Sub(b)
+	d = d.Add(c)
+	a, c, d, b = pixel.Transpose4(vecWrap(a), vecWrap(b), vecWrap(c), vecWrap(d))
+	a = a.Add(c)
+	d = d.Sub(b)
+	e = a.Sub(d).ShiftAllRight(1)
+	b = e.Sub(b)
+	c = e.Sub(c)
+	a = a.Sub(b)
+	d = d.Add(c)
+	pixel.StorePixels4(dst, a.Add(pixel.LoadPixels4(dst)))
+	pixel.StorePixels4(dst[stride:], b.Add(pixel.LoadPixels4(dst[stride:])))
+	pixel.StorePixels4(dst[2*stride:], c.Add(pixel.LoadPixels4(dst[2*stride:])))
+	pixel.StorePixels4(dst[3*stride:], d.Add(pixel.LoadPixels4(dst[3*stride:])))
 	return true
 }

@@ -102,7 +102,7 @@ ci: test-noasm test-simd-selection fmtcheck pgo-check test test-purego test-trac
 pre-commit: fmtcheck pgo-check
 
 fmtcheck:
-	files="$$($(GOFMT) -l $$($(GIT) ls-files '*.go'))"; \
+	files="$$($(GOFMT) -l $$($(GIT) ls-files '*.go'))" || exit $$?; \
 	if [ -n "$$files" ]; then \
 		printf 'gofmt needed:\n%s\n' "$$files"; \
 		exit 1; \
@@ -226,9 +226,9 @@ test-conformance: vp9-vpxdec-tools fetch-vp9-test-data
 pgo-refresh:
 	mkdir -p .pgo
 	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) build -pgo=off -o .pgo/govpx-bench-pgo ./cmd/govpx-bench
-	./.pgo/govpx-bench-pgo -width=1920 -height=1080 -frames=180 -fps=30 -bitrate=4000 -mode=realtime -cpu-used=8 -encode-only -cpuprofile=.pgo/vp8-encode.pgo >/dev/null
-	./.pgo/govpx-bench-pgo -width=1280 -height=720 -frames=240 -fps=30 -bitrate=2500 -mode=realtime -cpu-used=8 -cpuprofile=.pgo/vp8-quality.pgo >/dev/null
-	./.pgo/govpx-bench-pgo -codec=vp9 -width=1280 -height=720 -frames=120 -fps=30 -bitrate=2500 -mode=realtime -cpu-used=8 -threads=1 -encode-only -cpuprofile=.pgo/vp9-realtime.pgo >/dev/null
+	./.pgo/govpx-bench-pgo -auto-libvpx=false -width=1920 -height=1080 -frames=180 -fps=30 -bitrate=4000 -mode=realtime -cpu-used=8 -encode-only -cpuprofile=.pgo/vp8-encode.pgo >/dev/null
+	./.pgo/govpx-bench-pgo -auto-libvpx=false -width=1280 -height=720 -frames=240 -fps=30 -bitrate=2500 -mode=realtime -cpu-used=8 -cpuprofile=.pgo/vp8-quality.pgo >/dev/null
+	./.pgo/govpx-bench-pgo -auto-libvpx=false -codec=vp9 -width=1280 -height=720 -frames=120 -fps=30 -bitrate=2500 -mode=realtime -cpu-used=8 -threads=1 -encode-only -cpuprofile=.pgo/vp9-realtime.pgo >/dev/null
 	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) tool pprof -proto .pgo/vp8-encode.pgo .pgo/vp8-quality.pgo .pgo/vp9-realtime.pgo > "$(PGO_PROFILE).tmp"
 	mv "$(PGO_PROFILE).tmp" "$(PGO_PROFILE)"
 	rm -rf .pgo

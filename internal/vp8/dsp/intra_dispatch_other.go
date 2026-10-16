@@ -7,27 +7,51 @@ import "github.com/thesyncim/govpx/internal/pixel"
 // semantics.
 
 func intraDCPredict16x16(dst []byte, dstStride int, above []byte, left []byte, upAvailable bool, leftAvailable bool) {
-	intraDCPredictScalar(dst, dstStride, above, left, 16, upAvailable, leftAvailable)
+	if pixel.Enabled {
+		intraDCGo(dst, dstStride, above, left, 16, upAvailable, leftAvailable)
+	} else {
+		intraDCPredictScalar(dst, dstStride, above, left, 16, upAvailable, leftAvailable)
+	}
 }
 
 func intraDCPredict8x8(dst []byte, dstStride int, above []byte, left []byte, upAvailable bool, leftAvailable bool) {
-	intraDCPredictScalar(dst, dstStride, above, left, 8, upAvailable, leftAvailable)
+	if pixel.Enabled {
+		intraDCGo(dst, dstStride, above, left, 8, upAvailable, leftAvailable)
+	} else {
+		intraDCPredictScalar(dst, dstStride, above, left, 8, upAvailable, leftAvailable)
+	}
 }
 
 func intraVerticalPredict16x16(dst []byte, dstStride int, above []byte) {
-	intraVerticalPredictScalar(dst, dstStride, above, 16)
+	if pixel.Enabled {
+		pixel.RepeatRow(dst, dstStride, above, 16)
+	} else {
+		intraVerticalPredictScalar(dst, dstStride, above, 16)
+	}
 }
 
 func intraVerticalPredict8x8(dst []byte, dstStride int, above []byte) {
-	intraVerticalPredictScalar(dst, dstStride, above, 8)
+	if pixel.Enabled {
+		pixel.RepeatRow(dst, dstStride, above, 8)
+	} else {
+		intraVerticalPredictScalar(dst, dstStride, above, 8)
+	}
 }
 
 func intraHorizontalPredict16x16(dst []byte, dstStride int, left []byte) {
-	intraHorizontalPredictScalar(dst, dstStride, left, 16)
+	if pixel.Enabled {
+		pixel.Horizontal(dst, dstStride, left, 16)
+	} else {
+		intraHorizontalPredictScalar(dst, dstStride, left, 16)
+	}
 }
 
 func intraHorizontalPredict8x8(dst []byte, dstStride int, left []byte) {
-	intraHorizontalPredictScalar(dst, dstStride, left, 8)
+	if pixel.Enabled {
+		pixel.Horizontal(dst, dstStride, left, 8)
+	} else {
+		intraHorizontalPredictScalar(dst, dstStride, left, 8)
+	}
 }
 
 func intraTMPredict16x16(dst []byte, dstStride int, above []byte, left []byte, topLeft byte) {
@@ -44,4 +68,20 @@ func intraTMPredict8x8(dst []byte, dstStride int, above []byte, left []byte, top
 	} else {
 		intraTMPredictScalar(dst, dstStride, above, left, topLeft, 8)
 	}
+}
+
+func intraDCGo(dst []byte, ds int, above, left []byte, n int, up, lf bool) {
+	dc, sum, count := 128, 0, 0
+	if up {
+		sum += pixel.Sum(above, n, n, 1)
+		count += n
+	}
+	if lf {
+		sum += pixel.Sum(left, n, n, 1)
+		count += n
+	}
+	if count > 0 {
+		dc = (sum + count/2) / count
+	}
+	pixel.FillBlock(dst, ds, n, n, byte(dc))
 }

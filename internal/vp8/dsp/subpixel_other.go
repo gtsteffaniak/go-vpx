@@ -79,6 +79,11 @@ func sixTapPredict8x4Maybe(src []byte, srcStride int, xoffset int, yoffset int,
 
 func sixTapPredict4x4Maybe(src []byte, srcStride int, xoffset int, yoffset int,
 	dst []byte, dstStride int) bool {
+	if pixel.Enabled {
+		sixTapPredictGo(src, srcStride, xoffset, yoffset, dst, dstStride, 4, 4)
+		return true
+	}
+
 	if xoffset != 0 || yoffset != 0 {
 		sixTapPredict4xNScalar(src, srcStride, xoffset, yoffset, dst, dstStride, 4)
 		return true

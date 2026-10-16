@@ -13,6 +13,10 @@ func forward4Go(input []int16, stride int, output *[16]int16, walsh bool) bool {
 		return false
 	}
 	a, b, c, d := pixel.Transpose4(pixel.Load4(input), pixel.Load4(input[stride:]), pixel.Load4(input[2*stride:]), pixel.Load4(input[3*stride:]))
+	if pixel.Max4(a.Abs().Max(b.Abs()).Max(c.Abs()).Max(d.Abs())) > 255 {
+		return false
+	}
+
 	one := archsimd.BroadcastInt32x4(1)
 	zero := archsimd.Int32x4{}
 	var v0, v1, v2, v3 archsimd.Int32x4

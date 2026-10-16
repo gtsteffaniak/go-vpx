@@ -5,9 +5,10 @@ package pixel
 import (
 	"encoding/binary"
 	"simd/archsimd"
+	"unsafe"
 )
 
-func SAD(src []byte, ss int, ref []byte, rs, w, h int) int {
+func sadGeneric(src []byte, ss int, ref []byte, rs, w, h int) int {
 	var acc archsimd.Uint32x4
 	tail := 0
 	for y := range h {
@@ -28,6 +29,15 @@ func SAD(src []byte, ss int, ref []byte, rs, w, h int) int {
 	return int(sumU32(acc)) + tail
 }
 func Stats(src []byte, ss int, ref []byte, rs, w, h int) (int, uint32) {
+	if !Enabled {
+		return StatsScalar(src, ss, ref, rs, w, h)
+	}
+
+	if (w == 8 || w >= 16 && w%16 == 0) && w <= 64 && h <= 64 {
+		sse, sum := pixelStatsSIMD(src, ss, ref, rs, w, h)
+		return int(sum), sse
+	}
+
 	var sums, squares archsimd.Int32x4
 	tailSum := 0
 	var tailSSE uint32
@@ -41,6 +51,12 @@ func Stats(src []byte, ss int, ref []byte, rs, w, h int) (int, uint32) {
 			sums = sums.Add(lo).Add(hi)
 			squares = squares.Add(lo.Mul(lo)).Add(hi.Mul(hi))
 		}
+		if x+4 <= w {
+			d := LoadPixels4(a[x:]).Sub(LoadPixels4(b[x:]))
+			sums = sums.Add(d)
+			squares = squares.Add(d.Mul(d))
+			x += 4
+		}
 		for ; x < w; x++ {
 			d := int(a[x]) - int(b[x])
 			tailSum += d
@@ -50,6 +66,10 @@ func Stats(src []byte, ss int, ref []byte, rs, w, h int) (int, uint32) {
 	return int(sum32(sums)) + tailSum, uint32(sum32(squares)) + tailSSE
 }
 func Subtract(src []byte, ss int, pred []byte, ps int, out []int16, os, w, h int) bool {
+	if !Enabled {
+		return SubtractScalar(src, ss, pred, ps, out, os, w, h)
+	}
+
 	var bits archsimd.Int16x8
 	tail := int16(0)
 	for y := range h {
@@ -72,6 +92,27 @@ func Subtract(src []byte, ss int, pred []byte, ps int, out []int16, os, w, h int
 // Filter uses widening int32 products: negative filter lobes cannot overflow
 // or saturate before the codec's single rounding and clipping operation.
 func Filter(src []byte, ss int, dst []byte, ds, w, h, step int, taps []int16) {
+	if !Enabled {
+		FilterScalar(src, ss, dst, ds, w, h, step, taps)
+		return
+	}
+
+	if w == 4 {
+		bias := archsimd.BroadcastInt32x4(64)
+		var c [8]archsimd.Int32x4
+		for k, v := range taps {
+			c[k] = archsimd.BroadcastInt32x4(int32(v))
+		}
+		for y := range h {
+			sum := bias
+			for k := range taps {
+				sum = sum.Add(LoadPixels4(src[y*ss+k*step:]).Mul(c[k]))
+			}
+			StorePixels4(dst[y*ds:], sum.ShiftAllRight(7))
+		}
+		return
+	}
+
 	var c [8]archsimd.Int16x8
 	for i, v := range taps {
 		c[i] = archsimd.BroadcastInt16x8(v)
@@ -81,11 +122,13 @@ func Filter(src []byte, ss int, dst []byte, ds, w, h, step int, taps []int16) {
 		a, b := src[y*ss:], dst[y*ds:]
 		x := 0
 		for ; x+8 <= w; x += 8 {
-			lo, hi := bias, bias
-			for k := range taps {
-				v := widen8(load8(a[x+k*step:]))
-				lo, hi = mac(lo, hi, v, c[k])
+			var lo, hi archsimd.Int32x4
+			if step == 1 {
+				lo, hi = u8SumRowX(a[x:], &c, len(taps))
+			} else {
+				lo, hi = u8SumColY(a[x:], step, &c, len(taps))
 			}
+			lo, hi = lo.Add(bias), hi.Add(bias)
 			store8(b[x:], lo.ShiftAllRight(7), hi.ShiftAllRight(7))
 		}
 		for ; x < w; x++ {
@@ -98,6 +141,11 @@ func Filter(src []byte, ss int, dst []byte, ds, w, h, step int, taps []int16) {
 	}
 }
 func Average(src []byte, ss int, dst []byte, ds, w, h int) {
+	if !Enabled {
+		AverageScalar(src, ss, dst, ds, w, h)
+		return
+	}
+
 	one := archsimd.BroadcastInt16x8(1)
 	for y := range h {
 		a, b := src[y*ss:], dst[y*ds:]
@@ -115,6 +163,10 @@ func Average(src []byte, ss int, dst []byte, ds, w, h int) {
 // Error widens before subtraction, preserving the full signed int16 domain.
 // Four squares fit in uint64; no int32 horizontal accumulation can overflow.
 func Error(a, b []int16, n int) (sum uint64) {
+	if !Enabled {
+		return ErrorScalar(a, b, n)
+	}
+
 	i := 0
 	for ; i+8 <= n; i += 8 {
 		va, vb := archsimd.LoadInt16x8(a[i:]), archsimd.LoadInt16x8(b[i:])
@@ -130,6 +182,10 @@ func Error(a, b []int16, n int) (sum uint64) {
 }
 
 func Quantize(coeff, iscan, qcoeff, dqcoeff []int16, n, zbin, round, quant, shift, dequant int, fp bool) (eob int) {
+	if !Enabled {
+		return QuantizeScalar(coeff, iscan, qcoeff, dqcoeff, n, zbin, round, quant, shift, dequant, fp)
+	}
+
 	z, r, q, s, d := archsimd.BroadcastInt32x4(int32(zbin)), archsimd.BroadcastInt32x4(int32(round)), archsimd.BroadcastInt32x4(int32(quant)), archsimd.BroadcastInt32x4(int32(shift)), archsimd.BroadcastInt32x4(int32(dequant))
 	zero := archsimd.Int32x4{}
 	max16 := archsimd.BroadcastInt32x4(32767)
@@ -188,6 +244,11 @@ func Quantize(coeff, iscan, qcoeff, dqcoeff []int16, n, zbin, round, quant, shif
 // Gather writes residuals in VP8's 4x4 block scan order, without staging
 // complete macroblocks or allocating packing buffers.
 func Gather(src []byte, ss int, pred []byte, ps int, out []int16, w int) {
+	if !Enabled {
+		GatherScalar(src, ss, pred, ps, out, w)
+		return
+	}
+
 	for y := range w {
 		a, b := src[y*ss:], pred[y*ps:]
 		for x := 0; x < w; x += 8 {
@@ -199,6 +260,11 @@ func Gather(src []byte, ss int, pred []byte, ps int, out []int16, w int) {
 	}
 }
 func Temporal(src []byte, ss int, pred []byte, ps, w, strength, weight int, acc, count []uint32) {
+	if !Enabled {
+		TemporalScalar(src, ss, pred, ps, w, strength, weight, acc, count)
+		return
+	}
+
 	rounding := int32(0)
 	if strength > 0 {
 		rounding = 1 << (strength - 1)
@@ -219,6 +285,11 @@ func Temporal(src []byte, ss int, pred []byte, ps, w, strength, weight int, acc,
 	}
 }
 func VP8Quant(coeff, round, quant, dequant []int16, qcoeff, dqcoeff []int16) {
+	if !Enabled {
+		VP8QuantScalar(coeff, round, quant, dequant, qcoeff, dqcoeff)
+		return
+	}
+
 	for i := 0; i < 16; i += 4 {
 		c := Load4(coeff[i:])
 		sign := c.ShiftAllRight(31)
@@ -229,6 +300,11 @@ func VP8Quant(coeff, round, quant, dequant []int16, qcoeff, dqcoeff []int16) {
 	}
 }
 func AddConstant(pred []byte, ps int, dst []byte, ds, w, h, delta int) {
+	if !Enabled {
+		AddConstantScalar(pred, ps, dst, ds, w, h, delta)
+		return
+	}
+
 	v := archsimd.BroadcastInt32x4(int32(delta))
 	for y := range h {
 		for x := 0; x < w; x += 4 {
@@ -237,6 +313,11 @@ func AddConstant(pred []byte, ps int, dst []byte, ds, w, h, delta int) {
 	}
 }
 func TMPredict(dst []byte, ds int, above, left []byte, top byte, w int) {
+	if !Enabled {
+		TMPredictScalar(dst, ds, above, left, top, w)
+		return
+	}
+
 	t := archsimd.BroadcastInt32x4(int32(top))
 	for y := range w {
 		v := archsimd.BroadcastInt32x4(int32(left[y])).Sub(t)
@@ -253,9 +334,26 @@ func loadN(b []byte, n int) archsimd.Uint8x16 {
 	return load8(b)
 }
 
+func loadNPtr(p unsafe.Pointer, n int) archsimd.Uint8x16 {
+	if n == 4 {
+		return archsimd.Uint32x4{}.SetElem(0, *(*uint32)(p)).ReshapeToUint8s()
+	}
+	return archsimd.Uint64x2{}.SetElem(0, *(*uint64)(p)).ReshapeToUint8s()
+}
+
 // SubpelStats fuses two bilinear passes with variance accumulation. Horizontal
 // rows stay in vector registers, and each is reused by the next output row.
 func SubpelStats(src []byte, ss int, ref []byte, rs, w, h int, fx, fy [2]int16) (int, uint32) {
+	if !Enabled || (w != 4 && w%8 != 0) || w <= 0 || h <= 0 || ss < 0 || rs < 0 {
+		return SubpelStatsScalar(src, ss, ref, rs, w, h, fx, fy)
+	}
+
+	// Each read is exactly n bytes. These endpoints prove all source and
+	// reference accesses, including the extra bilinear row and column, stay
+	// in the original allocations. Neither input is written or retained.
+	_ = src[h*ss+w]
+	_ = ref[(h-1)*rs+w-1]
+	sp, rp := unsafe.Pointer(unsafe.SliceData(src)), unsafe.Pointer(unsafe.SliceData(ref))
 	x0, x1, y0, y1 := archsimd.BroadcastInt16x8(fx[0]), archsimd.BroadcastInt16x8(fx[1]), archsimd.BroadcastInt16x8(fy[0]), archsimd.BroadcastInt16x8(fy[1])
 	round := archsimd.BroadcastInt16x8(64)
 	var sum, sse archsimd.Int32x4
@@ -264,13 +362,13 @@ func SubpelStats(src []byte, ss int, ref []byte, rs, w, h int, fx, fy [2]int16) 
 		n = 4
 	}
 	for x := 0; x < w; x += n {
-		a := widen8(loadN(src[x:], n)).Mul(x0).Add(widen8(loadN(src[x+1:], n)).Mul(x1)).Add(round).ShiftAllRight(7)
+		a := widen8(loadNPtr(unsafe.Add(sp, x), n)).Mul(x0).Add(widen8(loadNPtr(unsafe.Add(sp, x+1), n)).Mul(x1)).Add(round).ShiftAllRight(7)
 		for y := range h {
-			p := src[(y+1)*ss+x:]
-			b := widen8(loadN(p, n)).Mul(x0).Add(widen8(loadN(p[1:], n)).Mul(x1)).Add(round).ShiftAllRight(7)
+			p := unsafe.Add(sp, (y+1)*ss+x)
+			b := widen8(loadNPtr(p, n)).Mul(x0).Add(widen8(loadNPtr(unsafe.Add(p, 1), n)).Mul(x1)).Add(round).ShiftAllRight(7)
 			v := a.Mul(y0).Add(b.Mul(y1)).Add(round).ShiftAllRight(7)
 			a = b
-			d := v.Sub(widen8(loadN(ref[y*rs+x:], n)))
+			d := v.Sub(widen8(loadNPtr(unsafe.Add(rp, y*rs+x), n)))
 			lo, hi := d.ExtendLo4ToInt32(), high4(d)
 			sum = sum.Add(lo).Add(hi)
 			sse = sse.Add(lo.Mul(lo)).Add(hi.Mul(hi))
@@ -279,6 +377,11 @@ func SubpelStats(src []byte, ss int, ref []byte, rs, w, h int, fx, fy [2]int16) 
 	return int(sum32(sum)), uint32(sum32(sse))
 }
 func BilinearFirst(src []byte, ss int, dst []uint16, w, h int, f [2]int16) {
+	if !Enabled {
+		BilinearFirstScalar(src, ss, dst, w, h, f)
+		return
+	}
+
 	c0, c1, r := archsimd.BroadcastInt32x4(int32(f[0])), archsimd.BroadcastInt32x4(int32(f[1])), archsimd.BroadcastInt32x4(64)
 	for y := range h {
 		for x := 0; x < w; x += 4 {
@@ -288,6 +391,11 @@ func BilinearFirst(src []byte, ss int, dst []uint16, w, h int, f [2]int16) {
 	}
 }
 func BilinearSecond(src []uint16, dst []byte, w, h int, f [2]int16) {
+	if !Enabled {
+		BilinearSecondScalar(src, dst, w, h, f)
+		return
+	}
+
 	c0, c1, r := archsimd.BroadcastInt32x4(int32(f[0])), archsimd.BroadcastInt32x4(int32(f[1])), archsimd.BroadcastInt32x4(64)
 	for y := range h {
 		for x := 0; x < w; x += 4 {
@@ -299,6 +407,10 @@ func BilinearSecond(src []uint16, dst []byte, w, h int, f [2]int16) {
 }
 
 func Sum(src []byte, ss, w, h int) int {
+	if !Enabled {
+		return SumScalar(src, ss, w, h)
+	}
+
 	var a archsimd.Int32x4
 	tail := 0
 	for y := range h {
@@ -314,6 +426,10 @@ func Sum(src []byte, ss, w, h int) int {
 	return int(sum32(a)) + tail
 }
 func Energy(src []int16) uint64 {
+	if !Enabled {
+		return EnergyScalar(src)
+	}
+
 	sum := uint64(0)
 	i := 0
 	for ; i+8 <= len(src); i += 8 {
@@ -327,6 +443,10 @@ func Energy(src []int16) uint64 {
 	return sum
 }
 func AbsSum(src []int16, n int) int {
+	if !Enabled {
+		return AbsSumScalar(src, n)
+	}
+
 	var a archsimd.Int32x4
 	i := 0
 	for ; i+8 <= n; i += 8 {
@@ -341,6 +461,11 @@ func AbsSum(src []int16, n int) int {
 	return sum
 }
 func ProjectionRow(src []byte, ss, h int, out []int16, shift uint64) {
+	if !Enabled {
+		ProjectionRowScalar(src, ss, h, out, shift)
+		return
+	}
+
 	var a, b archsimd.Int16x8
 	for y := range h {
 		v := archsimd.LoadUint8x16(src[y*ss:])
@@ -351,6 +476,10 @@ func ProjectionRow(src []byte, ss, h int, out []int16, shift uint64) {
 	b.ShiftAllRight(shift).Store(out[8:])
 }
 func VectorVariance(ref, src []int16, n, shift int) int {
+	if !Enabled {
+		return VectorVarianceScalar(ref, src, n, shift)
+	}
+
 	var sum, sse archsimd.Int32x4
 	for i := 0; i < n; i += 4 {
 		d := Load4(ref[i:]).Sub(Load4(src[i:]))
@@ -364,6 +493,10 @@ func VectorVariance(ref, src []int16, n, shift int) int {
 // DenoiseFirst keeps per-column signed adjustment sums (upper-clamped to
 // 127 for luma), matching libvpx's first denoising pass before its decision.
 func DenoiseFirst(mc []byte, ms int, avg []byte, as int, sig []byte, ss, w, inc, level int) int {
+	if !Enabled {
+		return DenoiseFirstScalar(mc, ms, avg, as, sig, ss, w, inc, level)
+	}
+
 	var columns [2]archsimd.Int16x8
 	l1, l2, l3 := archsimd.BroadcastInt16x8(int16(level)), archsimd.BroadcastInt16x8(int16(level+1)), archsimd.BroadcastInt16x8(int16(level+3))
 	zero := archsimd.Int16x8{}
@@ -390,4 +523,73 @@ func DenoiseFirst(mc []byte, ms int, avg []byte, as int, sig []byte, ss, w, inc,
 		total += int(sum32(v.ExtendLo4ToInt32().Add(high4(v))))
 	}
 	return total
+}
+
+func Intra4(dst []byte, ds int, border *[16]byte, indices *[4][16]byte) {
+	if !Enabled {
+		Intra4Scalar(dst, ds, border, indices)
+		return
+	}
+
+	v := archsimd.LoadUint8x16Array(border)
+	var lo, hi archsimd.Int16x8
+	for i := range 4 {
+		p := permute16(v, archsimd.LoadUint8x16Array(&indices[i]))
+		lo = lo.Add(widen8(p))
+		hi = hi.Add(widen8(highBytes(p)))
+	}
+	round := archsimd.BroadcastInt16x8(2)
+	a := packBytes(lo.Add(round).ShiftAllRight(2)).ReshapeToUint64s().GetElem(0)
+	b := packBytes(hi.Add(round).ShiftAllRight(2)).ReshapeToUint64s().GetElem(0)
+	binary.LittleEndian.PutUint32(dst, uint32(a))
+	binary.LittleEndian.PutUint32(dst[ds:], uint32(a>>32))
+	binary.LittleEndian.PutUint32(dst[2*ds:], uint32(b))
+	binary.LittleEndian.PutUint32(dst[3*ds:], uint32(b>>32))
+}
+func FillBlock(dst []byte, ds, w, h int, value byte) {
+	if !Enabled {
+		FillBlockScalar(dst, ds, w, h, value)
+		return
+	}
+	v := archsimd.BroadcastUint8x16(value)
+	for y := range h {
+		v.StorePart(dst[y*ds : y*ds+w])
+	}
+}
+func RepeatRow(dst []byte, ds int, above []byte, w int) {
+	if !Enabled {
+		RepeatRowScalar(dst, ds, above, w)
+		return
+	}
+	v := loadN(above, min(w, 8))
+	if w == 16 {
+		v = archsimd.LoadUint8x16(above)
+	}
+	for y := range w {
+		v.StorePart(dst[y*ds : y*ds+w])
+	}
+}
+func Horizontal(dst []byte, ds int, left []byte, w int) {
+	if !Enabled {
+		HorizontalScalar(dst, ds, left, w)
+		return
+	}
+	for y := range w {
+		v := archsimd.BroadcastUint8x16(left[y])
+		v.StorePart(dst[y*ds : y*ds+w])
+	}
+}
+
+func Mul16(a, b, out []int16, n int) {
+	if !Enabled {
+		Mul16Scalar(a, b, out, n)
+		return
+	}
+	i := 0
+	for ; i+8 <= n; i += 8 {
+		archsimd.LoadInt16x8(a[i:]).Mul(archsimd.LoadInt16x8(b[i:])).Store(out[i:])
+	}
+	for ; i < n; i++ {
+		out[i] = a[i] * b[i]
+	}
 }

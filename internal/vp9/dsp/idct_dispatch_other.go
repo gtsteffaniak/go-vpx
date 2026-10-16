@@ -1,5 +1,7 @@
 package dsp
 
+import "github.com/thesyncim/govpx/internal/pixel"
+
 // Scalar dispatchers for the non-arm64 / purego build path. These
 // expose the canonical Idct/Iwht/Iht entry points used by the VP9
 // decoder. On arm64 (non-purego) builds, idct_dispatch_arm64.go
@@ -17,6 +19,13 @@ func Idct4x4_16Add(input []int16, dest []uint8, stride int) {
 
 // Idct4x4_1Add is the DC-only fast path for the 4x4 inverse DCT.
 func Idct4x4_1Add(input []int16, dest []uint8, stride int) {
+	if pixel.Enabled {
+		v := int16(dctConstRoundShift(int64(input[0]) * cospi16_64))
+		v = int16(dctConstRoundShift(int64(v) * cospi16_64))
+		pixel.AddConstant(dest, stride, dest, stride, 4, 4, int(roundPowerOfTwo(int32(v), 4)))
+		return
+	}
+
 	idct4x4_1AddScalar(input, dest, stride)
 }
 
@@ -41,6 +50,13 @@ func Idct8x8_12Add(input []int16, dest []uint8, stride int) {
 
 // Idct8x8_1Add is the DC-only fast path for the 8x8 inverse DCT.
 func Idct8x8_1Add(input []int16, dest []uint8, stride int) {
+	if pixel.Enabled {
+		v := int16(dctConstRoundShift(int64(input[0]) * cospi16_64))
+		v = int16(dctConstRoundShift(int64(v) * cospi16_64))
+		pixel.AddConstant(dest, stride, dest, stride, 8, 8, int(roundPowerOfTwo(int32(v), 5)))
+		return
+	}
+
 	idct8x8_1AddScalar(input, dest, stride)
 }
 
@@ -73,6 +89,13 @@ func Idct16x16_10Add(input []int16, dest []uint8, stride int) {
 
 // Idct16x16_1Add is the DC-only fast path for the 16x16 inverse DCT.
 func Idct16x16_1Add(input []int16, dest []uint8, stride int) {
+	if pixel.Enabled {
+		v := int16(dctConstRoundShift(int64(input[0]) * cospi16_64))
+		v = int16(dctConstRoundShift(int64(v) * cospi16_64))
+		pixel.AddConstant(dest, stride, dest, stride, 16, 16, int(roundPowerOfTwo(int32(v), 6)))
+		return
+	}
+
 	idct16x16_1AddScalar(input, dest, stride)
 }
 
@@ -105,17 +128,28 @@ func Idct32x32_34Add(input []int16, dest []uint8, stride int) {
 
 // Idct32x32_1Add is the DC-only fast path for the 32x32 inverse DCT.
 func Idct32x32_1Add(input []int16, dest []uint8, stride int) {
+	if pixel.Enabled {
+		v := int16(dctConstRoundShift(int64(input[0]) * cospi16_64))
+		v = int16(dctConstRoundShift(int64(v) * cospi16_64))
+		pixel.AddConstant(dest, stride, dest, stride, 32, 32, int(roundPowerOfTwo(int32(v), 6)))
+		return
+	}
+
 	idct32x32_1AddScalar(input, dest, stride)
 }
 
 // Iwht4x4_16Add applies the inverse 4x4 Walsh-Hadamard (lossless).
 func Iwht4x4_16Add(input []int16, dest []uint8, stride int) {
-	iwht4x4_16AddScalar(input, dest, stride)
+	if !inverseWHTGo(input, dest, stride, false) {
+		iwht4x4_16AddScalar(input, dest, stride)
+	}
 }
 
 // Iwht4x4_1Add is the DC-only fast path for the lossless 4x4 IWHT.
 func Iwht4x4_1Add(input []int16, dest []uint8, stride int) {
-	iwht4x4_1AddScalar(input, dest, stride)
+	if !inverseWHTGo(input, dest, stride, true) {
+		iwht4x4_1AddScalar(input, dest, stride)
+	}
 }
 
 // Iht4x4_16Add dispatches the 2-D hybrid 4x4 inverse transform.
