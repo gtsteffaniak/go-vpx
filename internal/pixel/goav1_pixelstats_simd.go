@@ -13,12 +13,8 @@ import (
 func pixelDiffAcc(sse, sum archsimd.Int32x4, a, b archsimd.Uint8x16) (archsimd.Int32x4, archsimd.Int32x4) {
 	lo := a.ExtendLo8ToUint16().BitsToInt16().Sub(b.ExtendLo8ToUint16().BitsToInt16())
 	hi := widenHi8(a).BitsToInt16().Sub(widenHi8(b).BitsToInt16())
-	d0 := lo.ExtendLo4ToInt32()
-	d1 := hiInt16(lo).ExtendLo4ToInt32()
-	d2 := hi.ExtendLo4ToInt32()
-	d3 := hiInt16(hi).ExtendLo4ToInt32()
-	sse = sse.Add(d0.Mul(d0)).Add(d1.Mul(d1)).Add(d2.Mul(d2)).Add(d3.Mul(d3))
-	sum = sum.Add(d0).Add(d1).Add(d2).Add(d3)
+	sse = sse.Add(square8(lo)).Add(square8(hi))
+	sum = sum.Add(sumDiff16(lo.Add(hi)))
 	return sse, sum
 }
 

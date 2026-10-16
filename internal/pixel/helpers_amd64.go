@@ -89,3 +89,15 @@ func MulAdd8(a, b, c archsimd.Int32x8) archsimd.Int32x8 { return a.Mul(b).Add(c)
 
 func fpMulHigh16(a, b archsimd.Int16x8) archsimd.Int16x8 { return a.MulHigh(b) }
 func fpReduceMax16(v archsimd.Int16x8) int               { return int(Max4(v.ExtendLo4ToInt32().Max(high4(v)))) }
+
+func zipBytesLo(a, b archsimd.Uint8x16) archsimd.Uint16x8 {
+	return a.ExtendLo8ToUint16().Or(b.ExtendLo8ToUint16().ShiftAllLeft(8))
+}
+
+func square8(v archsimd.Int16x8) archsimd.Int32x4 { return v.DotProductPairs(v) }
+func sumDiff16(v archsimd.Int16x8) archsimd.Int32x4 {
+	return v.DotProductPairs(archsimd.BroadcastInt16x8(1))
+}
+
+func lfShift3(v archsimd.Int16x8) archsimd.Int16x8 { return v.ShiftAllRight(3) }
+func lfShift1(v archsimd.Int16x8) archsimd.Int16x8 { return v.ShiftAllRight(1) }

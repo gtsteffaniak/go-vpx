@@ -65,3 +65,12 @@ jobs:
 
       - name: Parity regression report
         run: make test-parity-report
+
+      - name: Save complete parity diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: parity-report-${{ github.event.pull_request.head.sha || github.sha }}
+          path: .parity-report.log
+          include-hidden-files: true
+          if-no-files-found: ignore

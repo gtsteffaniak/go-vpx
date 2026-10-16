@@ -45,4 +45,5 @@ jobs:
           path: |
             ${{ runner.temp }}/amd64-bench/*.txt
             ${{ runner.temp }}/amd64-bench/*.json
+            ${{ runner.temp }}/amd64-bench/*.pgo
           if-no-files-found: error

@@ -41,6 +41,9 @@ func TestPixelArithmetic(t *testing.T) {
 				if got := SAD(a, ss, b, rs, w, h); got != wantSAD {
 					t.Fatalf("SAD %dx%d off=%d got=%d want=%d", w, h, off, got, wantSAD)
 				}
+				if sad, sum, sse := DiffMetrics(a, ss, b, rs, w, h); sad != wantSAD || sum != wantSum || sse != wantSSE {
+					t.Fatalf("DiffMetrics %dx%d off=%d: got (%d,%d,%d), want (%d,%d,%d)", w, h, off, sad, sum, sse, wantSAD, wantSum, wantSSE)
+				}
 				sum, sse := Stats(a, ss, b, rs, w, h)
 				if sum != wantSum || sse != wantSSE {
 					t.Fatalf("Stats %dx%d off=%d got=(%d,%d) want=(%d,%d)", w, h, off, sum, sse, wantSum, wantSSE)
@@ -195,6 +198,26 @@ func TestSAD16MaxContrast(t *testing.T) {
 			expected := SAD16LimitScalar(a, 19, b, 23, h, limit)
 			if got != expected {
 				t.Fatalf("h=%d limit=%d got=%d want=%d", h, limit, got, expected)
+			}
+		}
+	}
+}
+
+func TestDiffMetricsAndStatsExtremeSums(t *testing.T) {
+	for _, w := range []int{4, 8, 16, 32, 64} {
+		for _, h := range []int{1, 16, 32, 64} {
+			for _, pair := range [][2]byte{{0, 255}, {255, 0}, {255, 255}} {
+				a, b := bytes.Repeat([]byte{pair[0]}, w*h), bytes.Repeat([]byte{pair[1]}, w*h)
+				d := int(pair[0]) - int(pair[1])
+				count := w * h
+				sad, sum, sse := DiffMetrics(a, w, b, w, w, h)
+				if sad != max(d, -d)*count || sum != d*count || sse != uint32(d*d*count) {
+					t.Fatalf("metrics extreme %dx%d %v: (%d,%d,%d)", w, h, pair, sad, sum, sse)
+				}
+				sum, sse = Stats(a, w, b, w, w, h)
+				if sum != d*count || sse != uint32(d*d*count) {
+					t.Fatalf("stats extreme %dx%d %v: (%d,%d)", w, h, pair, sum, sse)
+				}
 			}
 		}
 	}

@@ -47,16 +47,7 @@ func SAD16Limit(src []byte, ss int, ref []byte, rs, h, limit int) int {
 	_ = src[(h-1)*ss+15]
 	_ = ref[(h-1)*rs+15]
 	sp, rp := unsafe.Pointer(unsafe.SliceData(src)), unsafe.Pointer(unsafe.SliceData(ref))
-	var sum archsimd.Uint16x8
-	for y := range h {
-		a := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(sp, y*ss)))
-		b := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(rp, y*rs)))
-		sum = sum.Add(absPairs(a, b))
-		if value := sumPairs(sum); value > limit {
-			return value
-		}
-	}
-	return sumPairs(sum)
+	return sad16LimitPtr(sp, ss, rp, rs, h, limit)
 }
 func absPairs(a, b archsimd.Uint8x16) archsimd.Uint16x8 {
 	d := a.Max(b).Sub(a.Min(b))

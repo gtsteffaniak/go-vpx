@@ -1,0 +1,67 @@
+//go:build goexperiment.simd && amd64 && !purego
+
+package pixel
+
+import "simd/archsimd"
+
+func loopFilterWide(p []byte, q0, step, outer, n, blimit, limit, thresh, kind int) bool {
+	if (kind != 2 && kind != 4 && kind != 6) || n < 16 || (step != 1 && outer != 1) {
+		return false
+	}
+	width := 8
+	if kind == 2 {
+		width = 4
+	}
+	if (outer == 1 && step < 16) || (step == 1 && outer < width) {
+		return false
+	}
+	base := 0
+	for ; base+16 <= n; base += 16 {
+		loopFilterNarrow16(p, q0+base*outer, step, outer, blimit, limit, thresh, kind)
+	}
+	if base < n {
+		loopFilterNarrow8(p, q0+base*outer, step, outer, blimit, limit, thresh, kind)
+	}
+	return true
+}
+func wideBytes(a, b archsimd.Uint8x16) archsimd.Uint8x16 {
+	return a.ReshapeToUint64s().InterleaveLo(b.ReshapeToUint64s()).ReshapeToUint8s()
+}
+func loadEdgeRows16(p []byte, off, pitch, width int) (archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16) {
+	a0, a1, a2, a3, a4, a5, a6, a7 := loadEdgeRows(p, off, pitch, width)
+	b0, b1, b2, b3, b4, b5, b6, b7 := loadEdgeRows(p, off+8*pitch, pitch, width)
+	return wideBytes(a0, b0), wideBytes(a1, b1), wideBytes(a2, b2), wideBytes(a3, b3), wideBytes(a4, b4), wideBytes(a5, b5), wideBytes(a6, b6), wideBytes(a7, b7)
+}
+func edgeLoad16(p []byte, off, outer int) archsimd.Int16x16 {
+	// The wide entry point uses this only for contiguous horizontal samples.
+	return archsimd.LoadUint8x16(p[off:]).ExtendToUint16().BitsToInt16()
+}
+func widen16(v archsimd.Uint8x16) archsimd.Int16x16 { return v.ExtendToUint16().BitsToInt16() }
+func anyWide16(v archsimd.Mask16x16) bool {
+	bits := v.ToInt16x16().ToBits().ReshapeToUint64s()
+	lo, hi := bits.GetLo(), bits.GetHi()
+	return lo.GetElem(0)|lo.GetElem(1)|hi.GetElem(0)|hi.GetElem(1) != 0
+}
+func lfClamp16(v archsimd.Int16x16) archsimd.Int16x16 {
+	return v.Max(archsimd.BroadcastInt16x16(-128)).Min(archsimd.BroadcastInt16x16(127))
+}
+func lfWideShift1(v archsimd.Int16x16) archsimd.Int16x16 { return v.ShiftAllRight(1) }
+func lfWideShift3(v archsimd.Int16x16) archsimd.Int16x16 { return v.ShiftAllRight(3) }
+func lfWideShift7(v archsimd.Int16x16) archsimd.Int16x16 { return v.ShiftAllRight(7) }
+func storeNarrowEdge16(p []byte, off, step, outer, count int, v0, v1, v2, v3, v4, v5 archsimd.Int16x16) {
+	if outer != 1 {
+		storeNarrowEdge(p, off, step, outer, count, v0.GetLo(), v1.GetLo(), v2.GetLo(), v3.GetLo(), v4.GetLo(), v5.GetLo())
+		storeNarrowEdge(p, off+8*outer, step, outer, count, v0.GetHi(), v1.GetHi(), v2.GetHi(), v3.GetHi(), v4.GetHi(), v5.GetHi())
+		return
+	}
+	wideBytes(packBytes(v0.GetLo()), packBytes(v0.GetHi())).Store(p[off:])
+	wideBytes(packBytes(v1.GetLo()), packBytes(v1.GetHi())).Store(p[off+step:])
+	if count >= 4 {
+		wideBytes(packBytes(v2.GetLo()), packBytes(v2.GetHi())).Store(p[off+2*step:])
+		wideBytes(packBytes(v3.GetLo()), packBytes(v3.GetHi())).Store(p[off+3*step:])
+	}
+	if count == 6 {
+		wideBytes(packBytes(v4.GetLo()), packBytes(v4.GetHi())).Store(p[off+4*step:])
+		wideBytes(packBytes(v5.GetLo()), packBytes(v5.GetHi())).Store(p[off+5*step:])
+	}
+}

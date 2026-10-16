@@ -61,3 +61,18 @@ func sad16ColsX4Ptr(sp, p0, p1, p2, p3 unsafe.Pointer, srcStride, refStride int,
 func sumU64(acc archsimd.Uint64x2) int {
 	return int(acc.GetElem(0) + acc.GetElem(1))
 }
+
+// Preserve the exact first-row-over-limit result while using PSADBW's two
+// independent eight-byte sums instead of byte widening and reduction.
+func sad16LimitPtr(sp unsafe.Pointer, ss int, rp unsafe.Pointer, rs, h, limit int) int {
+	var acc archsimd.Uint64x2
+	value := 0
+	for y := range h {
+		acc = acc.Add(load16(step(sp, y*ss)).SumOf8AbsDiff(load16(step(rp, y*rs))))
+		value = sumU64(acc)
+		if value > limit {
+			return value
+		}
+	}
+	return value
+}

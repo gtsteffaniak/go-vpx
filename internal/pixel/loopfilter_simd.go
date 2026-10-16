@@ -2,7 +2,10 @@
 
 package pixel
 
-import "simd/archsimd"
+import (
+	"encoding/binary"
+	"simd/archsimd"
+)
 
 // LoopFilter is the shared 8-bit libvpx deblocker. kind is 2 (VP8 simple),
 // 4 (VP8/VP9 narrow), 6 (VP8 macroblock), 8 or 16 (VP9 flat filters).
@@ -11,6 +14,15 @@ import "simd/archsimd"
 func LoopFilter(p []byte, q0, step, outer, n, blimit, limit, thresh, kind int) bool {
 	if !Enabled {
 		return false
+	}
+	if loopFilterWide(p, q0, step, outer, n, blimit, limit, thresh, kind) {
+		return true
+	}
+	if kind == 2 || kind == 4 || kind == 6 {
+		for base := 0; base < n; base += 8 {
+			loopFilterNarrow8(p, q0+base*outer, step, outer, blimit, limit, thresh, kind)
+		}
+		return true
 	}
 	for base := 0; base < n; base += 8 {
 		loopFilter8(p, q0+base*outer, step, outer, blimit, limit, thresh, kind)
@@ -38,6 +50,65 @@ func edgeStore(p []byte, off, outer int, v archsimd.Int16x8) {
 		p[off+i*outer] = b[i]
 	}
 }
+
+// transposeBytes8 keeps eight strided edge positions in registers. Each
+// input/output uses its low eight bytes; transposing twice is the identity.
+func transposeBytes8(v0, v1, v2, v3, v4, v5, v6, v7 archsimd.Uint8x16) (archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16) {
+	a0 := zipBytesLo(v0, v1)
+	a1 := zipBytesLo(v2, v3)
+	a2 := zipBytesLo(v4, v5)
+	a3 := zipBytesLo(v6, v7)
+	b0 := a0.InterleaveLo(a1).ReshapeToUint32s()
+	b1 := a0.InterleaveHi(a1).ReshapeToUint32s()
+	b2 := a2.InterleaveLo(a3).ReshapeToUint32s()
+	b3 := a2.InterleaveHi(a3).ReshapeToUint32s()
+	c01 := b0.InterleaveLo(b2).ReshapeToUint8s()
+	c23 := b0.InterleaveHi(b2).ReshapeToUint8s()
+	c45 := b1.InterleaveLo(b3).ReshapeToUint8s()
+	c67 := b1.InterleaveHi(b3).ReshapeToUint8s()
+	return c01, highBytes(c01), c23, highBytes(c23), c45, highBytes(c45), c67, highBytes(c67)
+}
+func loadEdgeRows(p []byte, off, pitch, width int) (archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16) {
+	// loadN reads exactly width bytes, including on the final row. The slice
+	// checks prove the complete tile before any vector read.
+	row := func(y int) archsimd.Uint8x16 {
+		start := off + y*pitch
+		return loadN(p[start:start+width], width)
+	}
+	return transposeBytes8(row(0), row(1), row(2), row(3), row(4), row(5), row(6), row(7))
+}
+func loadEdgeTile(p []byte, off, pitch, width int, a *[16]archsimd.Int16x8, first int) {
+	c0, c1, c2, c3, c4, c5, c6, c7 := loadEdgeRows(p, off, pitch, width)
+	a[first], a[first+1], a[first+2], a[first+3] = widen8(c0), widen8(c1), widen8(c2), widen8(c3)
+	if width == 8 {
+		a[first+4], a[first+5], a[first+6], a[first+7] = widen8(c4), widen8(c5), widen8(c6), widen8(c7)
+	}
+}
+func storeEdgeTile(p []byte, off, pitch, tileFirst, width, first, last int, b *[16]archsimd.Int16x8) {
+	c0, c1, c2, c3 := packBytes(b[tileFirst]), packBytes(b[tileFirst+1]), packBytes(b[tileFirst+2]), packBytes(b[tileFirst+3])
+	c4, c5, c6, c7 := archsimd.Uint8x16{}, archsimd.Uint8x16{}, archsimd.Uint8x16{}, archsimd.Uint8x16{}
+	if width == 8 {
+		c4, c5, c6, c7 = packBytes(b[tileFirst+4]), packBytes(b[tileFirst+5]), packBytes(b[tileFirst+6]), packBytes(b[tileFirst+7])
+	}
+	r0, r1, r2, r3, r4, r5, r6, r7 := transposeBytes8(c0, c1, c2, c3, c4, c5, c6, c7)
+	rows := [8]archsimd.Uint8x16{r0, r1, r2, r3, r4, r5, r6, r7}
+	// Only write columns that the original filter writes. Rewriting unchanged
+	// neighbors would introduce conflicting accesses in parallel row filtering.
+	for y := range 8 {
+		start := off + y*pitch + first - tileFirst
+		out := p[start : start+last-first]
+		bits := rows[y].ReshapeToUint64s().GetElem(0) >> uint(8*(first-tileFirst))
+		switch last - first {
+		case 2:
+			binary.LittleEndian.PutUint16(out, uint16(bits))
+		case 4:
+			binary.LittleEndian.PutUint32(out, uint32(bits))
+		case 6:
+			binary.LittleEndian.PutUint32(out, uint32(bits))
+			binary.LittleEndian.PutUint16(out[4:], uint16(bits>>32))
+		}
+	}
+}
 func any16(m archsimd.Mask16x8) bool {
 	v := m.ToInt16x8().ToBits().ReshapeToUint64s()
 	return v.GetElem(0)|v.GetElem(1) != 0
@@ -53,8 +124,16 @@ func loopFilter8(p []byte, off, step, outer, blimit, limit, thresh, kind int) {
 	if kind == 2 {
 		first, last = 6, 10
 	}
+	tileFirst, tileWidth := first, last-first
+	tiled := step == 1 && outer > 1
+	if tiled {
+		loadEdgeTile(p, off+first-8, outer, tileWidth, &a, first)
+	} else {
+		for i := first; i < last; i++ {
+			a[i] = edgeLoad(p, off+(i-8)*step, outer)
+		}
+	}
 	for i := first; i < last; i++ {
-		a[i] = edgeLoad(p, off+(i-8)*step, outer)
 		b[i] = a[i]
 	}
 	p1, p0, q0, q1 := a[6], a[7], a[8], a[9]
@@ -130,8 +209,12 @@ func loopFilter8(p []byte, off, step, outer, blimit, limit, thresh, kind int) {
 			}
 		}
 	}
-	for i := first; i < last; i++ {
-		edgeStore(p, off+(i-8)*step, outer, b[i])
+	if tiled && first >= tileFirst && last <= tileFirst+tileWidth {
+		storeEdgeTile(p, off+tileFirst-8, outer, tileFirst, tileWidth, first, last, &b)
+	} else {
+		for i := first; i < last; i++ {
+			edgeStore(p, off+(i-8)*step, outer, b[i])
+		}
 	}
 }
 

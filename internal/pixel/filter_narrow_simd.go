@@ -81,33 +81,18 @@ func filterNarrow8(src []byte, ss int, dst []byte, ds, w, h, step int, taps []in
 }
 
 func narrow8Mode(taps []int16) int {
-	regular, smooth := true, true
-	negative := 0
-	for k, v := range taps {
-		if v < -128 || v > 128 {
-			return 0
-		}
-		if v < 0 {
-			negative -= int(v)
-		}
-		switch k {
-		case 0, 2, 5, 7:
-			regular = regular && v <= 0
-		default:
-			regular = regular && v >= 0
-		}
-		switch k {
-		case 0, 1, 6, 7:
-			smooth = smooth && v <= 0
-		default:
-			smooth = smooth && v >= 0
-		}
-	}
-	if negative > 128 || !regular && !smooth {
+	t0, t1, t2, t3, t4, t5, t6, t7 := taps[0], taps[1], taps[2], taps[3], taps[4], taps[5], taps[6], taps[7]
+	if min(t0, t1, t2, t3, t4, t5, t6, t7) < -128 || max(t0, t1, t2, t3, t4, t5, t6, t7) > 128 {
 		return 0
 	}
-	if regular {
-		return 1
+	if max(t0, t2, t5, t7) <= 0 && min(t1, t3, t4, t6) >= 0 {
+		if -int(t0)-int(t2)-int(t5)-int(t7) <= 128 {
+			return 1
+		}
+		return 0
 	}
-	return 2
+	if max(t0, t1, t6, t7) <= 0 && min(t2, t3, t4, t5) >= 0 && -int(t0)-int(t1)-int(t6)-int(t7) <= 128 {
+		return 2
+	}
+	return 0
 }

@@ -1,6 +1,9 @@
 package encoder
 
-import vp9dsp "github.com/thesyncim/govpx/internal/vp9/dsp"
+import (
+	"github.com/thesyncim/govpx/internal/pixel"
+	vp9dsp "github.com/thesyncim/govpx/internal/vp9/dsp"
+)
 
 // SourceSADSceneSamplesResult reports the sampled 64x64 source-SAD summary
 // used by one-pass scene detection.
@@ -151,6 +154,12 @@ func avgSourceSAD64(args AvgSourceSADArgs, x0, y0 int) (sad, variance, sse uint6
 	if x0+64 <= args.Width && y0+64 <= args.Height {
 		srcOff := y0*args.SourceYStride + x0
 		refOff := y0*args.LastSourceYStride + x0
+		if pixel.Enabled {
+			total, signed, squares := pixel.DiffMetrics(args.SourceY[srcOff:], args.SourceYStride, args.LastSourceY[refOff:], args.LastSourceYStride, 64, 64)
+			sad, sse = uint64(total), uint64(squares)
+			sum := int64(signed)
+			return sad, sse - uint64(sum*sum>>12), sse
+		}
 		sad = BlockSADOffsets(args.SourceY, srcOff, args.SourceYStride,
 			args.LastSourceY, refOff, args.LastSourceYStride, 64, 64, ^uint64(0))
 		var sse32 uint32
@@ -189,18 +198,13 @@ func avgSourceSAD64(args AvgSourceSADArgs, x0, y0 int) (sad, variance, sse uint6
 func avgSourceSAD64ClampedRow(args AvgSourceSADArgs, x0, y, cols, rightRepeat int) (sad uint64, sum int64, sse uint64) {
 	srcOff := y*args.SourceYStride + x0
 	refOff := y*args.LastSourceYStride + x0
+	total, signed, squares := pixel.DiffMetrics(args.SourceY[srcOff:], args.SourceYStride, args.LastSourceY[refOff:], args.LastSourceYStride, cols, 1)
+	sad, sum, sse = uint64(total), int64(signed), uint64(squares)
 	lastDiff := 0
-	for x := range cols {
-		diff := int(args.SourceY[srcOff+x]) - int(args.LastSourceY[refOff+x])
-		lastDiff = diff
-		if diff < 0 {
-			sad += uint64(-diff)
-		} else {
-			sad += uint64(diff)
-		}
-		sum += int64(diff)
-		sse += uint64(diff * diff)
+	if cols > 0 {
+		lastDiff = int(args.SourceY[srcOff+cols-1]) - int(args.LastSourceY[refOff+cols-1])
 	}
+
 	if rightRepeat > 0 {
 		if lastDiff < 0 {
 			sad += uint64(-lastDiff) * uint64(rightRepeat)

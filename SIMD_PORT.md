@@ -98,6 +98,15 @@ toggling filter strength; the VP8 oracle trace helper disables libvpx's
 interactive warning prompt. Both original quality failures were reproduced
 on unchanged main with exactly the same curves.
 
+Hosted CI also exposed adaptive-timing noise in VP8 oracle fixtures.
+The threaded byte matrix now pins its realtime floor with `CpuUsed=-4`.
+The inter-mode distribution report pins speed 8 with `CpuUsed=-8`, using
+fresh expected curves generated from unchanged `691cd051` with the same
+fixed-speed fixture. Its percentage-point, L1, and EOB tolerances remain
+unchanged; the independent 720p baseline now has L1=0 and EOB ratio=1.
+Adaptive-control coverage remains in the other oracle tests. CI retains
+the complete parity log as an artifact for future failed assertions.
+
 ## Performance and remaining limits
 
 The migration removes architecture-specific assembly maintenance; it does
@@ -164,5 +173,72 @@ ms/frame for the same assembly-era public VP9 workload: 22.7% less time.
 All twelve runs agreed on bytes, encoded/dropped frame counts and allocations.
 This result is specific to that CPU/workload; the old x64 dispatch had less
 assembly coverage than ARM64. Horizontal convolution was still slower in
-that checkpoint. The dedicated native amd64 workflow will remeasure the
-wider implementation, including VP8 and VP9 at 720p.
+that checkpoint.
+
+### Native amd64 measurements at `bb1a6ef3`
+
+The next hosted run used an AMD EPYC 9V74, which is a different CPU from
+the previous EPYC 7763 runner. Each comparison below uses baseline
+`691cd051` and SIMD `bb1a6ef3` on the same runner, official Go 1.27.2,
+`GOEXPERIMENT=simd`, `GOAMD64=v1`, `GOMAXPROCS=1`, and `-pgo=off`. Native
+SIMD selection was asserted with `GOVPX_REQUIRE_SIMD=1`. Six pairs alternate
+assembly/SIMD and SIMD/assembly order; kernel samples run for 150 ms.
+
+| Operation | Assembly-era dispatch | Go SIMD dispatch | Time change |
+| --- | ---: | ---: | ---: |
+| VP8 SAD 16x16 | 8.204 ns | 12.505 ns | +52.4% |
+| VP9 inverse DCT 4x4 | 55.84 ns | 17.76 ns | -68.2% |
+| VP9 inverse DCT 8x8 | 289.25 ns | 46.46 ns | -83.9% |
+| VP9 forward DCT 16x16 | 1,074.5 ns | 187.90 ns | -82.5% |
+| VP9 horizontal filter 16x16 | 233.10 ns | 87.38 ns | -62.5% |
+| VP9 vertical filter 16x16 | 618.70 ns | 87.665 ns | -85.8% |
+| VP9 subpixel variance 16x16 | 146.65 ns | 85.92 ns | -41.4% |
+| VP9 realtime 320x180 | 5.498 ms/frame | 3.607 ms/frame | -34.4% |
+| VP8 realtime 720p | 14.040 ms/frame | 45.187 ms/frame | +221.9% |
+| VP9 realtime 720p | 47.558 ms/frame | 28.475 ms/frame | -40.1% |
+
+Both 720p workloads encode 60 input frames at 2,500 kbps, CPU-used 8,
+one thread, with encode-only mode and external comparison disabled. The
+320x180 case retains the 120-frame, 500 kbps configuration described above.
+All kernels report zero allocations. The forward DCT scalar control is
+unchanged within these samples: 1,074.0 ns versus 1,073.5 ns.
+
+The VP8 720p regression is substantial and unresolved at this checkpoint:
+every paired SIMD run takes 220.8–223.1% more time. The VP9 paired time
+changes are -34.1 to -34.7% at 320x180 and -39.8 to -40.6% at 720p.
+These results support workload-specific VP9 gains; they do not establish
+overall performance parity with the removed assembly.
+
+Every run agrees on output byte counts, encoded/dropped frame counts,
+quantizer statistics/histograms, and allocations within each workload.
+These JSON reports retain byte counts, not bitstream hashes; exact codec
+bytes are checked separately by the oracle parity gates. VP8 720p
+produces 685,957 bytes, 58 encoded/2 dropped frames, and zero allocations
+per input frame. VP9 720p produces 642,654 bytes, 48 encoded/12 dropped
+frames, and 1.25 allocations per input frame. The 320x180 output remains
+246,893 bytes, 117 encoded/3 dropped frames, and 0.617 allocations per
+input frame.
+
+[The native amd64 workflow run](https://github.com/thesyncim/govpx/actions/runs/38947952120)
+retains raw samples, encoder JSON, CPU/compiler metadata, and the dispatch
+assertion. Do not compare absolute timings between its EPYC 9V74 and the
+earlier EPYC 7763 run. The workflow now captures separate VP8/VP9 720p CPU
+profiles after all timed pairs, with raw profiles and flat/cumulative top
+tables, to guide the remaining work without changing the timing samples.
+
+### Loop-filter and metric follow-up
+
+The next checkpoint replaces the generic narrow loop-filter arrays with
+named registers, adds a sixteen-position AVX2 filter, and copies goav1's
+ARM64 byte-domain filter with full VP8/VP9 masks and macroblock corrections.
+Vertical loads/stores use register transposes and touch exactly the original
+modified columns. Entry bounds and minimal/overlapping-layout tests cover
+unsafe row I/O; the block-limit-255 case retains exact int16 arithmetic.
+
+Local ARM64 comparisons reduced VP8 720p from 18.74 to 14.40 ms/frame with
+the narrow-register filter, then to 13.71 ms/frame with the copied byte
+pipeline before the final bounded row-I/O tuning. These are intermediate
+comparisons; the assembly baseline remains faster. Native x64 results for
+this checkpoint are pending. Variance64x64 improved from 508 to 309 ns,
+and a fused SAD/sum/SSE pass reduced bottom-edge source metrics from 915
+to 203 ns. All measured kernels retain zero allocations.

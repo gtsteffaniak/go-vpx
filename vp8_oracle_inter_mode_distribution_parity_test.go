@@ -26,13 +26,19 @@ import (
 // The parity report originated as the r7-b diagnosis of the +74% inter-frame
 // gap at speed 8 RT CBR (govpx over-picked NEAR/NEW vs libvpx's
 // NEAREST/ZEROMV). The R8 sweep closed the bulk of that gap; the
-// small-fixture baselines sit at L1=0pp. The high-resolution 720p fixture
-// intentionally records the remaining bench-scale residual so future changes
-// still have a stable line to beat instead of a stale impossible target. The
-// rt-cpu8-1280x720-bench-noise fixture (R9-1) extends the parity report
+// small-fixture baselines sit near L1=0pp. The high-resolution 720p fixture
+// originally recorded an adaptive-speed residual; its fixed-speed baseline
+// now isolates codec decisions from host-dependent timing. The
+// rt-fixed-cpu8-1280x720-bench-noise fixture (R9-1) extends the parity report
 // to the resolution and frame budget the cmd/govpx-bench harness
 // targets so future regressions in the high-resolution picker path
 // surface here, not just in the smaller synthetic fixtures.
+//
+// Pin realtime speed explicitly with CpuUsed=-8. Positive CpuUsed=8 runs
+// libvpx's wall-clock adaptive selector, so tracing and shared-runner load
+// can change the selected modes independently of codec behavior. Both
+// implementations map -8 to fixed speed 8; the baseline was measured on
+// unchanged main with these same fixed-speed fixtures and tolerances.
 //
 // Bootstrap with GOVPX_UPDATE_BASELINES=1 to seed the file.
 func TestVP8OracleInterModeDistributionParity(t *testing.T) {
@@ -58,21 +64,21 @@ func TestVP8OracleInterModeDistributionParity(t *testing.T) {
 	}
 	specs := []fixtureSpec{
 		// Panning fixtures sweep small/medium/large with realistic motion.
-		{64, 64, DeadlineRealtime, 8, 30, 700, 8, 999, fixturePanning, "rt-cpu8-64x64-panning"},
-		{128, 128, DeadlineRealtime, 8, 30, 700, 8, 999, fixturePanning, "rt-cpu8-128x128-panning"},
-		{256, 256, DeadlineRealtime, 8, 30, 1000, 8, 999, fixturePanning, "rt-cpu8-256x256-panning"},
+		{64, 64, DeadlineRealtime, -8, 30, 700, 8, 999, fixturePanning, "rt-fixed-cpu8-64x64-panning"},
+		{128, 128, DeadlineRealtime, -8, 30, 700, 8, 999, fixturePanning, "rt-fixed-cpu8-128x128-panning"},
+		{256, 256, DeadlineRealtime, -8, 30, 1000, 8, 999, fixturePanning, "rt-fixed-cpu8-256x256-panning"},
 		// Bench-style noise fixtures track the +74% inter-frame gap (no real
 		// motion -- only pseudo-random pixel deltas per frame, the worst case
 		// for ZEROMV-vs-NEW divergence).
-		{128, 128, DeadlineRealtime, 8, 30, 1200, 8, 30, fixtureBenchNoise, "rt-cpu8-128x128-bench-noise"},
-		{256, 256, DeadlineRealtime, 8, 30, 1200, 8, 30, fixtureBenchNoise, "rt-cpu8-256x256-bench-noise"},
+		{128, 128, DeadlineRealtime, -8, 30, 1200, 8, 30, fixtureBenchNoise, "rt-fixed-cpu8-128x128-bench-noise"},
+		{256, 256, DeadlineRealtime, -8, 30, 1200, 8, 30, fixtureBenchNoise, "rt-fixed-cpu8-256x256-bench-noise"},
 		// 720p fixture (R9-1): pins the mode-distribution parity report at the
 		// resolution the bench runs at (1280x720 cpu=8 RT CBR, 1500 kbps).
 		// This is the resolution where the prior +52pp / 1.37x interframe
 		// overshoot was observed; the parity report tracks the picker's mode
 		// dispersal here so inter-mode regressions surface at the bench
 		// scale, not just the small synthetic fixtures above.
-		{1280, 720, DeadlineRealtime, 8, 30, 1500, 8, 999, fixtureBenchNoise, "rt-cpu8-1280x720-bench-noise"},
+		{1280, 720, DeadlineRealtime, -8, 30, 1500, 8, 999, fixtureBenchNoise, "rt-fixed-cpu8-1280x720-bench-noise"},
 	}
 
 	type modeBreakdown struct {

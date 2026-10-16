@@ -75,3 +75,16 @@ func absAcc16(acc archsimd.Uint16x8, s, r archsimd.Uint8x16) archsimd.Uint16x8 {
 func sumU16(acc archsimd.Uint16x8) int {
 	return int(acc.ExtendLo4ToUint32().Add(acc.HiToLo().ExtendLo4ToUint32()).ReduceSum())
 }
+
+func sad16LimitPtr(sp unsafe.Pointer, ss int, rp unsafe.Pointer, rs, h, limit int) int {
+	var sum archsimd.Uint16x8
+	for y := range h {
+		a := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(sp, y*ss)))
+		b := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(rp, y*rs)))
+		sum = sum.Add(absPairs(a, b))
+		if value := sumPairs(sum); value > limit {
+			return value
+		}
+	}
+	return sumPairs(sum)
+}

@@ -174,3 +174,21 @@ func fpMulHigh16(a, b archsimd.Int16x8) archsimd.Int16x8 {
 	return lo.ConcatOdd(hi).BitsToInt16()
 }
 func fpReduceMax16(v archsimd.Int16x8) int { return int(v.ReduceMax()) }
+
+func zipBytesLo(a, b archsimd.Uint8x16) archsimd.Uint16x8 {
+	return a.InterleaveLo(b).ReshapeToUint16s()
+}
+
+func square8(v archsimd.Int16x8) archsimd.Int32x4 {
+	hi := v.HiToLo()
+	return v.MulWidenLo(v).Add(hi.MulWidenLo(hi))
+}
+func sumDiff16(v archsimd.Int16x8) archsimd.Int32x4 {
+	return v.ExtendLo4ToInt32().Add(v.HiToLo().ExtendLo4ToInt32())
+}
+
+var lfRight3 = archsimd.BroadcastInt16x8(-3)
+var lfRight1 = archsimd.BroadcastInt16x8(-1)
+
+func lfShift3(v archsimd.Int16x8) archsimd.Int16x8 { return v.Shift(lfRight3) }
+func lfShift1(v archsimd.Int16x8) archsimd.Int16x8 { return v.Shift(lfRight1) }

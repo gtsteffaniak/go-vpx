@@ -10,7 +10,8 @@ Copied from goav1 commit `ff46346e73f063ff1ea3a8d7f06ee26cd9baaad4`:
 | --- | --- | --- |
 | `goav1_sad_{arm64,amd64}.go` | `internal/av1/encoder/sad_simd_{arm64,amd64}.go` | Extracted the used pointer kernels; x4 receives independent source/reference strides. |
 | `goav1_ops_{arm64,amd64}.go` | `internal/av1/encoder/gosimd_ops_{arm64,amd64}.go` | Extracted widening and exact square-accumulation helpers. |
-| `goav1_pixelstats_simd.go` | `internal/av1/encoder/pixelstats_gosimd.go` | Removed AV1 dispatch registration and shape wrappers; fallback bridges to govpx scalar kernels. |
+| `goav1_loopfilter_arm64.go` | `internal/av1/loopfilter/filter4_wide_arm64.go` | Copied the sixteen-byte filter dataflow; added VP8/VP9 full p3-to-q3 masks, simple and macroblock variants, exact row transposes and bounded loads/stores. |
+| `goav1_pixelstats_simd.go` | `internal/av1/encoder/pixelstats_gosimd.go` | Removed AV1 dispatch registration and shape wrappers; fallback bridges to govpx scalar kernels; local pairwise dot products and widening multiplies reduce intermediate widening. |
 | `transform_arm64.go` | `internal/av1/transform/fhybrid_idtx_gosimd_arm64.go` | Extracted 8x8 int16 transpose for VP9's eight-line inverse DCT. |
 | `transform_avx2.go` | `internal/av1/transform/fdct_gosimd_vec_amd64.go` | Extracted eight-lane AVX2 register transpose; local exact load/store helpers. |
 | `goav1_convolve_simd.go` | `internal/av1/motion/compound8_gosimd.go` | Extracted horizontal/vertical tap sums; eight-byte loads preserve exact VP8/VP9 final-row bounds. |

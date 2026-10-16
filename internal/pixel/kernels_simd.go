@@ -381,9 +381,8 @@ func SubpelStats(src []byte, ss int, ref []byte, rs, w, h int, fx, fy [2]int16) 
 			v := filterShift7(a.Mul(y0).Add(b.Mul(y1)).Add(round))
 			a = b
 			d := v.Sub(widen8(loadNPtr(unsafe.Add(rp, y*rs+x), n)))
-			lo, hi := d.ExtendLo4ToInt32(), high4(d)
-			sum = sum.Add(lo).Add(hi)
-			sse = sse.Add(lo.Mul(lo)).Add(hi.Mul(hi))
+			sum = sum.Add(sumDiff16(d))
+			sse = sse.Add(square8(d))
 		}
 	}
 	return int(sum32(sum)), uint32(sum32(sse))
