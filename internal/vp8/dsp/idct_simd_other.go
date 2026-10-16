@@ -21,6 +21,9 @@ func dcOnlyIDCT4x4AddSIMD(inputDC int16, pred []byte, predStride int, dst []byte
 }
 
 func dcOnlyIDCT4x4AddPairSIMD(delta0 int16, delta1 int16, pred []byte, predStride int, dst []byte, dstStride int) {
+	if pixel.AddConstantPair4(pred, predStride, dst, dstStride, delta0, delta1) {
+		return
+	}
 	dcOnlyIDCT4x4AddSIMD(delta0<<3, pred, predStride, dst, dstStride)
 	dcOnlyIDCT4x4AddSIMD(delta1<<3, pred[4:], predStride, dst[4:], dstStride)
 }

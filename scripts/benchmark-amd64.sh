@@ -45,6 +45,7 @@ for source_dir in "$reference_dir" "$previous_dir"; do
 	[ -n "$source_dir" ] || continue
 	cp "$root/internal/vp8/encoder/dct_batch_native_test.go" "$source_dir/internal/vp8/encoder/dct_batch_native_test.go"
 	cp "$root/internal/vp8/dsp/sse_strip_test.go" "$source_dir/internal/vp8/dsp/sse_strip_test.go"
+	cp "$root/internal/vp8/dsp/dc_pair_bench_test.go" "$source_dir/internal/vp8/dsp/dc_pair_bench_test.go"
 	cp "$root/internal/vp9/encoder/dct32_bench_test.go" "$source_dir/internal/vp9/encoder/dct32_bench_test.go"
 done
 
@@ -67,7 +68,7 @@ if [ -n "$previous_dir" ]; then
 fi
 
 packages='internal/vp9/dsp internal/vp8/dsp internal/vp9/encoder internal/vp8/encoder'
-benchmarks='BenchmarkVP9(Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance16x16)$|BenchmarkSAD16x16$|BenchmarkForwardDCT(16x16|32x32Native)$|Benchmark(FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|ResidualGather16x16|ResidualGather8x8|SSE16x720PtrFast|SSE16x16|SSE8x8|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
+benchmarks='BenchmarkVP9(Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance16x16)$|BenchmarkSAD16x16$|BenchmarkForwardDCT(16x16|32x32Native)$|Benchmark(FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|DCOnlyIDCT4x4AddPairInt32|DCOnlyPairInPlace|ResidualGather16x16|ResidualGather8x8|SSE16x720PtrFast|SSE16x16|SSE8x8|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|(MB)?LoopFilter(Horizontal|Vertical)EdgeUV|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
 for variant in $variants; do
 	case "$variant" in
 		assembly) source_dir=$reference_dir ;;

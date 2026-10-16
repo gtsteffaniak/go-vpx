@@ -39,11 +39,17 @@ func loopFilterVerticalEdgesYDispatch(s []byte, stride int, blimit, limit, thres
 }
 
 func loopFilterHorizontalEdgeUVDispatch(u []byte, v []byte, stride int, blimit, limit, thresh byte) {
+	if pixel.LoopFilterUV8(u, v, stride, 1, int(blimit), int(limit), int(thresh), 4) {
+		return
+	}
 	loopFilterHorizontalEdgeDispatch(u, stride, blimit, limit, thresh, 1)
 	loopFilterHorizontalEdgeDispatch(v, stride, blimit, limit, thresh, 1)
 }
 
 func loopFilterVerticalEdgeUVDispatch(u []byte, v []byte, stride int, blimit, limit, thresh byte) {
+	if pixel.LoopFilterUV8(u, v, 1, stride, int(blimit), int(limit), int(thresh), 4) {
+		return
+	}
 	loopFilterVerticalEdgeDispatch(u, stride, blimit, limit, thresh, 1)
 	loopFilterVerticalEdgeDispatch(v, stride, blimit, limit, thresh, 1)
 }
@@ -65,11 +71,17 @@ func mbLoopFilterVerticalEdgeDispatch(s []byte, stride int, blimit, limit, thres
 }
 
 func mbLoopFilterHorizontalEdgeUVDispatch(u []byte, v []byte, stride int, blimit, limit, thresh byte) {
+	if pixel.LoopFilterUV8(u, v, stride, 1, int(blimit), int(limit), int(thresh), 6) {
+		return
+	}
 	mbLoopFilterHorizontalEdgeDispatch(u, stride, blimit, limit, thresh, 1)
 	mbLoopFilterHorizontalEdgeDispatch(v, stride, blimit, limit, thresh, 1)
 }
 
 func mbLoopFilterVerticalEdgeUVDispatch(u []byte, v []byte, stride int, blimit, limit, thresh byte) {
+	if pixel.LoopFilterUV8(u, v, 1, stride, int(blimit), int(limit), int(thresh), 6) {
+		return
+	}
 	mbLoopFilterVerticalEdgeDispatch(u, stride, blimit, limit, thresh, 1)
 	mbLoopFilterVerticalEdgeDispatch(v, stride, blimit, limit, thresh, 1)
 }

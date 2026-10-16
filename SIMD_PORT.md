@@ -600,3 +600,45 @@ exact bounds, including overlapping read-only rows and zero strides.
 AVX2 upper bits clear at return; generated-code inspection finds no legacy
 XMM moves in the YMM loop. Full pixel/DSP/encoder suites pass on ARM and
 Rosetta AVX2. Native x64 performance of this candidate is pending.
+
+
+### Native x64 forward32 and wider SSE results
+
+The 3eb51360 native run on EPYC 9V74 compares its parent 5a0cc122 on the
+same CPU. SSE16x16 improves 33.61→27.585ns (-17.93%) and the 720 -row strip
+1430.5→1154ns (-19.33%). Precise forward32 improves 7616.5→2717ns (-64.33%),
+RD 7995→2726.5ns (-65.90%). Public parent comparisons remain within noise:
+VP9 320 +0.013%, VP8 720 +0.516%, VP9 720 -0.030%. Against original assembly,
+VP9 remains 39.77%/43.12% lower in time; VP8 remains 39.59% slower.
+[All three variants](benchmarks/baselines/go127-simd-amd64/2026-10-16-3eb51360)
+match output/count/quantizer/allocation fields across 18 samples per workload.
+Full local and hosted native/purego, race/checkptr1, strict byte parity,
+quality/oracle/conformance and 18/18 report gates pass.
+
+### Paired chroma filtering and DC reconstruction
+
+VP8 U/V edges now occupy all sixteen byte lanes in one filter network.
+Generated arithmetic shares the canonical copied goav1/libvpx byte rules.
+Aliased planes and the 255 threshold boundary retain sequential calls.
+An overflow-safe complete 8x8 tile proof bounds every exact read/store.
+Two adjacent DC-only 4x4 blocks similarly share one native packet: unsigned
+saturated add/sub clips byte deltas without pixel widening. Safe slice loads
+and stores handle two rows at once. Exact in-place/disjoint layouts run
+natively; partial aliases and overlapping rows retain block order.
+
+Independent scalar tests cover whole allocations, minimal/misaligned spans,
+aliases, differing strides and oversized dimensions. All 130816 byte/delta
+combinations match scalar clipping, including both packet halves. ARM code
+inspection confirms live UQADD/UQSUB and zero public-call allocations.
+Six ARM pairs improve chroma filter kernels 30–35% in the fresh run. Six DC
+triples select byte saturation over int16: in-place 13.32→7.131ns (-46.46%),
+disjoint 12.695→6.559ns (-48.33%), all zero allocations.
+
+Ten balanced public quintets measure original assembly 6.952ms, parent
+3eb51360 10.408ms, UV-only 10.246ms, DC-only 10.209ms and combined 10.000ms.
+Combined VP8 time improves 3.92% versus parent, with all ten pairs faster
+(-5.14..-2.32%) and every output statistic/allocation count equal across 50
+samples. Original assembly still leads on ARM (new path +43.84% time).
+[Raw designs, public comparisons and live profiles](benchmarks/baselines/go127-simd-arm64/2026-10-16-paired-chroma-dc)
+retain the complete evidence. ARM and Rosetta AVX2 pixel/DSP/encoder suites
+pass; native x64 timing of the paired kernels is pending.
