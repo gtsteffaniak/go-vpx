@@ -1,5 +1,3 @@
-//go:build (!arm64 && !amd64) || purego
-
 package encoder
 
 // Pure-Go fallback dispatcher for the batched fast-quantize entry
@@ -7,7 +5,9 @@ package encoder
 // vp8_fast_quantize_b_c per block.
 
 func fastQuantizeBlockBatchSIMD(coeff []int16, quant *BlockQuant, qcoeff []int16, dqcoeff []int16, eobs []uint8, count int) {
-	fastQuantizeBlockBatchScalar(coeff, quant, qcoeff, dqcoeff, eobs, count)
+	for i := range count {
+		eobs[i] = uint8(fastQuantizeBlockSIMD((*[16]int16)(coeff[i*16:]), quant, (*[16]int16)(qcoeff[i*16:]), (*[16]int16)(dqcoeff[i*16:])))
+	}
 }
 
 func fastQuantizeBlockBatchScalar(coeff []int16, quant *BlockQuant, qcoeff []int16, dqcoeff []int16, eobs []uint8, count int) {

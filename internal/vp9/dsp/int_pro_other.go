@@ -1,5 +1,3 @@
-//go:build !arm64 || purego
-
 package dsp
 
 // Scalar-only builds: the batched integer-projection helpers fall

@@ -1,5 +1,3 @@
-//go:build (!arm64 && !amd64) || purego
-
 package dsp
 
 import "github.com/thesyncim/govpx/internal/vp8/tables"

@@ -1,8 +1,9 @@
-//go:build (!arm64 && !amd64) || purego
-
 package dsp
 
-import "github.com/thesyncim/govpx/internal/vp8/tables"
+import (
+	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/thesyncim/govpx/internal/vp8/tables"
+)
 
 // Pure-Go fallback for SixTapPredict on architectures without a SIMD port.
 // Mirrors the libvpx v1.16.0 scalar six-tap predictor; width-specialized
@@ -12,7 +13,7 @@ import "github.com/thesyncim/govpx/internal/vp8/tables"
 func sixTapPredict16x16Maybe(src []byte, srcStride int, xoffset int, yoffset int,
 	dst []byte, dstStride int) bool {
 	if xoffset != 0 || yoffset != 0 {
-		sixTapPredict16xNScalar(src, srcStride, xoffset, yoffset, dst, dstStride, 16)
+		sixTapPredictGo(src, srcStride, xoffset, yoffset, dst, dstStride, 16, 16)
 		return true
 	}
 	copyCentralBlock(src, srcStride, dst, dstStride, 16, 16)
@@ -22,7 +23,7 @@ func sixTapPredict16x16Maybe(src []byte, srcStride int, xoffset int, yoffset int
 func sixTapPredict16x8Maybe(src []byte, srcStride int, xoffset int, yoffset int,
 	dst []byte, dstStride int) bool {
 	if xoffset != 0 || yoffset != 0 {
-		sixTapPredict16xNScalar(src, srcStride, xoffset, yoffset, dst, dstStride, 8)
+		sixTapPredictGo(src, srcStride, xoffset, yoffset, dst, dstStride, 16, 8)
 		return true
 	}
 	copyCentralBlock(src, srcStride, dst, dstStride, 16, 8)
@@ -32,7 +33,7 @@ func sixTapPredict16x8Maybe(src []byte, srcStride int, xoffset int, yoffset int,
 func sixTapPredict8x16Maybe(src []byte, srcStride int, xoffset int, yoffset int,
 	dst []byte, dstStride int) bool {
 	if xoffset != 0 || yoffset != 0 {
-		sixTapPredict8xNScalar(src, srcStride, xoffset, yoffset, dst, dstStride, 16)
+		sixTapPredictGo(src, srcStride, xoffset, yoffset, dst, dstStride, 8, 16)
 		return true
 	}
 	copyCentralBlock(src, srcStride, dst, dstStride, 8, 16)
@@ -42,7 +43,7 @@ func sixTapPredict8x16Maybe(src []byte, srcStride int, xoffset int, yoffset int,
 func sixTapPredict8x8Maybe(src []byte, srcStride int, xoffset int, yoffset int,
 	dst []byte, dstStride int) bool {
 	if xoffset != 0 || yoffset != 0 {
-		sixTapPredict8xNScalar(src, srcStride, xoffset, yoffset, dst, dstStride, 8)
+		sixTapPredictGo(src, srcStride, xoffset, yoffset, dst, dstStride, 8, 8)
 		return true
 	}
 	copyCentralBlock(src, srcStride, dst, dstStride, 8, 8)
@@ -57,8 +58,8 @@ func sixTapPredict8x8PairMaybe(
 	dst1 []byte, dst1Stride int,
 ) bool {
 	if xoffset != 0 || yoffset != 0 {
-		sixTapPredict8xNScalar(src0, src0Stride, xoffset, yoffset, dst0, dst0Stride, 8)
-		sixTapPredict8xNScalar(src1, src1Stride, xoffset, yoffset, dst1, dst1Stride, 8)
+		sixTapPredictGo(src0, src0Stride, xoffset, yoffset, dst0, dst0Stride, 8, 8)
+		sixTapPredictGo(src1, src1Stride, xoffset, yoffset, dst1, dst1Stride, 8, 8)
 		return true
 	}
 	copyCentralBlock(src0, src0Stride, dst0, dst0Stride, 8, 8)
@@ -69,7 +70,7 @@ func sixTapPredict8x8PairMaybe(
 func sixTapPredict8x4Maybe(src []byte, srcStride int, xoffset int, yoffset int,
 	dst []byte, dstStride int) bool {
 	if xoffset != 0 || yoffset != 0 {
-		sixTapPredict8xNScalar(src, srcStride, xoffset, yoffset, dst, dstStride, 4)
+		sixTapPredictGo(src, srcStride, xoffset, yoffset, dst, dstStride, 8, 4)
 		return true
 	}
 	copyCentralBlock(src, srcStride, dst, dstStride, 8, 4)
@@ -192,4 +193,26 @@ func sixTapPredict4xNScalar(src []byte, srcStride int, xoffset int, yoffset int,
 			dst[dstRow+x] = ClipPixel(v >> tables.FilterShift)
 		}
 	}
+}
+
+func sixTapPredictGo(src []byte, ss, x, y int, dst []byte, ds, w, h int) {
+	if !pixel.Enabled {
+		if w == 16 {
+			sixTapPredict16xNScalar(src, ss, x, y, dst, ds, h)
+		} else {
+			sixTapPredict8xNScalar(src, ss, x, y, dst, ds, h)
+		}
+		return
+	}
+	if y == 0 {
+		pixel.Filter(src[2*ss:], ss, dst, ds, w, h, 1, tables.SubPelFilters[x][:])
+		return
+	}
+	if x == 0 {
+		pixel.Filter(src[2:], ss, dst, ds, w, h, ss, tables.SubPelFilters[y][:])
+		return
+	}
+	var tmp [21 * 16]byte
+	pixel.Filter(src, ss, tmp[:], w, w, h+5, 1, tables.SubPelFilters[x][:])
+	pixel.Filter(tmp[:], w, dst, ds, w, h, w, tables.SubPelFilters[y][:])
 }

@@ -1,8 +1,9 @@
-//go:build (!arm64 && !amd64) || purego
-
 package dsp
 
-import "unsafe"
+import (
+	"github.com/thesyncim/govpx/internal/pixel"
+	"unsafe"
+)
 
 // Pure-Go fallback for the residual gather. Mirrors libvpx v1.16.0
 // vp8/encoder/encodemb.c (vp8_subtract_mby / vp8_subtract_mbuv) plus the
@@ -14,6 +15,11 @@ import "unsafe"
 // without a SIMD residual-gather kernel. The contract matches the arm64
 // NEON implementation.
 func ResidualGather16x16PtrFast(src *byte, srcStride int, pred *byte, predStride int, out *int16) {
+	if pixel.Enabled {
+		pixel.Gather(unsafe.Slice(src, 15*srcStride+16), srcStride, unsafe.Slice(pred, 15*predStride+16), predStride, unsafe.Slice(out, 256), 16)
+		return
+	}
+
 	srcBase := unsafe.Pointer(src)
 	predBase := unsafe.Pointer(pred)
 	outBase := unsafe.Pointer(out)
@@ -38,6 +44,11 @@ func ResidualGather16x16PtrFast(src *byte, srcStride int, pred *byte, predStride
 
 // ResidualGather8x8PtrFast is the chroma scalar fallback.
 func ResidualGather8x8PtrFast(src *byte, srcStride int, pred *byte, predStride int, out *int16) {
+	if pixel.Enabled {
+		pixel.Gather(unsafe.Slice(src, 7*srcStride+8), srcStride, unsafe.Slice(pred, 7*predStride+8), predStride, unsafe.Slice(out, 64), 8)
+		return
+	}
+
 	srcBase := unsafe.Pointer(src)
 	predBase := unsafe.Pointer(pred)
 	outBase := unsafe.Pointer(out)

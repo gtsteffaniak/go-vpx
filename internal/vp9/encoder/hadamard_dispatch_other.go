@@ -1,5 +1,3 @@
-//go:build !arm64 || purego
-
 package encoder
 
 func hadamard8x8Into(src []int16, stride int, coeff []int16) {

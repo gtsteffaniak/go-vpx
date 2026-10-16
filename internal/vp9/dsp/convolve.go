@@ -1,6 +1,7 @@
 package dsp
 
 import (
+	"github.com/thesyncim/govpx/internal/pixel"
 	"runtime"
 
 	"github.com/thesyncim/govpx/internal/vp9/tables"
@@ -137,6 +138,12 @@ func convolveHoriz(src []byte, srcStride int, dst []byte, dstStride int,
 	xFilters *[tables.SubpelShifts][tables.SubpelTaps]int16,
 	x0Q4, xStepQ4, w, h, srcOffset int,
 ) {
+	if pixel.Enabled && xStepQ4 == 16 && w >= 8 && h > 0 {
+		base := srcOffset - 3 + (x0Q4 >> 4)
+		pixel.Filter(src[base:], srcStride, dst, dstStride, w, h, 1, xFilters[x0Q4&15][:])
+		return
+	}
+
 	srcStart := srcOffset - (tables.SubpelTaps/2 - 1)
 	for y := range h {
 		xQ4 := x0Q4
@@ -161,6 +168,12 @@ func convolveVert(src []byte, srcStride int, dst []byte, dstStride int,
 	yFilters *[tables.SubpelShifts][tables.SubpelTaps]int16,
 	y0Q4, yStepQ4, w, h, srcOffset int,
 ) {
+	if pixel.Enabled && yStepQ4 == 16 && w >= 8 && h > 0 {
+		base := srcOffset + (y0Q4>>4)*srcStride - 3*srcStride
+		pixel.Filter(src[base:], srcStride, dst, dstStride, w, h, srcStride, yFilters[y0Q4&15][:])
+		return
+	}
+
 	srcStart := srcOffset - srcStride*(tables.SubpelTaps/2-1)
 	for x := range w {
 		yQ4 := y0Q4
@@ -291,6 +304,11 @@ func VpxConvolveAvg(src []byte, srcStride int, dst []byte, dstStride, w, h, srcO
 }
 
 func vpxConvolveAvgScalar(src []byte, srcStride int, dst []byte, dstStride, w, h, srcOffset int) {
+	if pixel.Enabled {
+		pixel.Average(src[srcOffset:], srcStride, dst, dstStride, w, h)
+		return
+	}
+
 	for y := range h {
 		for x := range w {
 			c := int(src[srcOffset+y*srcStride+x]) + int(dst[y*dstStride+x])

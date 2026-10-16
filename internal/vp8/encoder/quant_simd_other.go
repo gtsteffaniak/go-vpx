@@ -1,6 +1,9 @@
-//go:build (!arm64 && !amd64) || purego
-
 package encoder
+
+import (
+	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/thesyncim/govpx/internal/vp8/tables"
+)
 
 // Pure-Go fallback dispatchers for the FastQuantizeBlock, ForwardDCT4x4, and
 // ForwardWalsh4x4 SIMD entry points. They mirror the libvpx v1.16.0
@@ -9,13 +12,27 @@ package encoder
 // references exactly.
 
 func fastQuantizeBlockSIMD(coeff *[16]int16, quant *BlockQuant, qcoeff *[16]int16, dqcoeff *[16]int16) int {
-	return fastQuantizeBlockScalar(coeff, quant, qcoeff, dqcoeff)
+	if !pixel.Enabled {
+		return fastQuantizeBlockScalar(coeff, quant, qcoeff, dqcoeff)
+	}
+	pixel.VP8Quant(coeff[:], quant.Round[:], quant.QuantFast[:], quant.Dequant[:], qcoeff[:], dqcoeff[:])
+	eob := 0
+	for i, rc := range tables.DefaultZigZag1D {
+		if qcoeff[rc] != 0 {
+			eob = i + 1
+		}
+	}
+	return eob
 }
 
 func forwardDCT4x4SIMD(input []int16, stride int, output *[16]int16) {
-	forwardDCT4x4Scalar(input, stride, output)
+	if !forward4Go(input, stride, output, false) {
+		forwardDCT4x4Scalar(input, stride, output)
+	}
 }
 
 func forwardWalsh4x4SIMD(input []int16, stride int, output *[16]int16) {
-	forwardWalsh4x4Scalar(input, stride, output)
+	if !forward4Go(input, stride, output, true) {
+		forwardWalsh4x4Scalar(input, stride, output)
+	}
 }

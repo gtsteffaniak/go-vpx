@@ -1,20 +1,21 @@
-//go:build (!arm64 && !amd64) || purego
-
 package dsp
 
-import "unsafe"
+import (
+	"github.com/thesyncim/govpx/internal/pixel"
+	"unsafe"
+)
 
 // Pure-Go fallback for the SAD primitives on architectures without a SIMD
 // port. Mirrors libvpx v1.16.0 vpx_dsp/sad.c semantics.
 
 func sadBlock16x16(src []byte, srcStride int, ref []byte, refStride int) int {
-	return sadBlockScalar(src, srcStride, ref, refStride, 16, 16)
+	return pixel.SAD(src, srcStride, ref, refStride, 16, 16)
 }
 
 // SAD16x16PtrFast is the pointer-form fallback used when callers have
 // already validated bounds. See sad_dispatch_arm64.go for the contract.
 func SAD16x16PtrFast(src *byte, srcStride int, ref *byte, refStride int) int {
-	return sadBlockScalarPtr(src, srcStride, ref, refStride, 16, 16)
+	return pixel.SAD(unsafe.Slice(src, 15*srcStride+16), srcStride, unsafe.Slice(ref, 15*refStride+16), refStride, 16, 16)
 }
 
 // SAD16x16LimitPtrFast is the limited pointer-form fallback. See
@@ -25,10 +26,10 @@ func SAD16x16LimitPtrFast(src *byte, srcStride int, ref *byte, refStride int, li
 
 // SAD16x16x4PtrFast mirrors libvpx's vpx_sad16x16x4d interface.
 func SAD16x16x4PtrFast(src *byte, srcStride int, ref0 *byte, ref1 *byte, ref2 *byte, ref3 *byte, refStride int, out *[4]uint32) {
-	out[0] = uint32(sadBlockScalarPtr(src, srcStride, ref0, refStride, 16, 16))
-	out[1] = uint32(sadBlockScalarPtr(src, srcStride, ref1, refStride, 16, 16))
-	out[2] = uint32(sadBlockScalarPtr(src, srcStride, ref2, refStride, 16, 16))
-	out[3] = uint32(sadBlockScalarPtr(src, srcStride, ref3, refStride, 16, 16))
+	out[0] = uint32(SAD16x16PtrFast(src, srcStride, ref0, refStride))
+	out[1] = uint32(SAD16x16PtrFast(src, srcStride, ref1, refStride))
+	out[2] = uint32(SAD16x16PtrFast(src, srcStride, ref2, refStride))
+	out[3] = uint32(SAD16x16PtrFast(src, srcStride, ref3, refStride))
 }
 
 // SAD16x16x4LimitPtrFast is the pointer-form x4 limited fallback.
@@ -62,6 +63,19 @@ func sadBlockScalarPtr(src *byte, srcStride int, ref *byte, refStride int, width
 }
 
 func sadBlockLimitScalarPtr(src *byte, srcStride int, ref *byte, refStride int, width, height, limit int) int {
+	if pixel.Enabled {
+		sum := 0
+		for y := range height {
+			a := unsafe.Slice((*byte)(unsafe.Add(unsafe.Pointer(src), y*srcStride)), width)
+			b := unsafe.Slice((*byte)(unsafe.Add(unsafe.Pointer(ref), y*refStride)), width)
+			sum += pixel.SAD(a, width, b, width, width, 1)
+			if sum > limit {
+				return sum
+			}
+		}
+		return sum
+	}
+
 	srcBase := unsafe.Pointer(src)
 	refBase := unsafe.Pointer(ref)
 	sad := 0
@@ -83,19 +97,19 @@ func sadBlockLimitScalarPtr(src *byte, srcStride int, ref *byte, refStride int, 
 }
 
 func sadBlock16x8(src []byte, srcStride int, ref []byte, refStride int) int {
-	return sadBlockScalar(src, srcStride, ref, refStride, 16, 8)
+	return pixel.SAD(src, srcStride, ref, refStride, 16, 8)
 }
 
 func sadBlock8x16(src []byte, srcStride int, ref []byte, refStride int) int {
-	return sadBlockScalar(src, srcStride, ref, refStride, 8, 16)
+	return pixel.SAD(src, srcStride, ref, refStride, 8, 16)
 }
 
 func sadBlock8x8(src []byte, srcStride int, ref []byte, refStride int) int {
-	return sadBlockScalar(src, srcStride, ref, refStride, 8, 8)
+	return pixel.SAD(src, srcStride, ref, refStride, 8, 8)
 }
 
 func sadBlock4x4(src []byte, srcStride int, ref []byte, refStride int) int {
-	return sadBlockScalar(src, srcStride, ref, refStride, 4, 4)
+	return pixel.SAD(src, srcStride, ref, refStride, 4, 4)
 }
 
 func sadBlockScalar(src []byte, srcStride int, ref []byte, refStride int, width, height int) int {
@@ -122,6 +136,10 @@ func sadBlockScalar(src []byte, srcStride int, ref []byte, refStride int, width,
 }
 
 func sadBlockLimitScalar(src []byte, srcStride int, ref []byte, refStride int, width, height, limit int) int {
+	if pixel.Enabled {
+		return sadBlockLimitScalarPtr(unsafe.SliceData(src), srcStride, unsafe.SliceData(ref), refStride, width, height, limit)
+	}
+
 	if width <= 0 || height <= 0 {
 		return 0
 	}

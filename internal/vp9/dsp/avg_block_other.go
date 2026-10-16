@@ -1,5 +1,3 @@
-//go:build !arm64 || purego
-
 package dsp
 
 // Scalar-only builds: Avg8x8Quad falls through to four VpxAvg8x8 calls.

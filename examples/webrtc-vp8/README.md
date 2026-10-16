@@ -27,7 +27,7 @@ End-to-end demo of govpx's VP8 realtime stack:
 
 This is a separate Go module (its own `go.mod`) so the `pion/webrtc`
 dependency tree stays out of the core `govpx` module. It requires the
-same Go 1.26+ toolchain as govpx itself.
+same Go 1.27+ toolchain as govpx itself.
 
 ## Run
 

@@ -1,5 +1,3 @@
-//go:build (!amd64 && !arm64) || purego
-
 package dsp
 
 // Scalar size-specialized sub-pixel variance helpers. Architectures

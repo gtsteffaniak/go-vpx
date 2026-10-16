@@ -1,5 +1,3 @@
-//go:build (!arm64 && !amd64) || purego
-
 package encoder
 
 // libvpx v1.16.0 baseline: scalar denoiser fallback when no SIMD build tag matches.

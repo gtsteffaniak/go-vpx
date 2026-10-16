@@ -1,5 +1,3 @@
-//go:build (!arm64 && !amd64) || purego
-
 package dsp
 
 // Pure-Go fallback dispatcher for the InverseWalsh4x4 SIMD entry point.

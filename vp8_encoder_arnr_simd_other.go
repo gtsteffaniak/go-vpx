@@ -1,7 +1,11 @@
-//go:build (!amd64 && !arm64) || purego
-
 package govpx
 
-func applyTemporalFilterSIMD(_ []byte, _ int, _ []byte, _ int, _ int, _ int, _ int, _ []uint32, _ []uint32) bool {
-	return false
+import "github.com/thesyncim/govpx/internal/pixel"
+
+func applyTemporalFilterSIMD(src []byte, ss int, pred []byte, ps, w, strength, weight int, acc, count []uint32) bool {
+	if !pixel.Enabled || (w != 8 && w != 16) || strength < 0 || strength > 6 {
+		return false
+	}
+	pixel.Temporal(src, ss, pred, ps, w, strength, weight, acc, count)
+	return true
 }

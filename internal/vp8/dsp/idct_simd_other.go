@@ -1,5 +1,3 @@
-//go:build (!arm64 && !amd64) || purego
-
 package dsp
 
 // Pure-Go fallback dispatchers for the IDCT SIMD entry points. They

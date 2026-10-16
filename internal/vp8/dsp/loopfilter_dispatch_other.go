@@ -1,5 +1,3 @@
-//go:build (!arm64 && !amd64) || purego
-
 package dsp
 
 // Pure-Go fallback for VP8 loop-filter apply paths (libvpx v1.16.0 baseline).

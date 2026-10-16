@@ -1,5 +1,3 @@
-//go:build (!arm64 && !amd64) || purego
-
 package dsp
 
 // Fallback stubs for the fused kernels ported from libvpx v1.16.0

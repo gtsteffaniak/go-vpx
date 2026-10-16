@@ -12,6 +12,10 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  GOEXPERIMENT: simd
+  GOTOOLCHAIN: go1.27.2
+
 jobs:
   test:
     name: Exhaustive test

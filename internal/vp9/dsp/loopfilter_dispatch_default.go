@@ -1,5 +1,3 @@
-//go:build !arm64 || purego
-
 package dsp
 
 func vpxLpfHorizontal4(plane []uint8, s, pitch int, blimit, limit, thresh uint8) {

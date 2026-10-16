@@ -5,9 +5,11 @@ GOFMT ?= gofmt
 GIT ?= git
 CURL ?= curl
 AWK ?= awk
-GOTOOLCHAIN ?= go1.26.3
+GOTOOLCHAIN ?= go1.27.2
+GOEXPERIMENT ?= simd
+export GOTOOLCHAIN GOEXPERIMENT
+GO_CMD = GO="$(GO)" scripts/go.sh
 
-GOCACHE ?= $(CURDIR)/.gocache
 CORACLE_BUILD := internal/coracle/build
 LIBVPX_TEST_DATA_BASE := https://storage.googleapis.com/downloads.webmproject.org/test_data/libvpx
 LIBVPX_TEST_DATA_MK := $(CORACLE_BUILD)/libvpx-v1.16.0/test/test-data.mk
@@ -95,7 +97,7 @@ VP9_DSP_TESTDATA := internal/vp9/dsp/testdata/dsp_oracle.bin
 
 all: ci
 
-ci: fmtcheck pgo-check test test-purego test-trace test-conformance test-quality
+ci: test-noasm fmtcheck pgo-check test test-purego test-trace test-conformance test-quality
 
 pre-commit: fmtcheck pgo-check
 
@@ -117,7 +119,7 @@ fmtcheck:
 # session. The `fmtcheck` gate fails if hash-named seeds remain, so
 # this also unblocks commits after a fuzz discovery.
 fuzz-rename:
-	GOCACHE="$(GOCACHE)" GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO) run ./cmd/govpx-fuzz-rename
+	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) run ./cmd/govpx-fuzz-rename
 
 verify: ci
 
@@ -126,14 +128,14 @@ verify: ci
 # a small libvpx-backed BD-rate subset covering brittle ARNR/AQ/CBR/loop-filter
 # paths; `make test-bdrate-vp9` remains the full BD-rate sweep.
 test-quality: vp9-vpxdec-tools
-	GOCACHE="$(GOCACHE)" GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO) build -o $(CORACLE_BUILD)/govpx-bench ./cmd/govpx-bench
+	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) build -o $(CORACLE_BUILD)/govpx-bench ./cmd/govpx-bench
 	$(CORACLE_BUILD)/govpx-bench -quality-fixtures -quality-gate -libvpx-vpxenc-vp9="$(VPXENC_VP9)" -auto-libvpx=false
-	GOCACHE="$(GOCACHE)" GOTOOLCHAIN="$(GOTOOLCHAIN)" \
+	GOTOOLCHAIN="$(GOTOOLCHAIN)" \
 		GOVPX_BD_RATE_GATES=1 \
 		GOVPX_BD_RATE_BUILD_LIBVPX=1 \
 		GOVPX_BD_RATE_LIBVPX_REQUIRED=1 \
 		GOVPX_VPXENC_VP9_FRAMEFLAGS_BIN="$(VPXENC_VP9_FRAMEFLAGS)" \
-		$(GO) test -count=1 -v -run 'TestVP9BDRate(ARNR|PerceptualAQ|CyclicRefresh|LoopFilter)$$' -timeout 360s .
+		$(GO_CMD) test -count=1 -v -run 'TestVP9BDRate(ARNR|PerceptualAQ|CyclicRefresh|LoopFilter)$$' -timeout 360s .
 
 verify-production: ci test-oracle test-byte-parity test-parity-report
 
@@ -156,12 +158,12 @@ verify-decoder-parity: ci test-decoder-oracle
 # assertion from a soft-skip to t.Fatal so CI fails fast when the
 # oracle is unavailable.
 test-bdrate-vp9: $(VPXENC_VP9_FRAMEFLAGS)
-	GOCACHE="$(GOCACHE)" GOTOOLCHAIN="$(GOTOOLCHAIN)" \
+	GOTOOLCHAIN="$(GOTOOLCHAIN)" \
 		GOVPX_BD_RATE_GATES=1 \
 		GOVPX_BD_RATE_BUILD_LIBVPX=1 \
 		GOVPX_BD_RATE_LIBVPX_REQUIRED=1 \
 		GOVPX_VPXENC_VP9_FRAMEFLAGS_BIN="$(VPXENC_VP9_FRAMEFLAGS)" \
-		$(GO) test -count=1 -v -run 'TestVP9BDRate' -timeout 600s . ./cmd/govpx-bench/benchcmd/
+		$(GO_CMD) test -count=1 -v -run 'TestVP9BDRate' -timeout 600s . ./cmd/govpx-bench/benchcmd/
 
 $(VPXENC_VP9_FRAMEFLAGS):
 	internal/coracle/build_vpxenc_vp9_frameflags.sh >/dev/null
@@ -172,11 +174,11 @@ $(VPXENC_VP9_FRAMEFLAGS):
 # GOVPX_BD_RATE_LIBVPX_VP8_REQUIRED=1 elevates the libvpx
 # assertion from a soft-skip to t.Fatal.
 test-bdrate-vp8: $(VPXENC)
-	GOCACHE="$(GOCACHE)" GOTOOLCHAIN="$(GOTOOLCHAIN)" \
+	GOTOOLCHAIN="$(GOTOOLCHAIN)" \
 		GOVPX_BD_RATE_GATES=1 \
 		GOVPX_VPXENC_VP8_BIN="$(VPXENC)" \
 		GOVPX_BD_RATE_LIBVPX_VP8_REQUIRED=1 \
-		$(GO) test -count=1 -v -run 'TestVP8BDRate' -timeout 1200s . ./cmd/govpx-bench/benchcmd/
+		$(GO_CMD) test -count=1 -v -run 'TestVP8BDRate' -timeout 1200s . ./cmd/govpx-bench/benchcmd/
 
 $(VPXENC):
 	internal/coracle/build_vpxenc.sh >/dev/null
@@ -192,21 +194,21 @@ vp9-dsp-oracle:
 	printf 'wrote %s\n' "$(VP9_DSP_TESTDATA)"
 
 test:
-	GOCACHE="$(GOCACHE)" GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO) test ./... -count=1
+	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) test ./... -count=1
 
 test-purego:
-	sfiles="$$(GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO) list -tags purego -f '{{if .SFiles}}{{.ImportPath}} {{.SFiles}}{{end}}' ./...)"; \
+	sfiles="$$(GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) list -tags purego -f '{{if .SFiles}}{{.ImportPath}} {{.SFiles}}{{end}}' ./...)"; \
 	if [ -n "$$sfiles" ]; then \
 		printf 'purego selected assembly files:\n%s\n' "$$sfiles"; \
 		exit 1; \
 	fi
-	GOCACHE="$(GOCACHE)" GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO) test -tags purego ./... -count=1
+	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) test -tags purego ./... -count=1
 
 test-trace:
-	GOCACHE="$(GOCACHE)" GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO) test -tags govpx_oracle_trace ./... -run '^$$' -count=1
+	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) test -tags govpx_oracle_trace ./... -run '^$$' -count=1
 
 test-conformance: vp9-vpxdec-tools fetch-vp9-test-data
-	GOCACHE="$(GOCACHE)" \
+	\
 	GOTOOLCHAIN="$(GOTOOLCHAIN)" \
 	GOVPX_VPXDEC_VP9_BIN="$(VPXDEC_VP9)" \
 	GOVPX_VP9_TEST_DATA_PATH="$(VP9_TEST_DATA_DIR)" \
@@ -219,15 +221,15 @@ test-conformance: vp9-vpxdec-tools fetch-vp9-test-data
 	GOVPX_VP9_PROFILE_TEST_DATA_MIN="$(VP9_DECODER_PROFILE_WEBM_MIN)" \
 	GOVPX_VP9_INVALID_TEST_DATA_REQUIRED=1 \
 	GOVPX_VP9_INVALID_TEST_DATA_MIN="$(VP9_INVALID_IVF_MIN)" \
-	$(GO) test . -run 'TestVP9Decoder(Official(IVFTestDataMatchesLibvpx|IVFTestDataThreadedMatchesSerial|Profile0WebMTestDataMatchesLibvpx|ProfileWebMTestDataReturnsUnsupported|InvalidIVFTestDataRejectedLikeLibvpx)|ThreadingOfficial(IVFMatchesSerial|Profile0WebMMatchesSerial|Profile0TileColumnsUseWorkers))$$' -count=1 -timeout 10m
+	$(GO_CMD) test . -run 'TestVP9Decoder(Official(IVFTestDataMatchesLibvpx|IVFTestDataThreadedMatchesSerial|Profile0WebMTestDataMatchesLibvpx|ProfileWebMTestDataReturnsUnsupported|InvalidIVFTestDataRejectedLikeLibvpx)|ThreadingOfficial(IVFMatchesSerial|Profile0WebMMatchesSerial|Profile0TileColumnsUseWorkers))$$' -count=1 -timeout 10m
 
 pgo-refresh:
 	mkdir -p .pgo
-	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO) build -pgo=off -o .pgo/govpx-bench-pgo ./cmd/govpx-bench
+	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) build -pgo=off -o .pgo/govpx-bench-pgo ./cmd/govpx-bench
 	./.pgo/govpx-bench-pgo -width=1920 -height=1080 -frames=180 -fps=30 -bitrate=4000 -mode=realtime -cpu-used=8 -encode-only -cpuprofile=.pgo/vp8-encode.pgo >/dev/null
 	./.pgo/govpx-bench-pgo -width=1280 -height=720 -frames=240 -fps=30 -bitrate=2500 -mode=realtime -cpu-used=8 -cpuprofile=.pgo/vp8-quality.pgo >/dev/null
 	./.pgo/govpx-bench-pgo -codec=vp9 -width=1280 -height=720 -frames=120 -fps=30 -bitrate=2500 -mode=realtime -cpu-used=8 -threads=1 -encode-only -cpuprofile=.pgo/vp9-realtime.pgo >/dev/null
-	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO) tool pprof -proto .pgo/vp8-encode.pgo .pgo/vp8-quality.pgo .pgo/vp9-realtime.pgo > "$(PGO_PROFILE).tmp"
+	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) tool pprof -proto .pgo/vp8-encode.pgo .pgo/vp8-quality.pgo .pgo/vp9-realtime.pgo > "$(PGO_PROFILE).tmp"
 	mv "$(PGO_PROFILE).tmp" "$(PGO_PROFILE)"
 	rm -rf .pgo
 	$(MAKE) pgo-update-fingerprint
@@ -248,11 +250,11 @@ pgo-check:
 		printf 'expected %s\nactual   %s\n' "$$expected" "$$actual"; \
 		exit 1; \
 	fi
-	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO) build -pgo="$(PGO_PROFILE)" -o /tmp/govpx-bench-pgo-check ./cmd/govpx-bench
+	GOTOOLCHAIN="$(GOTOOLCHAIN)" $(GO_CMD) build -pgo="$(PGO_PROFILE)" -o /tmp/govpx-bench-pgo-check ./cmd/govpx-bench
 	rm -f /tmp/govpx-bench-pgo-check
 
 test-oracle: oracle-tools vp9-vpxdec-tools fetch-test-data test-vp9-internal-oracle
-	GOCACHE="$(GOCACHE)" \
+	\
 	GOTOOLCHAIN="$(GOTOOLCHAIN)" \
 	GOVPX_WITH_ORACLE=1 \
 	GOVPX_ORACLE="$(ORACLE)" \
@@ -280,14 +282,14 @@ test-oracle: oracle-tools vp9-vpxdec-tools fetch-test-data test-vp9-internal-ora
 	GOVPX_ENCODER_TEST_DATA_REQUIRED=1 \
 	GOVPX_ENCODER_TEST_DATA_MIN="$(VP8_ENCODER_SOURCE_MIN)" \
 	GOVPX_ENCODER_TEST_DATA_FRAMES="$(VP8_ENCODER_SOURCE_FRAMES)" \
-	$(GO) test . -run 'Test(VP8Oracle|VPxOracle|Oracle|VP9EncoderVpxdecOracleAccepts|VP9DecoderVpxdecOracleMatches|VP9DecoderOfficial|VP9DecoderThreadingOfficial)' -count=1 -timeout 10m
+	$(GO_CMD) test . -run 'Test(VP8Oracle|VPxOracle|Oracle|VP9EncoderVpxdecOracleAccepts|VP9DecoderVpxdecOracleMatches|VP9DecoderOfficial|VP9DecoderThreadingOfficial)' -count=1 -timeout 10m
 
 VP9_INTERNAL_ORACLE_TESTS := Test(DSPMatchesLibvpx|VP9CostTokens(MatchesLibvpxOracle|SkipMatchesCostTokens)|VP9ProbCostMatchesLibvpxSource|PtEnergyClassMatchesLibvpxSource|ExtendModesMatchLibvpxSource|DefaultNmvContextMatchesLibvpxSource|QuantTablesMatchLibvpxSource|ScanTablesMatchLibvpxSource|FilterTablesMatchLibvpxSource|VpxNormMatchesLibvpxSource|DefaultProbsMatchLibvpxSource|DefaultCoefProbsMatchLibvpxSource|DetokTablesMatchLibvpxSource|Mode2CounterMatchesLibvpxSource|CounterToContextMatchesLibvpxSource|MvRefBlocksMatchLibvpxSource)$$
 
 test-vp9-internal-oracle: vp9-vpxdec-tools
-	GOCACHE="$(GOCACHE)" \
+	\
 	GOTOOLCHAIN="$(GOTOOLCHAIN)" \
-	$(GO) test -tags govpx_oracle_trace ./internal/vp9/tables ./internal/vp9/encoder ./internal/vp9/decoder ./internal/vp9/dsp -run '$(VP9_INTERNAL_ORACLE_TESTS)' -count=1 -timeout 5m
+	$(GO_CMD) test -tags govpx_oracle_trace ./internal/vp9/tables ./internal/vp9/encoder ./internal/vp9/decoder ./internal/vp9/dsp -run '$(VP9_INTERNAL_ORACLE_TESTS)' -count=1 -timeout 5m
 
 PARITY_REPORT_TESTS := TestVP8OracleReconstructionAdler32Match|TestVP8OracleRecodeRowParity|TestVP8OracleARNRBufferAdler|TestVP8OracleQuantizerHistogramParity|TestVP8OracleInterDecisionMatchRate|TestVP8OracleSplitMVDecisionMatchRate|TestVP8OracleTraceInterCandidateParity|TestVP8OracleInterQDriftParity|TestVP8OracleLoopFilterHeaderMatchRate|TestVP8OracleSecondPassAllocationParity|TestVP8OracleChromaSubpelParity|TestVP8OracleImprovedMVMatchParity|TestVP8OracleCBRDropFrameParity|TestVP8OracleCandidateRateParity|TestVP8OracleInterModeDistributionParity|TestVP8OracleTemporalSVCParity|TestVP9OracleRuntimeControl(ByteParity|ConstantByteParityMatrix)
 BYTE_PARITY_TESTS := Test(VP8OracleEncoder(StreamByteParity|CopyReferenceFrameParity|QuantizerMetadataParity|ProductionRuntimeTransitions720p)|VP9EncoderVpxencOracle(Checker320KeyframeByteParity|Stepped320FixedQuantizerKeyframeByteParity|CBRKeyframeByteParity|CBRCyclicRefreshKeyframeByteParity)|VP9Oracle(CopyReferenceFrameParity|SpatialSVCParity|StreamSelectedCasesMatchLibvpx|RuntimeControlsPinnedCasesMatchLibvpx|CyclicRefreshKeyframeSeedsMatchLibvpx|ThreadedTileEncodingMatchesLibvpx|RealtimeNewModeMatchesLibvpx|InvisibleKeyFrameStrictByteParity|EncoderStreamByteParity(FrameFlagsMatrix|ControlCrossMatrix|LookaheadFlushBursts)))|FuzzVP8OracleEncoderRuntimeControlTransitions
@@ -295,7 +297,7 @@ FUZZTIME ?= 30s
 FUZZPARALLEL ?= 1
 
 test-byte-parity: oracle-tools vp9-vpxdec-tools fetch-test-data
-	GOCACHE="$(GOCACHE)" \
+	\
 	GOTOOLCHAIN="$(GOTOOLCHAIN)" \
 	GOVPX_WITH_ORACLE=1 \
 	GOVPX_ORACLE="$(ORACLE)" \
@@ -308,7 +310,7 @@ test-byte-parity: oracle-tools vp9-vpxdec-tools fetch-test-data
 	GOVPX_VPX_TEMPORAL_SVC_ENCODER="$(VPX_TEMPORAL_SVC_ENCODER)" \
 	GOVPX_TEST_DATA_PATH="$(VP8_TEST_DATA_DIR)" \
 	GOVPX_ENCODER_TEST_DATA_PATH="$(VP8_ENCODER_SOURCE_DIR)" \
-	$(GO) test -tags govpx_oracle_trace . -run '$(BYTE_PARITY_TESTS)' -count=1 -timeout 15m
+	$(GO_CMD) test -tags govpx_oracle_trace . -run '$(BYTE_PARITY_TESTS)' -count=1 -timeout 15m
 
 # Fair pure-Go-vs-pure-C VP8 byte-parity lane. Both sides are scalar: govpx is
 # built with `-tags purego` (no assembly) and the oracle is the generic-gnu
@@ -323,16 +325,16 @@ vpxenc-purec:
 	sh internal/coracle/build_vpxenc_purec.sh >/dev/null
 
 test-byte-parity-purec: vpxenc-purec
-	GOCACHE="$(GOCACHE)" \
+	\
 	GOTOOLCHAIN="$(GOTOOLCHAIN)" \
 	GOVPX_WITH_ORACLE=1 \
 	GOVPX_VPXDEC="$(VPXDEC_PUREC)" \
 	GOVPX_VPXENC="$(VPXENC_PUREC)" \
 	GOVPX_VPXENC_ORACLE="$(VPXENC_PUREC)" \
-	$(GO) test -tags 'govpx_oracle_trace purego' . -run '$(VP8_PUREC_BYTE_PARITY_TESTS)' -count=1 -timeout 15m
+	$(GO_CMD) test -tags 'govpx_oracle_trace purego' . -run '$(VP8_PUREC_BYTE_PARITY_TESTS)' -count=1 -timeout 15m
 
 fuzz-controls: oracle-tools fetch-test-data
-	GOCACHE="$(GOCACHE)" \
+	\
 	GOTOOLCHAIN="$(GOTOOLCHAIN)" \
 	GOVPX_WITH_ORACLE=1 \
 	GOVPX_ORACLE="$(ORACLE)" \
@@ -343,10 +345,10 @@ fuzz-controls: oracle-tools fetch-test-data
 	GOVPX_VPX_TEMPORAL_SVC_ENCODER="$(VPX_TEMPORAL_SVC_ENCODER)" \
 	GOVPX_TEST_DATA_PATH="$(VP8_TEST_DATA_DIR)" \
 	GOVPX_ENCODER_TEST_DATA_PATH="$(VP8_ENCODER_SOURCE_DIR)" \
-	$(GO) test -tags govpx_oracle_trace . -run '^$$' -fuzz '^FuzzVP8OracleEncoderRuntimeControlTransitions$$' -fuzztime '$(FUZZTIME)' -parallel '$(FUZZPARALLEL)' -timeout 30m
+	$(GO_CMD) test -tags govpx_oracle_trace . -run '^$$' -fuzz '^FuzzVP8OracleEncoderRuntimeControlTransitions$$' -fuzztime '$(FUZZTIME)' -parallel '$(FUZZPARALLEL)' -timeout 30m
 
 test-parity-report: oracle-tools vp9-vpxdec-tools fetch-test-data
-	GOCACHE="$(GOCACHE)" \
+	\
 	GOTOOLCHAIN="$(GOTOOLCHAIN)" \
 	GOVPX_WITH_ORACLE=1 \
 	GOVPX_ORACLE="$(ORACLE)" \
@@ -357,10 +359,10 @@ test-parity-report: oracle-tools vp9-vpxdec-tools fetch-test-data
 	GOVPX_VPX_TEMPORAL_SVC_ENCODER="$(VPX_TEMPORAL_SVC_ENCODER)" \
 	GOVPX_TEST_DATA_PATH="$(VP8_TEST_DATA_DIR)" \
 	GOVPX_ENCODER_TEST_DATA_PATH="$(VP8_ENCODER_SOURCE_DIR)" \
-	$(GO) run ./cmd/parity-report -- -tags govpx_oracle_trace . -run '$(PARITY_REPORT_TESTS)' -count=1 -timeout 10m
+	$(GO_CMD) run ./cmd/parity-report -- -tags govpx_oracle_trace . -run '$(PARITY_REPORT_TESTS)' -count=1 -timeout 10m
 
 update-parity-baselines: oracle-tools fetch-test-data
-	GOCACHE="$(GOCACHE)" \
+	\
 	GOTOOLCHAIN="$(GOTOOLCHAIN)" \
 	GOVPX_WITH_ORACLE=1 \
 	GOVPX_UPDATE_BASELINES=1 \
@@ -371,10 +373,10 @@ update-parity-baselines: oracle-tools fetch-test-data
 	GOVPX_VPX_TEMPORAL_SVC_ENCODER="$(VPX_TEMPORAL_SVC_ENCODER)" \
 	GOVPX_TEST_DATA_PATH="$(VP8_TEST_DATA_DIR)" \
 	GOVPX_ENCODER_TEST_DATA_PATH="$(VP8_ENCODER_SOURCE_DIR)" \
-	$(GO) run ./cmd/parity-report -- -tags govpx_oracle_trace . -run '$(PARITY_REPORT_TESTS)' -count=1 -timeout 10m
+	$(GO_CMD) run ./cmd/parity-report -- -tags govpx_oracle_trace . -run '$(PARITY_REPORT_TESTS)' -count=1 -timeout 10m
 
 test-decoder-oracle: oracle-tools vp9-vpxdec-tools fetch-vp8-test-data fetch-vp9-test-data
-	GOCACHE="$(GOCACHE)" \
+	\
 	GOTOOLCHAIN="$(GOTOOLCHAIN)" \
 	GOVPX_WITH_ORACLE=1 \
 	GOVPX_ORACLE="$(ORACLE)" \
@@ -394,7 +396,7 @@ test-decoder-oracle: oracle-tools vp9-vpxdec-tools fetch-vp8-test-data fetch-vp9
 	GOVPX_VP9_PROFILE_TEST_DATA_MIN="$(VP9_DECODER_PROFILE_WEBM_MIN)" \
 	GOVPX_VP9_INVALID_TEST_DATA_REQUIRED=1 \
 	GOVPX_VP9_INVALID_TEST_DATA_MIN="$(VP9_INVALID_IVF_MIN)" \
-	$(GO) test . -run 'Test(Oracle(Libvpx(ExtendedDecodeModesAvailable|DecoderReferenceControls|ErrorConcealment.*|KeyFrameResolutionChange|PostProcess.*)|ExternalIVFTestData(MatchesLibvpx|DecodeIntoMatchesLibvpx)|ExternalInvalidIVFTestDataRejectedLikeLibvpx|GeneratedLibvpxCorpusMatchesLibvpx)|VP9Decoder(VpxdecOracleMatches.*|Official.*|ThreadingOfficial.*))$$' -count=1 -timeout 10m
+	$(GO_CMD) test . -run 'Test(Oracle(Libvpx(ExtendedDecodeModesAvailable|DecoderReferenceControls|ErrorConcealment.*|KeyFrameResolutionChange|PostProcess.*)|ExternalIVFTestData(MatchesLibvpx|DecodeIntoMatchesLibvpx)|ExternalInvalidIVFTestDataRejectedLikeLibvpx|GeneratedLibvpxCorpusMatchesLibvpx)|VP9Decoder(VpxdecOracleMatches.*|Official.*|ThreadingOfficial.*))$$' -count=1 -timeout 10m
 
 oracle-tools: $(ORACLE)
 	internal/coracle/build_vpxenc.sh >/dev/null
@@ -471,4 +473,12 @@ fetch-encoder-test-data: oracle-tools
 			$(CURL) -fsSL --retry 3 -o "$(VP8_ENCODER_SOURCE_DIR)/$$f.tmp" "$(LIBVPX_TEST_DATA_BASE)/$$f"; \
 			mv "$(VP8_ENCODER_SOURCE_DIR)/$$f.tmp" "$(VP8_ENCODER_SOURCE_DIR)/$$f"; \
 		fi; \
+	done
+
+# Both optimized and purego builds must be free of repository assembly.
+.PHONY: test-noasm
+test-noasm:
+	@for tags in '' purego; do \
+	  sfiles="$$($(GO_CMD) list -tags "$$tags" -f '{{if .SFiles}}{{.ImportPath}} {{.SFiles}}{{end}}' ./...)"; \
+	  if [ -n "$$sfiles" ]; then printf 'assembly selected:\n%s\n' "$$sfiles"; exit 1; fi; \
 	done
