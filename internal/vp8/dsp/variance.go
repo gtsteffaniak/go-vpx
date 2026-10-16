@@ -175,6 +175,12 @@ func subpelVariance(src []byte, srcStride int, xOffset int, yOffset int, ref []b
 		sum, sse := varianceBlock(src, srcStride, ref, refStride, width, height)
 		return sse - sum*sum/(width*height), sse
 	}
+	// Both fractional axes require the same extra row/column as the scalar
+	// two-pass path. Split blocks can reuse the fused SIMD statistics kernel.
+	if pixel.Enabled && (width != 16 || height != 16) && xOffset != 0 && yOffset != 0 {
+		sum, sse := pixel.SubpelStats(src, srcStride, ref, refStride, width, height, tables.BilinearFilters[xOffset], tables.BilinearFilters[yOffset])
+		return int(sse) - sum*sum/(width*height), int(sse)
+	}
 	if width == 16 && height == 16 && (xOffset == 0 || yOffset == 0) {
 		if xOffset == 0 {
 			if sum, sse, ok := subpelVariance16x16Vertical(src, srcStride, yOffset, ref, refStride); ok {

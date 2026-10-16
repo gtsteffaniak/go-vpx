@@ -98,6 +98,10 @@ func Filter(src []byte, ss int, dst []byte, ds, w, h, step int, taps []int16) {
 		return
 	}
 
+	if len(taps) == 6 && filterSixNarrow8(src, ss, dst, ds, w, h, step, taps) {
+		return
+	}
+
 	if len(taps) == 2 && filterLinear8(src, ss, dst, ds, w, h, step, taps) {
 		return
 	}

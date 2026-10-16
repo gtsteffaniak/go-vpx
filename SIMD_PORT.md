@@ -459,7 +459,7 @@ removes four/eight-byte load branches from subpixel variance's inner loop,
 uses stride increments and integer multiply-adds: 16x16 improves from 72.7
 to 50.5 ns, 64x64 from 1,138 to 770 ns. All kernels report zero allocations.
 
-The EPYC7763 profile exposed legacy SSE register moves while AVX2 upper
+The EPYC 7763 profile exposed legacy SSE register moves while AVX2 upper
 halves remained live. Go1.27.2's archsimd explicitly provides
 ClearAVXUpperBits for this boundary. Wide kernels now clear on scalar/memory
 return; loop-filter stores hand off six VEX memory stores to a 128-bit
@@ -690,3 +690,53 @@ VP8 +43.33%, VP9 +46.86% time. These remaining gaps are unresolved.
 preserve the evidence. Five pixel/DSP/encoder packages pass natively and
 under Rosetta AVX2; PGO is refreshed and pre-commit passes. Native x64
 performance of the new wider/filter paths is pending.
+
+### Native x64 wider subpixel and non-flat results
+
+The 08c2b96e three-variant run is fully green on EPYC 7763. Same-run parent
+comparisons improve VP9 320p 4.493→4.428ms (-1.44%) and 720p 35.497→34.590ms
+(-2.55%), every pair faster. VP8's +0.42% parent change is within noise;
+current 23.908ms versus assembly 23.568ms leaves a 1.44% gap on this runner.
+Subpixel 16/32/64 improves 14.3–21.1%; non-flat filters 28.8–38.8%, all zero allocations.
+All 18 public samples per workload match every recorded semantic/allocation
+field. [Raw samples and live profiles](benchmarks/baselines/go127-simd-amd64/2026-10-16-08c2b96e)
+retain same-run assembly and parent comparisons. Hosted CI, full local
+native/purego, race/checkptr1, strict byte, 18/18 report and source/PGO gates
+all pass.
+
+### VP8 six-tap arithmetic and split-block dispatch
+
+VP8's bounded six-tap weights now use int16 SIMD. Negative products are
+accumulated first; their total weight is at most 128, giving a minimum
+64-128*255=-32576. Subsequent positive saturation is exact after byte
+rounding/clipping. Odd phases omit both zero end taps in a separate
+four-tap helper. Unsupported filters retain the int32 path. All reads and
+stores use safe slices. Initial six-round triples halve dense 16x16
+prediction time; another six triples select separate helpers over a
+naive kernel and generic specialization, avoiding extra small-block cost.
+
+Both-axis fractional split-block variance now uses the existing fused
+statistics kernel. Integer/one-axis cases retain their previous path.
+Fresh six-pair B.Loop tests with observable outputs improve split shapes
+69.65–83.59%, all zero allocations. Codec-table/extreme/random six-tap tests and
+all-phase minimal/misaligned split tests match independent scalar results.
+Five kernel/DSP/encoder packages pass on ARM and Rosetta AVX2.
+
+Ten balanced public quintets compare assembly, parent 08c2b96e, each
+isolated change and the combination. ARM VP8 720p improves 9.969→9.704ms
+(-2.661%), all ten pairs faster (-5.11..-1.65%). Every non-timing field and
+allocation count matches across 50 samples. Assembly still leads at 7.067ms,
+leaving 37.31% extra time on ARM. Split-only public samples do not establish
+an end-to-end improvement. Six control pairs show VP8 CPU-used4 320x180
+-1.987% (every pair faster) and VP9 720p within noise (-0.447%, paired range
+crossing zero); all 24 control samples preserve output/allocation fields.
+The 720p profile confirms the six-tap kernel live at 4.23% cumulative time.
+[Raw designs, comparisons, controls and profiles](benchmarks/baselines/go127-simd-arm64/2026-10-16-six-tap-split)
+keep the evidence and rejected variants. Native x64 timing of this next
+checkpoint is pending.
+
+After integration, six fresh balanced parent/prototype/final triples measure
+9.932/9.592/9.616ms. The final build improves 3.184% versus parent, all pairs
+faster 2.32–4.12%; its 0.243% prototype difference is within noise. All 18
+samples preserve recorded semantic/allocation fields. Final ARM/Rosetta
+five-package suites, PGO refresh and pre-commit pass.
