@@ -876,7 +876,8 @@ Fusion is ARM-only. The x64 VP8 DSP test instruction region remains
 byte-identical to dff92311 after excluding the Go build-ID header, preserving
 its measured architecture-specific paths.
 [Raw designs, final comparisons, controls, profiles and generated code evidence](benchmarks/baselines/go127-simd-arm64/2026-10-16-fused-internal)
-retain the results. Final broader local/hosted checks are in progress.
+retain the results. Final broader local checks pass; the native x64 control
+run also passes. Hosted validation is tracked on the PR.
 
 ### Native x64 batched-reduction result
 
@@ -900,3 +901,31 @@ Final fused ARM full native, five-package race/checkptr1, strict byte parity,
 coverage remains valid because its selected sources are unchanged; hosted CI
 also reruns that suite. Latest upstream main and the PR base remain 691cd051,
 and the draft PR is mergeable without conflicts.
+
+### Empty projection contract and second x64 CPU
+
+Final review reproduced a zero-row projection panic caused by evaluating
+`ref[off:]` before the empty-batch check. The public entry now returns before
+reading either buffer for zero/negative row counts. A regression test covers
+nil sources, unused positive/negative/maximum offsets, and unchanged output.
+Targeted native ARM, Rosetta AVX2 correctness, experiment-off and purego checks
+pass. PGO was refreshed after the final source change, with fingerprint
+`bd5031e5889589f04c4d01da296645535ee6d44b`; pre-commit passes.
+[Reproduction and final validation](benchmarks/baselines/go127-simd-arm64/2026-10-16-empty-projection)
+retain the logs. No extra performance gain is attributed to this fix.
+
+The c49e9d60 native control run used EPYC 9V45 rather than the earlier EPYC
+7763. Parent/current changes are mixed and cross zero, consistent with their
+identical x64 VP8 DSP instruction bodies. Current VP9 uses 44.03% less time
+at 320p and 50.64% less at 720p than same-run original assembly. VP8 uses
+19.82% more time than assembly, with every pair slower (8.86–21.47%). All
+18 recorded semantic/allocation fields match. This control establishes a
+remaining x64 VP8 gap on that CPU, despite the earlier 7763 result. Raw
+control artifacts are linked from the [native run](https://github.com/thesyncim/govpx/actions/runs/38976212853);
+the PR remains draft, with ARM and CPU-specific x64 performance limits open.
+
+The final empty-projection source also passes full native (45.181s), full
+purego (112.845s), five-package race/checkptr1, strict encoder bytes (34.302s),
+18/18 parity report, no-assembly audit, all six selection modes, formatting
+and exact-source PGO checks. The preceding c49e9d60 hosted and native jobs
+are both green.
