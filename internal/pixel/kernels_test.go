@@ -253,3 +253,39 @@ func BenchmarkStatsTallStrip(b *testing.B) {
 		Stats(a, 1312, ref, 1344, 16, 720)
 	}
 }
+
+func TestGatherMinimalWindows(t *testing.T) {
+	for _, w := range []int{8, 16} {
+		for _, ss := range []int{w, w + 1, w + 15} {
+			rs := ss + 3
+			for align := range 8 {
+				a, b := make([]byte, align+(w-1)*ss+w), make([]byte, align+(w-1)*rs+w)
+				for i := range a {
+					a[i] = byte(i*37 + 11)
+				}
+				for i := range b {
+					b[i] = byte(i*19 + 53)
+				}
+				originalA, originalB := bytes.Clone(a), bytes.Clone(b)
+				out, want := make([]int16, w*w+2), make([]int16, w*w)
+				out[0], out[len(out)-1] = 12345, -12345
+				Gather(a[align:], ss, b[align:], rs, out[1:len(out)-1], w)
+				GatherScalar(a[align:], ss, b[align:], rs, want, w)
+				for i, v := range want {
+					if out[i+1] != v {
+						t.Fatalf("w%d stride%d align%d lane%d", w, ss, align, i)
+					}
+				}
+				if out[0] != 12345 || out[len(out)-1] != -12345 || !bytes.Equal(a, originalA) || !bytes.Equal(b, originalB) {
+					t.Fatal("gather changed sentinel or input")
+				}
+				Gather(a[align:], ss, a[align:], ss, out[1:len(out)-1], w)
+				for _, v := range out[1 : len(out)-1] {
+					if v != 0 {
+						t.Fatal("read-only input alias")
+					}
+				}
+			}
+		}
+	}
+}

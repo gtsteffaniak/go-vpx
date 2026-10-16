@@ -407,6 +407,40 @@ filter, 13.1% to statistics rows, 6.1% to gathering, and 2.8% to the new
 batched transform. The complete raw artifact and summary are preserved in
 [the batch checkpoint directory](benchmarks/baselines/go127-simd-amd64/2026-10-16-3c94d2cc).
 
+### Native amd64 SSE/Walsh results at `bd25795a`
+
+This checkpoint adds squared-error-only scoring and permits the native
+Walsh path across the full signed-int16 domain. The
+[native benchmark](https://github.com/thesyncim/govpx/actions/runs/38958062568)
+and [all hosted production gates](https://github.com/thesyncim/govpx/actions/runs/38958062570)
+pass. The runner is an EPYC 9V74 with AVX2/AVX512, unlike the previous
+EPYC 7763 run; absolute checkpoint timings do not isolate these changes.
+Within each run, both variants share the compiler, settings, and host.
+
+| Operation | Assembly-era dispatch | Go SIMD dispatch | Time change |
+| --- | ---: | ---: | ---: |
+| SSE16x720 strip | 862.35 ns | 1,435.00 ns | +66.4% |
+| SSE16x16 | 12.60 ns | 33.585 ns | +166.5% |
+| SSE8x8 | 9.834 ns | 15.420 ns | +56.8% |
+| Residual DCT, 25 blocks | 163.70 ns | 162.95 ns | -0.5% |
+| VP9 realtime 320x180 | 5.505 ms/frame | 3.380 ms/frame | -38.6% |
+| VP8 realtime 720p | 13.981 ms/frame | 20.683 ms/frame | +47.9% |
+| VP9 realtime 720p | 47.022 ms/frame | 25.998 ms/frame | -44.7% |
+
+All six VP8 pairs take 47.7–48.8% more time, so its remaining performance
+gap is still material on this CPU. VP9 takes 38.0–38.9% less time at
+320x180 and 44.6–44.9% less time at 720p. Every semantic/size/quantizer
+field and allocation count matches across all twelve samples per workload,
+with no allocation outliers. Counts remain 246,893 bytes, 117/3 frames,
+0.616667 allocations/input for VP9 320x180; 685,957 bytes, 58/2 frames,
+zero allocations for VP8 720p; and 642,654 bytes, 48/12 frames,
+1.25 allocations for VP9 720p. All kernel samples allocate zero bytes.
+
+The independent VP8 profile attributes 30.9% cumulative time to the
+byte-wide filter, 4.1% to SSE16, and 4.9% to gathering. Raw profiles,
+timings, metadata, a summary, and test-only baseline overlay details are
+preserved in [the SSE checkpoint directory](benchmarks/baselines/go127-simd-amd64/2026-10-16-bd25795a).
+
 ### SIMD width boundaries and VP8 quantization
 
 The next optimization restores fused VP8 quantization/dequantization/EOB,
@@ -504,3 +538,24 @@ allocation field equal. These differences do not establish a public encoder
 speedup. [Raw comparisons](benchmarks/baselines/go127-simd-arm64/2026-10-16-squared-error)
 retain the evidence. A filter-kind specialization was rejected because its
 horizontal-edge regression outweighed an uncertain vertical benefit.
+
+
+### Fused internal edges and full-row residual gather
+
+VP8's three internal luma edges share one validated 16x16 tile and native
+byte-filter dispatch. Each edge still observes the preceding edge's writes.
+The 255-threshold fallback and eight-lane layout retain their existing paths.
+Gather now loads each sixteen-pixel row once before widening both halves;
+exact four-coefficient stores retain block-scan order. Minimal allocations,
+misalignment, read-only input aliases and untouched sentinels are tested.
+The x64 high-byte widening uses a fixed shuffle instead of a loaded mask.
+
+Six ARM pairs improve horizontal edges about 36→23 ns, vertical 99→77 ns,
+and 16x16 gather 61→41 ns, with zero allocations. Six public VP8 quartets
+improve 10.758→10.444 ms/frame (-2.92%) against bd25795a. Output statistics
+and allocations match in every sample. Original assembly measures 7.330
+ms/frame in the same run, so the new path still trails by 42.48%.
+[Raw evidence](benchmarks/baselines/go127-simd-arm64/2026-10-16-fused-edges-gather)
+retains all variants. ARM and Rosetta AVX2 pixel/DSP/encoder suites pass.
+Native x64 CI now compares the parent commit in the same runner alongside
+head and the original baseline, with balanced execution order.

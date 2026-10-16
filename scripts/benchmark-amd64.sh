@@ -1,6 +1,7 @@
 #!/bin/sh
-# Run both implementations serially on one native amd64 runner. Each pair
-# alternates A/B and B/A to expose ordering drift in the raw measurements.
+# Compare assembly and native Go SIMD on one native amd64 runner, optionally
+# adding a previous SIMD commit as the third argument. Two variants alternate
+# A/B and B/A; three variants use every permutation over the six rounds.
 set -eu
 case "$(uname -s)/$(uname -m)" in
 	Linux/x86_64) ;;
@@ -11,22 +12,47 @@ root=$(git rev-parse --show-toplevel)
 cd "$root"
 baseline_ref=${1:-691cd0512c4829d9ee40d483205dd223f9eb028d}
 output_dir=${2:?provide an output directory}
+previous_ref=${3:-}
+baseline_commit=$(git rev-parse --verify --end-of-options "$baseline_ref^{commit}")
+previous_commit=
+if [ -n "$previous_ref" ]; then
+	previous_commit=$(git rev-parse --verify --end-of-options "$previous_ref^{commit}")
+fi
 mkdir -p "$output_dir"
 output_dir=$(CDPATH= cd -- "$output_dir" && pwd)
+reference_dir=
+previous_dir=
+cleanup() {
+	for directory in "$reference_dir" "$previous_dir"; do
+		[ -n "$directory" ] || continue
+		git worktree remove --force "$directory" >/dev/null 2>&1 || rmdir "$directory" >/dev/null 2>&1 || true
+	done
+}
+trap cleanup EXIT
+trap 'exit 1' HUP INT TERM
 reference_dir=$(mktemp -d "${TMPDIR:-/tmp}/govpx-assembly-reference.XXXXXX")
-git worktree add --detach "$reference_dir" "$baseline_ref"
-trap 'git worktree remove --force "$reference_dir" >/dev/null 2>&1 || true' EXIT
+git worktree add --detach "$reference_dir" "$baseline_commit"
+variants='assembly simd'
+if [ -n "$previous_commit" ]; then
+	previous_dir=$(mktemp -d "${TMPDIR:-/tmp}/govpx-previous-reference.XXXXXX")
+	git worktree add --detach "$previous_dir" "$previous_commit"
+	variants='assembly previous simd'
+fi
 
-# Apply the same residual-domain benchmark and independent scalar test to
-# both implementations. The assembly reference's production files stay at
-# the pinned baseline commit.
-cp "$root/internal/vp8/encoder/dct_batch_native_test.go" "$reference_dir/internal/vp8/encoder/dct_batch_native_test.go"
-cp "$root/internal/vp8/dsp/sse_strip_test.go" "$reference_dir/internal/vp8/dsp/sse_strip_test.go"
+# Apply identical test-only fixtures to every reference. Production files
+# remain unchanged at their respective pinned commits.
+for source_dir in "$reference_dir" "$previous_dir"; do
+	[ -n "$source_dir" ] || continue
+	cp "$root/internal/vp8/encoder/dct_batch_native_test.go" "$source_dir/internal/vp8/encoder/dct_batch_native_test.go"
+	cp "$root/internal/vp8/dsp/sse_strip_test.go" "$source_dir/internal/vp8/dsp/sse_strip_test.go"
+done
 
 export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 {
-	printf 'assembly commit: %s\n' "$(git rev-parse "$baseline_ref^{commit}")"
+	printf 'assembly commit: %s\n' "$baseline_commit"
+	if [ -n "$previous_commit" ]; then printf 'previous SIMD commit: %s\n' "$previous_commit"; fi
 	printf 'SIMD commit: %s\n' "$(git rev-parse HEAD)"
+	printf 'variants: %s\n' "$variants"
 	printf '%s\n' 'GOMAXPROCS=1 PGO=off rounds=6 kernel-benchtime=150ms'
 	scripts/go.sh version
 	scripts/go.sh env GOOS GOARCH GOAMD64 GOEXPERIMENT GOTOOLCHAIN GOCACHE
@@ -35,12 +61,18 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 
 # This test fails if runtime feature detection selected the scalar backend.
 GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBackendSelected$' -count=1 -v > "$output_dir/dispatch.txt" 2>&1
+if [ -n "$previous_dir" ]; then
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh -C "$previous_dir" test -pgo=off ./internal/pixel -run '^TestBackendSelected$' -count=1 -v > "$output_dir/previous-dispatch.txt" 2>&1
+fi
 
 packages='internal/vp9/dsp internal/vp8/dsp internal/vp9/encoder internal/vp8/encoder'
-benchmarks='BenchmarkVP9(Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance16x16)$|BenchmarkSAD16x16$|BenchmarkForwardDCT16x16$|Benchmark(FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|SSE16x720PtrFast|SSE16x16|SSE8x8|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
-for variant in assembly simd; do
-	source_dir=$root
-	if [ "$variant" = assembly ]; then source_dir=$reference_dir; fi
+benchmarks='BenchmarkVP9(Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance16x16)$|BenchmarkSAD16x16$|BenchmarkForwardDCT16x16$|Benchmark(FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|ResidualGather16x16|ResidualGather8x8|SSE16x720PtrFast|SSE16x16|SSE8x8|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
+for variant in $variants; do
+	case "$variant" in
+		assembly) source_dir=$reference_dir ;;
+		previous) source_dir=$previous_dir ;;
+		simd) source_dir=$root ;;
+	esac
 	for package in $packages; do
 		name=$(printf '%s' "$package" | tr / -)
 		scripts/go.sh -C "$source_dir" test -pgo=off -c -o "$output_dir/$variant-$name.test" "./$package"
@@ -51,6 +83,17 @@ done
 for round in 1 2 3 4 5 6; do
 	order='assembly simd'
 	case "$round" in 2|4|6) order='simd assembly' ;; esac
+	if [ -n "$previous_dir" ]; then
+		case "$round" in
+			1) order='assembly previous simd' ;;
+			2) order='previous simd assembly' ;;
+			3) order='simd assembly previous' ;;
+			4) order='assembly simd previous' ;;
+			5) order='simd previous assembly' ;;
+			6) order='previous assembly simd' ;;
+		esac
+	fi
+	printf 'round %s: %s\n' "$round" "$order" >> "$output_dir/orders.txt"
 	for variant in $order; do
 		printf 'round %s: %s\n' "$round" "$variant"
 		for package in $packages; do
@@ -67,10 +110,10 @@ for round in 1 2 3 4 5 6; do
 	done
 done
 
-# Profile separately after every timing pair has finished. Retain both flat
+# Profile separately after all timing rounds have finished. Retain both flat
 # and cumulative views so a native encoder regression can be traced through
 # its public callers without contaminating the benchmark samples.
-for variant in assembly simd; do
+for variant in $variants; do
 	for codec in vp8 vp9; do
 		profile="$output_dir/$variant-$codec-720p-profile.pgo"
 		"$output_dir/$variant-govpx-bench" -codec="$codec" -width=1280 -height=720 -frames=120 -fps=30 -bitrate=2500 -mode=realtime -cpu-used=8 -threads=1 -encode-only -auto-libvpx=false -format=json -cpuprofile="$profile" > "$output_dir/$variant-$codec-720p-profile.json"

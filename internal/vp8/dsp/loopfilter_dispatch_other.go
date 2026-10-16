@@ -13,6 +13,9 @@ func loopFilterHorizontalEdgeDispatch(s []byte, stride int, blimit, limit, thres
 }
 
 func loopFilterHorizontalEdgesYDispatch(s []byte, stride int, blimit, limit, thresh byte) {
+	if pixel.LoopFilterInternal16(s, stride, 1, int(blimit), int(limit), int(thresh)) {
+		return
+	}
 	loopFilterHorizontalEdgeDispatch(s, stride, blimit, limit, thresh, 2)
 	loopFilterHorizontalEdgeDispatch(s[4*stride:], stride, blimit, limit, thresh, 2)
 	loopFilterHorizontalEdgeDispatch(s[8*stride:], stride, blimit, limit, thresh, 2)
@@ -27,6 +30,9 @@ func loopFilterVerticalEdgeDispatch(s []byte, stride int, blimit, limit, thresh 
 }
 
 func loopFilterVerticalEdgesYDispatch(s []byte, stride int, blimit, limit, thresh byte) {
+	if pixel.LoopFilterInternal16(s, 1, stride, int(blimit), int(limit), int(thresh)) {
+		return
+	}
 	loopFilterVerticalEdgeDispatch(s, stride, blimit, limit, thresh, 2)
 	loopFilterVerticalEdgeDispatch(s[4:], stride, blimit, limit, thresh, 2)
 	loopFilterVerticalEdgeDispatch(s[8:], stride, blimit, limit, thresh, 2)

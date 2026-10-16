@@ -259,10 +259,25 @@ func Quantize(coeff, iscan, qcoeff, dqcoeff []int16, n, zbin, round, quant, shif
 }
 
 // Gather writes residuals in VP8's 4x4 block scan order, without staging
-// complete macroblocks or allocating packing buffers.
+// complete macroblocks or allocating packing buffers. Output must not overlap
+// either input; the read-only input planes may alias each other.
 func Gather(src []byte, ss int, pred []byte, ps int, out []int16, w int) {
 	if !Enabled {
 		GatherScalar(src, ss, pred, ps, out, w)
+		return
+	}
+
+	if w == 16 {
+		for y := range 16 {
+			a, b := archsimd.LoadUint8x16(src[y*ss:]), archsimd.LoadUint8x16(pred[y*ps:])
+			lo := widen8(a).Sub(widen8(b)).ToBits().ReshapeToUint64s()
+			hi := widenHi8(a).Sub(widenHi8(b)).ReshapeToUint64s()
+			off := (y/4)*64 + (y%4)*4
+			put4(out[off:], lo.GetElem(0))
+			put4(out[off+16:], lo.GetElem(1))
+			put4(out[off+32:], hi.GetElem(0))
+			put4(out[off+48:], hi.GetElem(1))
+		}
 		return
 	}
 

@@ -10,13 +10,12 @@ import (
 )
 
 var (
-	hiBytesIdx   = [16]int8{8, 9, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1}
 	hi16WordsIdx = [16]int8{8, 9, 10, 11, 12, 13, 14, 15, -1, -1, -1, -1, -1, -1, -1, -1}
 	oddDwordsIdx = [16]int8{4, 5, 6, 7, -1, -1, -1, -1, 12, 13, 14, 15, -1, -1, -1, -1}
 )
 
 func widenHi8(v archsimd.Uint8x16) archsimd.Uint16x8 {
-	return v.PermuteOrZero(archsimd.LoadInt8x16Array(&hiBytesIdx)).ExtendLo8ToUint16()
+	return highBytes(v).ExtendLo8ToUint16()
 }
 
 func hiInt16(v archsimd.Int16x8) archsimd.Int16x8 {
