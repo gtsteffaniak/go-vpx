@@ -11,8 +11,11 @@ func TestInternalLoopFilterMinimalWindows(t *testing.T) {
 	if !Enabled {
 		t.Skip("native SIMD unavailable")
 	}
-	for _, stride := range []int{16, 17, 32} {
+	for _, stride := range []int{8, 9, 15, 16, 17, 32} {
 		for _, vertical := range []bool{false, true} {
+			if stride < 16 && !vertical {
+				continue
+			}
 			step, outer := stride, 1
 			if vertical {
 				step, outer = 1, stride
@@ -48,5 +51,23 @@ func TestInternalLoopFilterMinimalWindows(t *testing.T) {
 				}
 			}
 		}
+	}
+}
+
+func TestInternalLoopFilterRejectInvalidSpans(t *testing.T) {
+	p := bytes.Repeat([]byte{128}, 256)
+	saved := bytes.Clone(p)
+	maxInt := int(^uint(0) >> 1)
+	for _, shape := range [][2]int{{maxInt, 1}, {1, maxInt}, {16, 1}, {1, 16}} {
+		source := p
+		if shape[0] == 16 || shape[1] == 16 {
+			source = p[:255]
+		}
+		if LoopFilterInternal16(source, shape[0], shape[1], 64, 32, 0) || !bytes.Equal(p, saved) {
+			t.Fatalf("invalid span accepted or changed: %v", shape)
+		}
+	}
+	if LoopFilterInternal16(nil, 16, 1, 64, 32, 0) {
+		t.Fatal("nil tile accepted")
 	}
 }

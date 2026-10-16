@@ -13,9 +13,16 @@ func LoopFilterInternal16(p []byte, step, outer, blimit, limit, thresh int) bool
 		return false
 	}
 	// Three complete eight-row/column windows occupy the exact 16x16 tile.
-	_ = p[15*step+15*outer]
-	loopFilterBytes(p, 4*step, step, outer, 16, blimit, limit, thresh, 4)
-	loopFilterBytes(p, 8*step, step, outer, 16, blimit, limit, thresh, 4)
-	loopFilterBytes(p, 12*step, step, outer, 16, blimit, limit, thresh, 4)
+	// Divide before multiplying so oversized strides cannot wrap the tile.
+	if len(p) == 0 {
+		return false
+	}
+	span := (len(p) - 1) / 15
+	if step > span || outer > span-step {
+		return false
+	}
+	loopFilterInternalEdge(p, 4*step, step, outer, blimit, limit, thresh)
+	loopFilterInternalEdge(p, 8*step, step, outer, blimit, limit, thresh)
+	loopFilterInternalEdge(p, 12*step, step, outer, blimit, limit, thresh)
 	return true
 }

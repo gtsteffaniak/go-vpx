@@ -746,3 +746,42 @@ by two comment-space edits after refresh. A full refresh against the exact
 committed source and pre-commit now pass with fingerprint b2f0317c. Native
 benchmark concurrency preserves the active run while queueing the newest
 checkpoint, allowing fixes to be pushed without discarding measurements.
+
+### Native x64 six-tap and split-block result
+
+The 3792c617 native EPYC 7763 comparison improves VP8 720p
+23.716→23.047 ms (-2.82%) versus parent, every pair faster (2.08–4.45%).
+It also beats original assembly 23.452 ms by 1.73%, every pair faster
+(0.88–2.54%). VP9 changes from parent remain small/mixed (-0.25% 320p,
+-0.50% 720p), while both workloads beat assembly in every pair. Six-tap
+kernels improve 11.6–58.9% from parent and split-block statistics 72.9–85.3%,
+all zero allocations. Some small four/eight-pixel six-tap phases still trail
+assembly. All 18 public samples per workload retain every recorded semantic
+and allocation field. [Raw native samples and profiles](benchmarks/baselines/go127-simd-amd64/2026-10-16-3792c617)
+retain the same-run evidence. The ARM assembly gap remains unresolved.
+
+### Fixed VP8 internal-edge packets
+
+Generated sixteen-position/four-column packets remove dynamic kind/width
+branches and general store dispatch from the live three-edge VP8 path.
+Exact-width stores preserve minimal windows and overlapping logical-row
+order. Divide-before-multiply checks reject short/overflow-sized spans.
+Four designs compare fixed packets, direct stores and separate orientations;
+complete encodes select the shared direct-store design despite a different
+microbenchmark winner. Eight balanced public quartets improve ARM VP8 720p
+2.58%; six fresh parent/prototype/final triples confirm 9.704→9.493 ms
+(-2.176%), all six pairs faster (1.12–2.87%). Every recorded non-timing field
+and allocation count matches across all 62 public/control samples.
+
+Fresh kernel pairs improve horizontal 22.075→20.750 ns (-6.00%) and vertical
+73.600→63.465 ns (-13.77%), zero allocations. Five pixel/DSP/encoder packages
+pass on ARM and Rosetta AVX2. A live 600-frame profile and LLVM disassembly
+confirm the specialized body executes and no longer calls the general store
+helper. VP9 control variation is recorded without attribution to this VP8
+change; native x64 timing and a fresh original-assembly ARM comparison remain
+pending. [Raw designs, fresh comparisons, control, code and profile](benchmarks/baselines/go127-simd-arm64/2026-10-16-internal-filter)
+keep the evidence and rejected variants.
+
+The final internal-filter sources also pass a full PGO refresh and pre-commit;
+the exact-source fingerprint is recorded with the profile. Broader final
+local/hosted validation is in progress.
