@@ -17,6 +17,11 @@ reference_dir=$(mktemp -d "${TMPDIR:-/tmp}/govpx-assembly-reference.XXXXXX")
 git worktree add --detach "$reference_dir" "$baseline_ref"
 trap 'git worktree remove --force "$reference_dir" >/dev/null 2>&1 || true' EXIT
 
+# Apply the same residual-domain benchmark and independent scalar test to
+# both implementations. The assembly reference's production files stay at
+# the pinned baseline commit.
+cp "$root/internal/vp8/encoder/dct_batch_native_test.go" "$reference_dir/internal/vp8/encoder/dct_batch_native_test.go"
+
 export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 {
 	printf 'assembly commit: %s\n' "$(git rev-parse "$baseline_ref^{commit}")"
@@ -31,7 +36,7 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBackendSelected$' -count=1 -v > "$output_dir/dispatch.txt" 2>&1
 
 packages='internal/vp9/dsp internal/vp8/dsp internal/vp9/encoder internal/vp8/encoder'
-benchmarks='BenchmarkVP9(Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance16x16)$|BenchmarkSAD16x16$|BenchmarkForwardDCT16x16$|Benchmark(FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
+benchmarks='BenchmarkVP9(Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance16x16)$|BenchmarkSAD16x16$|BenchmarkForwardDCT16x16$|Benchmark(FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
 for variant in assembly simd; do
 	source_dir=$root
 	if [ "$variant" = assembly ]; then source_dir=$reference_dir; fi

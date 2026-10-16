@@ -5,7 +5,7 @@ package encoder
 // applied per block.
 
 func forwardDCT4x4BatchSIMD(input []int16, output []int16, count int) {
-	for i := range count {
+	for i := forwardDCT4BatchGo(input, output, count); i < count; i++ {
 		forwardDCT4x4SIMD(input[i*16:i*16+16], 4, (*[16]int16)(output[i*16:i*16+16]))
 	}
 }

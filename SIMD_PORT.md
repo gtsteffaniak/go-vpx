@@ -333,6 +333,45 @@ each individual optimization contributes. Full raw timing/profile evidence,
 CPU metadata, a summary, and exact count/allocation details are retained in
 [the dated checkpoint directory](benchmarks/baselines/go127-simd-amd64/2026-10-16-6a7b0345).
 
+### Native amd64 byte-domain results at `ff9395d0`
+
+This checkpoint extends the byte-domain loop filter to amd64, avoiding its
+wide int16 packing path, and specializes full-height statistics. The
+[native run](https://github.com/thesyncim/govpx/actions/runs/38955379654)
+uses an EPYC 7763 with AVX2 and no AVX512. This is the same CPU model as
+the `b9badbe3` run, but a different hosted VM; only the baseline/SIMD pairs
+within each run share the same host. Multiple intervening changes prevent
+isolating the transition repair from the byte-filter and statistics work.
+
+| Operation | Assembly-era dispatch | Go SIMD dispatch | Time change |
+| --- | ---: | ---: | ---: |
+| VP8 horizontal luma loop-filter edges | 34.875 ns | 92.345 ns | +164.8% |
+| VP8 vertical luma loop-filter edges | 116.900 ns | 171.100 ns | +46.4% |
+| VP8 fast quantization | 6.870 ns | 8.116 ns | +18.1% |
+| VP9 inverse DCT 8x8 | 373.500 ns | 63.780 ns | -82.9% |
+| VP9 subpixel variance 16x16 | 207.850 ns | 85.615 ns | -58.8% |
+| VP9 realtime 320x180 | 6.996 ms/frame | 4.489 ms/frame | -35.8% |
+| VP8 realtime 720p | 23.187 ms/frame | 28.039 ms/frame | +20.9% |
+| VP9 realtime 720p | 60.011 ms/frame | 34.547 ms/frame | -42.4% |
+
+VP8 remains 20.7–21.7% slower in every pair. VP9 takes 35.1–36.2% less
+time at 320x180 and 41.8–43.2% less time at 720p. All twelve samples per
+workload agree on output byte counts, encoded/dropped counts, quantizer
+statistics/histograms, keyframe/interframe sizes, and allocations, with no
+allocation outliers. The unchanged counts and allocations are 246,893
+bytes, 117/3 frames, 0.616667 allocations per input for VP9 320x180;
+685,957 bytes, 58/2 frames, zero allocations for VP8 720p; and 642,654
+bytes, 48/12 frames, 1.25 allocations for VP9 720p. Exact bitstreams
+remain covered separately by the oracle gates.
+
+In the separate VP8 profile, loop filtering accounts for 23.7% cumulative
+time, including 22.2% in the byte-wide path. `pixelStatsRows16` accounts
+for 7.6%, `forward4Go` for 5.3%, and `Gather` for 4.7%. The VP8 gap is
+substantially smaller than the earlier EPYC 7763 run's +411.7%, but this
+is not a same-host measurement of any individual change. Raw paired
+timings, semantic fields, profiles, CPU metadata, and summary are retained
+in [the checkpoint directory](benchmarks/baselines/go127-simd-amd64/2026-10-16-ff9395d0).
+
 ### SIMD width boundaries and VP8 quantization
 
 The next optimization restores fused VP8 quantization/dequantization/EOB,
@@ -387,3 +426,22 @@ small differences do not establish an improvement. Counts, quantizers and
 allocations match in every sample. The original ARM assembly baseline
 remains faster. [Raw pairs and kernel evidence](benchmarks/baselines/go127-simd-arm64/2026-10-16-byte-filters)
 retain the workload and compiler context.
+
+### Batched VP8 forward transforms
+
+The batched DCT now processes two independent 4x4 blocks across eight lanes
+on ARM64 and amd64. ARM uses widening int16 products; x64 uses 128-bit
+pairwise dot products, with no AVX512 requirement. Residuals outside
+[-255,255] retain scalar arithmetic, and odd blocks retain the single-block
+path. Independent scalar tests cover full signed inputs and in-place use.
+ARM fixed register shifts also remove repeated scalar-to-vector shift setup.
+
+Six alternating ARM kernel triples measure the 25-block residual workload
+at about 221 ns before, 186 ns with fixed shifts, and 107 ns with batching;
+all allocate zero. Six public VP8 720p encoder pairs improve 11.684 to
+11.165 ms/frame (-4.44%), with identical counts, quantizers and allocations.
+[Raw measurements](benchmarks/baselines/go127-simd-arm64/2026-10-16-batched-dct)
+include both experiments. The original ARM encoder remains faster.
+Rosetta verifies x64 correctness; native batch timings are pending. The
+native harness adds only the shared benchmark test to the archived baseline,
+leaving its production implementation unchanged.
