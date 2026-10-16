@@ -20,6 +20,5 @@ func VarianceBlock16x16PtrFast(src *byte, srcStride int, ref *byte, refStride in
 }
 
 func sse16x16PtrFast(src *byte, srcStride int, ref *byte, refStride int) int {
-	_, sse := VarianceBlock16x16PtrFast(src, srcStride, ref, refStride)
-	return sse
+	return SSE16xNPtrFast(src, srcStride, ref, refStride, 16)
 }

@@ -13,7 +13,9 @@ func forward4Go(input []int16, stride int, output *[16]int16, walsh bool) bool {
 		return false
 	}
 	a, b, c, d := pixel.Transpose4(pixel.Load4(input), pixel.Load4(input[stride:]), pixel.Load4(input[2*stride:]), pixel.Load4(input[3*stride:]))
-	if pixel.Max4(a.Abs().Max(b.Abs()).Max(c.Abs()).Max(d.Abs())) > 255 {
+	// DCT products use the pixel residual bound. Walsh uses only int32
+	// sums/shifts and is exact for all int16 DC coefficients (including Y2).
+	if !walsh && pixel.Max4(a.Abs().Max(b.Abs()).Max(c.Abs()).Max(d.Abs())) > 255 {
 		return false
 	}
 

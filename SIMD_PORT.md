@@ -372,6 +372,41 @@ is not a same-host measurement of any individual change. Raw paired
 timings, semantic fields, profiles, CPU metadata, and summary are retained
 in [the checkpoint directory](benchmarks/baselines/go127-simd-amd64/2026-10-16-ff9395d0).
 
+### Native amd64 batch results at `3c94d2cc`
+
+The next checkpoint processes two VP8 transform blocks together, with
+eight-lane ARM64 arithmetic and a 128-bit amd64 dot-product pipeline.
+The [native run](https://github.com/thesyncim/govpx/actions/runs/38956724630)
+uses another EPYC 7763 VM, with the same compiler, settings, and six
+alternating pairs. Only the new benchmark/test file is copied onto the
+assembly baseline; its production source remains at `691cd051`.
+
+The new residual-domain 25-block DCT benchmark measures 217.25 ns for
+assembly and 216.15 ns for SIMD, with zero allocations. The -0.51% median
+change and -0.87% to +0.55% paired range indicate parity within these
+samples. This compares both implementations with identical [-255,255]
+coefficients; the fixture does not modify either production implementation.
+
+| Workload | Assembly-era dispatch | Go SIMD dispatch | Time change |
+| --- | ---: | ---: | ---: |
+| VP9 realtime 320x180 | 6.966 ms/frame | 4.445 ms/frame | -36.2% |
+| VP8 realtime 720p | 23.166 ms/frame | 27.470 ms/frame | +18.6% |
+| VP9 realtime 720p | 59.909 ms/frame | 34.636 ms/frame | -42.2% |
+
+Every VP8 pair remains slower, ranging from +17.4% to +34.7%; the fourth
+SIMD sample is 30.982 ms/frame while the other five are 27.265–28.024 ms.
+All samples are retained. VP9 paired ranges are 36.1–36.3% less time at
+320x180 and 41.1–42.8% less time at 720p. All byte counts, encoded/dropped
+counts, quantizer statistics/histograms, keyframe/interframe sizes, and
+allocations remain identical across every sample, with no allocation
+outliers. Different VMs prevent a controlled same-host comparison against
+the preceding checkpoint, even when their CPU model matches.
+
+The separate VP8 profile attributes 20.8% cumulative time to the byte-wide
+filter, 13.1% to statistics rows, 6.1% to gathering, and 2.8% to the new
+batched transform. The complete raw artifact and summary are preserved in
+[the batch checkpoint directory](benchmarks/baselines/go127-simd-amd64/2026-10-16-3c94d2cc).
+
 ### SIMD width boundaries and VP8 quantization
 
 The next optimization restores fused VP8 quantization/dequantization/EOB,
@@ -405,7 +440,7 @@ is required to establish the performance effect of this transition repair.
 VP8 filter scoring compares full-height16-pixel strips. The old64-row
 statistics dispatch limit sent those strips to a slower loop. Native
 statistics now accept tall strips and batch at4096rows to bound signed
-accumulators while preserving modulo2^32 SSE. The generic tail also uses
+accumulators while preserving modulo 2^32 SSE. The generic tail also uses
 native widening square/dot-product helpers. Extreme signed sums and SSE
 wraparound are checked against the independent scalar loop.
 
@@ -445,3 +480,27 @@ include both experiments. The original ARM encoder remains faster.
 Rosetta verifies x64 correctness; native batch timings are pending. The
 native harness adds only the shared benchmark test to the archived baseline,
 leaving its production implementation unchanged.
+
+
+### Squared-error-only scoring and DC Walsh coverage
+
+VP8 SSE calls now use dedicated eight/sixteen-column kernels instead of
+computing and discarding variance's signed sum. They reuse exact row packing
+and native square/dot products, with two independent accumulators. Odd rows,
+minimal/misaligned allocations, read-only aliases, and modulo 2^32 overflow
+are checked against independent scalar arithmetic. ARM kernel comparisons
+measure roughly 1,160→750 ns for 16x720,30→19 ns for 16x16,and11.9→8.2 ns for 8x8,
+with zero allocations.
+
+The Walsh transform's int32 sums/shifts are safe across all int16 inputs.
+Its former pixel-residual guard unnecessarily sent larger DC/Y2 inputs to
+scalar code. 6000 full-signed cases now require live native dispatch and
+match the scalar transform on ARM64 and Rosetta amd64. DCT retains its
+separate residual bound.
+
+Six ARM encoder triples show small/noisy changes 10.783→10.697→10.640 ms/frame
+for baseline, SSE-only, and SSE+Walsh, with every output/count/quantizer and
+allocation field equal. These differences do not establish a public encoder
+speedup. [Raw comparisons](benchmarks/baselines/go127-simd-arm64/2026-10-16-squared-error)
+retain the evidence. A filter-kind specialization was rejected because its
+horizontal-edge regression outweighed an uncertain vertical benefit.

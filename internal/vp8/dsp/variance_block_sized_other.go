@@ -35,13 +35,11 @@ func VarianceBlock8x8PtrFast(src *byte, srcStride int, ref *byte, refStride int)
 }
 
 func sse8x8PtrFast(src *byte, srcStride int, ref *byte, refStride int) int {
-	_, sse := VarianceBlock8x8PtrFast(src, srcStride, ref, refStride)
-	return sse
+	return int(pixel.SSE8(unsafe.Slice(src, 7*srcStride+8), srcStride, unsafe.Slice(ref, 7*refStride+8), refStride, 8))
 }
 
 func SSE16xNPtrFast(src *byte, srcStride int, ref *byte, refStride int, height int) int {
-	_, sse := variancePtr(src, srcStride, ref, refStride, 16, height)
-	return sse
+	return int(pixel.SSE16(unsafe.Slice(src, (height-1)*srcStride+16), srcStride, unsafe.Slice(ref, (height-1)*refStride+16), refStride, height))
 }
 
 func varianceBlock16xNPtrScalar(src *byte, srcStride int, ref *byte, refStride int, height int) (int, int) {
