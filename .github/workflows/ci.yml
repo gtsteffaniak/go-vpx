@@ -39,6 +39,9 @@ jobs:
       - name: Source and PGO checks
         run: make test-noasm test-simd-selection fmtcheck pgo-check
 
+      - name: Prepare pinned upstream control tables
+        run: sh scripts/prepare-control-sources.sh
+
       - name: Native SIMD tests
         run: make test
 
