@@ -55,6 +55,9 @@ for round in 1 2 3 4 5 6; do
 			} >> "$output_dir/$variant-kernels.txt" 2>&1
 		done
 		"$output_dir/$variant-govpx-bench" -codec=vp9 -width=320 -height=180 -frames=120 -fps=30 -bitrate=500 -mode=realtime -cpu-used=8 -threads=1 -encode-only -auto-libvpx=false -format=json > "$output_dir/$variant-encoder-$round.json"
+        for codec in vp8 vp9; do
+            "$output_dir/$variant-govpx-bench" -codec="$codec" -width=1280 -height=720 -frames=60 -fps=30 -bitrate=2500 -mode=realtime -cpu-used=8 -threads=1 -encode-only -auto-libvpx=false -format=json > "$output_dir/$variant-$codec-720p-encoder-$round.json"
+        done
 	done
 done
 

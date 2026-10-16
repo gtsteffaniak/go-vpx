@@ -8,10 +8,8 @@ import (
 	"simd/archsimd"
 )
 
-func vecRound(v archsimd.Int32x4) archsimd.Int32x4 {
-	return v.Add(archsimd.BroadcastInt32x4(fdctDctConstRounding)).ShiftAllRight(fdctDctConstBits)
-}
-func vecWrap(v archsimd.Int32x4) archsimd.Int32x4 { return v.ShiftAllLeft(16).ShiftAllRight(16) }
+func vecRound(v archsimd.Int32x4) archsimd.Int32x4 { return pixel.RoundTransform4(v) }
+func vecWrap(v archsimd.Int32x4) archsimd.Int32x4  { return pixel.WrapTransform4(v) }
 func forwardNetwork(in, out []archsimd.Int32x4, n int, adst bool) {
 	switch n {
 	case 4:
@@ -36,6 +34,9 @@ func forwardNetwork(in, out []archsimd.Int32x4, n int, adst bool) {
 }
 func forwardTransformGo(input []int16, stride int, output []int16, n int, tx common.TxType) bool {
 	if tx == common.DctDct {
+		if forwardDCTWideGo(input, stride, output, n) {
+			return true
+		}
 		switch n {
 		case 4:
 			return forwardDCT4Go(input, stride, output)

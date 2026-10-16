@@ -5,9 +5,8 @@ import (
 	"github.com/thesyncim/govpx/internal/vp9/common"
 )
 
-// Pure-Go fallback dispatchers for the VP9 forward-transform and
-// quantizer SIMD entry points. Every entry point routes directly to the
-// canonical scalar reference defined in transform_quant.go.
+// Shared Go transform and quantizer dispatch, with independent scalar
+// references retained for unsupported inputs and fallback builds.
 
 func forwardDCT4x4Dispatch(input []int16, stride int, output []int16) {
 	if forwardTransformGo(input, stride, output, 4, common.DctDct) {
@@ -78,13 +77,12 @@ func quantizeFPLibvpxValidated(coeff []int16, nCoeffs int, roundFP, quantFP, deq
 		scan, iscan, qcoeff, dqcoeff)
 }
 
-// quantizeFPLibvpxValidatedClasses: no fused token-class kernel on this
-// build; the plain quantizer runs and callers keep the token-cache walk.
-func quantizeFPLibvpxValidatedClasses(coeff []int16, nCoeffs int, roundFP, quantFP, dequant [2]int16,
-	scan, iscan []int16, qcoeff, dqcoeff []int16, _ []uint8,
-) (int, bool) {
-	return quantizeFPLibvpxValidated(coeff, nCoeffs, roundFP, quantFP, dequant,
-		scan, iscan, qcoeff, dqcoeff), false
+// Quantization and token-class generation share one SIMD block walk.
+func quantizeFPLibvpxValidatedClasses(coeff []int16, nCoeffs int, roundFP, quantFP, dequant [2]int16, scan, iscan []int16, qcoeff, dqcoeff []int16, classes []uint8) (int, bool) {
+	if pixel.Enabled && nCoeffs > 0 && len(classes) >= nCoeffs && len(iscan) >= nCoeffs && roundFP[0] >= 0 && roundFP[1] >= 0 && quantFP[0] >= 0 && quantFP[1] >= 0 && dequant[0] > 0 && dequant[1] > 0 {
+		return pixel.QuantizeFPBlock(coeff, iscan, qcoeff, dqcoeff, nCoeffs, roundFP, quantFP, dequant, classes), true
+	}
+	return quantizeFPLibvpxValidated(coeff, nCoeffs, roundFP, quantFP, dequant, scan, iscan, qcoeff, dqcoeff), false
 }
 
 func quantizeBWithQScanOrderRasterDispatch(coeff []int16, params vp9QuantizeParams,
@@ -115,9 +113,9 @@ func qcoeffSlice(s []int16, a, b int) []int16 {
 	return s[a:b]
 }
 func quantizeFPGo(coeff, iscan, qcoeff, dqcoeff []int16, n int, r, q, d [2]int16) int {
-	eob := pixel.Quantize(coeff[:1], iscan[:1], qcoeff[:1], dqcoeff[:1], 1, 0, int(r[0]), int(q[0]), 0, int(d[0]), true)
-	return max(eob, pixel.Quantize(coeff[1:], iscan[1:], qcoeff[1:], dqcoeff[1:], n-1, 0, int(r[1]), int(q[1]), 0, int(d[1]), true))
+	return pixel.QuantizeFPBlock(coeff, iscan, qcoeff, dqcoeff, n, r, q, d, nil)
 }
+
 func quantizeBACGo(coeff, iscan, qcoeff, dqcoeff []int16, n, z, r, q, s, d int) int {
 	return pixel.Quantize(coeff, iscan, qcoeff, dqcoeff, n, z, r, q, s, d, false)
 }

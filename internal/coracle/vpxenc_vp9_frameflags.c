@@ -464,9 +464,16 @@ static void apply_vp9_copy_reference_token(vpx_codec_ctx_t *ctx, int width,
                                            const char *ref_name, FILE *log) {
   if (!log) die_msg("copyref token requires --copy-ref-log");
   vpx_image_t ref_img;
-  if (!vpx_img_alloc(&ref_img, VPX_IMG_FMT_I420, (unsigned)width,
-                     (unsigned)height, 1)) {
+  // VP8_COPY_REFERENCE copies libvpx's complete 8-pixel-aligned coded
+  // planes, including padding beyond an odd visible width/height. Reserve
+  // that storage while retaining the visible rectangle for checksums.
+  if (!vpx_img_alloc(&ref_img, VPX_IMG_FMT_I420,
+                     (unsigned)((width + 7) & ~7),
+                     (unsigned)((height + 7) & ~7), 1)) {
     die_msg("vpx_img_alloc copyref failed");
+  }
+  if (vpx_img_set_rect(&ref_img, 0, 0, (unsigned)width, (unsigned)height)) {
+    die_msg("vpx_img_set_rect copyref failed");
   }
   vpx_ref_frame_t ref;
   ref.frame_type = parse_ref_frame_type(ref_name);

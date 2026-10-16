@@ -109,7 +109,7 @@ slower than the assembly baseline. The PR remains draft while that gap is
 visible, and the historical README numbers should not be interpreted as
 measurements of this implementation.
 
-Measurements below compare `691cd051` with this implementation using the
+The initial migration measurements below compare `691cd051` with `d5374fe0` using the
 same Go 1.27.2 compiler, experiment, CPU and `-pgo=off`. Kernel medians use
 five runs with 150ms per benchmark. The public encoder comparison alternates
 six baseline and six SIMD runs: VP9 realtime, 320x180, 120 frames, 30 fps,
@@ -141,3 +141,28 @@ kernels. Generated ARM64 code also contains widening vector multiplies,
 vector additions, and byte narrowing in the selected filter body. Its
 multiply/add instruction sequence and the four-lane transform layout leave
 further tuning opportunities; no x86 performance claim is made from Rosetta.
+
+### Subsequent optimization checkpoint
+
+The next pass adds actual eight-lane AVX2 DCT8/16 pipelines, an ARM64
+int16 inverse DCT8 pipeline, sixteen-pixel AVX2 convolution, exact narrowed
+int16 convolution on both architectures, and fused FP quantization/EOB/token
+classes. Four-pixel convolution now reaches the native backend. The wider
+transforms include sparse and full signed-int16 parity tests; FP token-class
+tests require the fused native path when SIMD is enabled.
+
+On ARM64, inverse DCT8 now measures about 32 ns, forward DCT16 about 180 ns,
+horizontal filtering about 98 ns and vertical filtering about 70 ns, with
+zero allocations. Six new alternating public VP9 encoder pairs measure
+1.889 ms/frame for SIMD versus 1.518 ms/frame for the assembly baseline
+(24.4% more time); every run still emits the same 246,893 bytes. The initial
+36.6% regression above is historical. ARM performance work remains open.
+
+Native Linux/amd64 measurements on an AMD EPYC 7763, before these latest
+wider kernels (commit `818e4630`), measured 5.408 ms/frame versus 6.995
+ms/frame for the same assembly-era public VP9 workload: 22.7% less time.
+All twelve runs agreed on bytes, encoded/dropped frame counts and allocations.
+This result is specific to that CPU/workload; the old x64 dispatch had less
+assembly coverage than ARM64. Horizontal convolution was still slower in
+that checkpoint. The dedicated native amd64 workflow will remeasure the
+wider implementation, including VP8 and VP9 at 720p.

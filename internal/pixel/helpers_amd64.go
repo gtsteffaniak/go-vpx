@@ -71,3 +71,21 @@ func highU16(v archsimd.Uint16x8) archsimd.Uint16x8 {
 }
 
 func filterVertical8(src []byte, ss int, dst []byte, ds, w, h int, taps []int16) bool { return false }
+
+func RoundTransform4(v archsimd.Int32x4) archsimd.Int32x4 {
+	return v.Add(archsimd.BroadcastInt32x4(8192)).ShiftAllRight(14)
+}
+func WrapTransform4(v archsimd.Int32x4) archsimd.Int32x4 { return v.ShiftAllLeft(16).ShiftAllRight(16) }
+
+func mulAdd16(sum, a, b archsimd.Int16x8) archsimd.Int16x8 { return a.Mul(b).Add(sum) }
+func filterShift7(v archsimd.Int16x8) archsimd.Int16x8     { return v.ShiftAllRight(7) }
+
+func filterVerticalNarrow8(src []byte, ss int, dst []byte, ds, w, h int, taps []int16, mode int) bool {
+	return false
+}
+
+func MulAdd4(a, b, c archsimd.Int32x4) archsimd.Int32x4 { return a.Mul(b).Add(c) }
+func MulAdd8(a, b, c archsimd.Int32x8) archsimd.Int32x8 { return a.Mul(b).Add(c) }
+
+func fpMulHigh16(a, b archsimd.Int16x8) archsimd.Int16x8 { return a.MulHigh(b) }
+func fpReduceMax16(v archsimd.Int16x8) int               { return int(Max4(v.ExtendLo4ToInt32().Max(high4(v)))) }

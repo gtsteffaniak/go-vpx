@@ -101,3 +101,76 @@ func filterVertical8(src []byte, ss int, dst []byte, ds, w, h int, taps []int16)
 	}
 	return true
 }
+
+// Adapted from goav1's fwdShr: fixed register shifts avoid rebuilding and
+// negating an immediate shift vector for every transform stage.
+var transformRight14 = archsimd.BroadcastInt32x4(-14)
+
+func RoundTransform4(v archsimd.Int32x4) archsimd.Int32x4 {
+	return v.Add(archsimd.BroadcastInt32x4(8192)).Shift(transformRight14)
+}
+func WrapTransform4(v archsimd.Int32x4) archsimd.Int32x4 { return v.TruncToInt16().ExtendLo4ToInt32() }
+
+func mulAdd16(sum, a, b archsimd.Int16x8) archsimd.Int16x8 { return a.MulAdd(b, sum) }
+
+var filterRight7 = archsimd.BroadcastInt16x8(-7)
+
+func filterShift7(v archsimd.Int16x8) archsimd.Int16x8 { return v.Shift(filterRight7) }
+
+func filterVerticalNarrow8(src []byte, ss int, dst []byte, ds, w, h int, taps []int16, mode int) bool {
+	if len(taps) != 8 || w <= 0 || w%8 != 0 || h <= 0 || ss < 0 || ds < 0 {
+		return false
+	}
+	_ = src[(h+6)*ss+w-1]
+	_ = dst[(h-1)*ds+w-1]
+	sp := unsafe.Pointer(unsafe.SliceData(src))
+	c0 := archsimd.BroadcastInt16x8(taps[0])
+	c1 := archsimd.BroadcastInt16x8(taps[1])
+	c2 := archsimd.BroadcastInt16x8(taps[2])
+	c3 := archsimd.BroadcastInt16x8(taps[3])
+	c4 := archsimd.BroadcastInt16x8(taps[4])
+	c5 := archsimd.BroadcastInt16x8(taps[5])
+	c6 := archsimd.BroadcastInt16x8(taps[6])
+	c7 := archsimd.BroadcastInt16x8(taps[7])
+	bias := archsimd.BroadcastInt16x8(64)
+	for x := 0; x < w; x += 8 {
+		p0 := widen8(loadNPtr(unsafe.Add(sp, 0*ss+x), 8))
+		p1 := widen8(loadNPtr(unsafe.Add(sp, 1*ss+x), 8))
+		p2 := widen8(loadNPtr(unsafe.Add(sp, 2*ss+x), 8))
+		p3 := widen8(loadNPtr(unsafe.Add(sp, 3*ss+x), 8))
+		p4 := widen8(loadNPtr(unsafe.Add(sp, 4*ss+x), 8))
+		p5 := widen8(loadNPtr(unsafe.Add(sp, 5*ss+x), 8))
+		p6 := widen8(loadNPtr(unsafe.Add(sp, 6*ss+x), 8))
+		for y := 0; y < h; y++ {
+			p7 := widen8(loadNPtr(unsafe.Add(sp, (y+7)*ss+x), 8))
+			acc := bias
+			if mode == 1 {
+				acc = mulAdd16(acc, p0, c0)
+				acc = mulAdd16(acc, p2, c2)
+				acc = mulAdd16(acc, p5, c5)
+				acc = mulAdd16(acc, p7, c7)
+				acc = acc.AddSaturated(p1.Mul(c1)).AddSaturated(p3.Mul(c3)).AddSaturated(p4.Mul(c4)).AddSaturated(p6.Mul(c6))
+			} else {
+				acc = mulAdd16(acc, p0, c0)
+				acc = mulAdd16(acc, p1, c1)
+				acc = mulAdd16(acc, p6, c6)
+				acc = mulAdd16(acc, p7, c7)
+				acc = acc.AddSaturated(p2.Mul(c2)).AddSaturated(p3.Mul(c3)).AddSaturated(p4.Mul(c4)).AddSaturated(p5.Mul(c5))
+			}
+			storeBytes8(dst[y*ds+x:], packBytes(filterShift7(acc)))
+			p0, p1, p2, p3, p4, p5, p6 = p1, p2, p3, p4, p5, p6, p7
+		}
+	}
+	return true
+}
+
+func MulAdd4(a, b, c archsimd.Int32x4) archsimd.Int32x4 { return a.MulAdd(b, c) }
+
+func filterWide8(src []byte, ss int, dst []byte, ds, w, h, step int, taps []int16) bool { return false }
+
+func fpMulHigh16(a, b archsimd.Int16x8) archsimd.Int16x8 {
+	lo := a.MulWidenLo(b).ToBits().ReshapeToUint16s()
+	hi := a.HiToLo().MulWidenLo(b.HiToLo()).ToBits().ReshapeToUint16s()
+	return lo.ConcatOdd(hi).BitsToInt16()
+}
+func fpReduceMax16(v archsimd.Int16x8) int { return int(v.ReduceMax()) }

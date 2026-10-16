@@ -1,6 +1,7 @@
 package encoder
 
 import (
+	"github.com/thesyncim/govpx/internal/pixel"
 	"math/rand"
 	"testing"
 
@@ -79,6 +80,9 @@ func TestQuantizeFPTokenClassesMatchesScalar(t *testing.T) {
 				}
 			}
 			if !produced {
+				if pixel.Enabled {
+					t.Fatal("native SIMD did not produce fused token classes")
+				}
 				continue // builds without the fused kernel keep the fallback walk
 			}
 			for i := range coeff {

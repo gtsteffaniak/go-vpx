@@ -5,7 +5,10 @@
 
 package encoder
 
-import "simd/archsimd"
+import (
+	"github.com/thesyncim/govpx/internal/pixel"
+	"simd/archsimd"
+)
 
 func forwardDCT4Vec(input []archsimd.Int32x4, output []archsimd.Int32x4) {
 	step0 := (input[0]).Add(input[3])
@@ -14,8 +17,8 @@ func forwardDCT4Vec(input []archsimd.Int32x4, output []archsimd.Int32x4) {
 	step3 := (input[0]).Sub(input[3])
 	output[0] = vecRound(((step0).Add(step1)).Mul(archsimd.BroadcastInt32x4(fdctCospi16_64)))
 	output[2] = vecRound(((step0).Sub(step1)).Mul(archsimd.BroadcastInt32x4(fdctCospi16_64)))
-	output[1] = vecRound(((step2).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))).Add((step3).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))))
-	output[3] = vecRound(((archsimd.Int32x4{}.Sub(step2)).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))).Add((step3).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))))
+	output[1] = vecRound(pixel.MulAdd4(step2, archsimd.BroadcastInt32x4(fdctCospi24_64), (step3).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))))
+	output[3] = vecRound(pixel.MulAdd4(archsimd.Int32x4{}.Sub(step2), archsimd.BroadcastInt32x4(fdctCospi8_64), (step3).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))))
 }
 
 func forwardDCT8Vec(input []archsimd.Int32x4, output []archsimd.Int32x4) {
@@ -32,19 +35,19 @@ func forwardDCT8Vec(input []archsimd.Int32x4, output []archsimd.Int32x4) {
 	x2 := (s1).Sub(s2)
 	x3 := (s0).Sub(s3)
 	output[0] = vecRound(((x0).Add(x1)).Mul(archsimd.BroadcastInt32x4(fdctCospi16_64)))
-	output[2] = vecRound(((x2).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))).Add((x3).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))))
+	output[2] = vecRound(pixel.MulAdd4(x2, archsimd.BroadcastInt32x4(fdctCospi24_64), (x3).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))))
 	output[4] = vecRound(((x0).Sub(x1)).Mul(archsimd.BroadcastInt32x4(fdctCospi16_64)))
-	output[6] = vecRound(((archsimd.Int32x4{}.Sub(x2)).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))).Add((x3).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))))
+	output[6] = vecRound(pixel.MulAdd4(archsimd.Int32x4{}.Sub(x2), archsimd.BroadcastInt32x4(fdctCospi8_64), (x3).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))))
 	t2 := vecRound(((s6).Sub(s5)).Mul(archsimd.BroadcastInt32x4(fdctCospi16_64)))
 	t3 := vecRound(((s6).Add(s5)).Mul(archsimd.BroadcastInt32x4(fdctCospi16_64)))
 	x0 = (s4).Add(t2)
 	x1 = (s4).Sub(t2)
 	x2 = (s7).Sub(t3)
 	x3 = (s7).Add(t3)
-	output[1] = vecRound(((x0).Mul(archsimd.BroadcastInt32x4(fdctCospi28_64))).Add((x3).Mul(archsimd.BroadcastInt32x4(fdctCospi4_64))))
-	output[3] = vecRound(((x2).Mul(archsimd.BroadcastInt32x4(fdctCospi12_64))).Sub((x1).Mul(archsimd.BroadcastInt32x4(fdctCospi20_64))))
-	output[5] = vecRound(((x1).Mul(archsimd.BroadcastInt32x4(fdctCospi12_64))).Add((x2).Mul(archsimd.BroadcastInt32x4(fdctCospi20_64))))
-	output[7] = vecRound(((x3).Mul(archsimd.BroadcastInt32x4(fdctCospi28_64))).Sub((x0).Mul(archsimd.BroadcastInt32x4(fdctCospi4_64))))
+	output[1] = vecRound(pixel.MulAdd4(x0, archsimd.BroadcastInt32x4(fdctCospi28_64), (x3).Mul(archsimd.BroadcastInt32x4(fdctCospi4_64))))
+	output[3] = vecRound(pixel.MulAdd4(x2, archsimd.BroadcastInt32x4(fdctCospi12_64), (x1).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi20_64)))))
+	output[5] = vecRound(pixel.MulAdd4(x1, archsimd.BroadcastInt32x4(fdctCospi12_64), (x2).Mul(archsimd.BroadcastInt32x4(fdctCospi20_64))))
+	output[7] = vecRound(pixel.MulAdd4(x3, archsimd.BroadcastInt32x4(fdctCospi28_64), (x0).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi4_64)))))
 }
 
 func forwardDCT16Vec(in []archsimd.Int32x4, out []archsimd.Int32x4) {
@@ -87,10 +90,10 @@ func forwardDCT16Vec(in []archsimd.Int32x4, out []archsimd.Int32x4) {
 	step3[5] = (step1[6]).Sub(step2[5])
 	step3[6] = (step1[6]).Add(step2[5])
 	step3[7] = (step1[7]).Add(step2[4])
-	step2[1] = vecRound(((archsimd.Int32x4{}.Sub(step3[1])).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))).Add((step3[6]).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))))
-	step2[2] = vecRound(((step3[2]).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))).Add((step3[5]).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))))
-	step2[5] = vecRound(((step3[2]).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))).Sub((step3[5]).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))))
-	step2[6] = vecRound(((step3[1]).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))).Add((step3[6]).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))))
+	step2[1] = vecRound(pixel.MulAdd4(archsimd.Int32x4{}.Sub(step3[1]), archsimd.BroadcastInt32x4(fdctCospi8_64), (step3[6]).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))))
+	step2[2] = vecRound(pixel.MulAdd4(step3[2], archsimd.BroadcastInt32x4(fdctCospi24_64), (step3[5]).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))))
+	step2[5] = vecRound(pixel.MulAdd4(step3[2], archsimd.BroadcastInt32x4(fdctCospi8_64), (step3[5]).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi24_64)))))
+	step2[6] = vecRound(pixel.MulAdd4(step3[1], archsimd.BroadcastInt32x4(fdctCospi24_64), (step3[6]).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))))
 	step1[0] = (step3[0]).Add(step2[1])
 	step1[1] = (step3[0]).Sub(step2[1])
 	step1[2] = (step3[3]).Add(step2[2])
@@ -99,14 +102,14 @@ func forwardDCT16Vec(in []archsimd.Int32x4, out []archsimd.Int32x4) {
 	step1[5] = (step3[4]).Add(step2[5])
 	step1[6] = (step3[7]).Sub(step2[6])
 	step1[7] = (step3[7]).Add(step2[6])
-	out[1] = vecRound(((step1[0]).Mul(archsimd.BroadcastInt32x4(fdctCospi30_64))).Add((step1[7]).Mul(archsimd.BroadcastInt32x4(fdctCospi2_64))))
-	out[9] = vecRound(((step1[1]).Mul(archsimd.BroadcastInt32x4(fdctCospi14_64))).Add((step1[6]).Mul(archsimd.BroadcastInt32x4(fdctCospi18_64))))
-	out[5] = vecRound(((step1[2]).Mul(archsimd.BroadcastInt32x4(fdctCospi22_64))).Add((step1[5]).Mul(archsimd.BroadcastInt32x4(fdctCospi10_64))))
-	out[13] = vecRound(((step1[3]).Mul(archsimd.BroadcastInt32x4(fdctCospi6_64))).Add((step1[4]).Mul(archsimd.BroadcastInt32x4(fdctCospi26_64))))
-	out[3] = vecRound(((archsimd.Int32x4{}.Sub(step1[3])).Mul(archsimd.BroadcastInt32x4(fdctCospi26_64))).Add((step1[4]).Mul(archsimd.BroadcastInt32x4(fdctCospi6_64))))
-	out[11] = vecRound(((archsimd.Int32x4{}.Sub(step1[2])).Mul(archsimd.BroadcastInt32x4(fdctCospi10_64))).Add((step1[5]).Mul(archsimd.BroadcastInt32x4(fdctCospi22_64))))
-	out[7] = vecRound(((archsimd.Int32x4{}.Sub(step1[1])).Mul(archsimd.BroadcastInt32x4(fdctCospi18_64))).Add((step1[6]).Mul(archsimd.BroadcastInt32x4(fdctCospi14_64))))
-	out[15] = vecRound(((archsimd.Int32x4{}.Sub(step1[0])).Mul(archsimd.BroadcastInt32x4(fdctCospi2_64))).Add((step1[7]).Mul(archsimd.BroadcastInt32x4(fdctCospi30_64))))
+	out[1] = vecRound(pixel.MulAdd4(step1[0], archsimd.BroadcastInt32x4(fdctCospi30_64), (step1[7]).Mul(archsimd.BroadcastInt32x4(fdctCospi2_64))))
+	out[9] = vecRound(pixel.MulAdd4(step1[1], archsimd.BroadcastInt32x4(fdctCospi14_64), (step1[6]).Mul(archsimd.BroadcastInt32x4(fdctCospi18_64))))
+	out[5] = vecRound(pixel.MulAdd4(step1[2], archsimd.BroadcastInt32x4(fdctCospi22_64), (step1[5]).Mul(archsimd.BroadcastInt32x4(fdctCospi10_64))))
+	out[13] = vecRound(pixel.MulAdd4(step1[3], archsimd.BroadcastInt32x4(fdctCospi6_64), (step1[4]).Mul(archsimd.BroadcastInt32x4(fdctCospi26_64))))
+	out[3] = vecRound(pixel.MulAdd4(archsimd.Int32x4{}.Sub(step1[3]), archsimd.BroadcastInt32x4(fdctCospi26_64), (step1[4]).Mul(archsimd.BroadcastInt32x4(fdctCospi6_64))))
+	out[11] = vecRound(pixel.MulAdd4(archsimd.Int32x4{}.Sub(step1[2]), archsimd.BroadcastInt32x4(fdctCospi10_64), (step1[5]).Mul(archsimd.BroadcastInt32x4(fdctCospi22_64))))
+	out[7] = vecRound(pixel.MulAdd4(archsimd.Int32x4{}.Sub(step1[1]), archsimd.BroadcastInt32x4(fdctCospi18_64), (step1[6]).Mul(archsimd.BroadcastInt32x4(fdctCospi14_64))))
+	out[15] = vecRound(pixel.MulAdd4(archsimd.Int32x4{}.Sub(step1[0]), archsimd.BroadcastInt32x4(fdctCospi2_64), (step1[7]).Mul(archsimd.BroadcastInt32x4(fdctCospi30_64))))
 }
 
 func forwardADST4Vec(input []archsimd.Int32x4, output []archsimd.Int32x4) {
@@ -142,14 +145,14 @@ func forwardADST8Vec(input []archsimd.Int32x4, output []archsimd.Int32x4) {
 	x5 := input[4]
 	x6 := input[1]
 	x7 := input[6]
-	s0 := ((archsimd.BroadcastInt32x4(fdctCospi2_64)).Mul(x0)).Add((archsimd.BroadcastInt32x4(fdctCospi30_64)).Mul(x1))
-	s1 := ((archsimd.BroadcastInt32x4(fdctCospi30_64)).Mul(x0)).Sub((archsimd.BroadcastInt32x4(fdctCospi2_64)).Mul(x1))
-	s2 := ((archsimd.BroadcastInt32x4(fdctCospi10_64)).Mul(x2)).Add((archsimd.BroadcastInt32x4(fdctCospi22_64)).Mul(x3))
-	s3 := ((archsimd.BroadcastInt32x4(fdctCospi22_64)).Mul(x2)).Sub((archsimd.BroadcastInt32x4(fdctCospi10_64)).Mul(x3))
-	s4 := ((archsimd.BroadcastInt32x4(fdctCospi18_64)).Mul(x4)).Add((archsimd.BroadcastInt32x4(fdctCospi14_64)).Mul(x5))
-	s5 := ((archsimd.BroadcastInt32x4(fdctCospi14_64)).Mul(x4)).Sub((archsimd.BroadcastInt32x4(fdctCospi18_64)).Mul(x5))
-	s6 := ((archsimd.BroadcastInt32x4(fdctCospi26_64)).Mul(x6)).Add((archsimd.BroadcastInt32x4(fdctCospi6_64)).Mul(x7))
-	s7 := ((archsimd.BroadcastInt32x4(fdctCospi6_64)).Mul(x6)).Sub((archsimd.BroadcastInt32x4(fdctCospi26_64)).Mul(x7))
+	s0 := pixel.MulAdd4(archsimd.BroadcastInt32x4(fdctCospi2_64), x0, (archsimd.BroadcastInt32x4(fdctCospi30_64)).Mul(x1))
+	s1 := pixel.MulAdd4(archsimd.BroadcastInt32x4(fdctCospi30_64), x0, (archsimd.BroadcastInt32x4(fdctCospi2_64)).Mul(archsimd.Int32x4{}.Sub(x1)))
+	s2 := pixel.MulAdd4(archsimd.BroadcastInt32x4(fdctCospi10_64), x2, (archsimd.BroadcastInt32x4(fdctCospi22_64)).Mul(x3))
+	s3 := pixel.MulAdd4(archsimd.BroadcastInt32x4(fdctCospi22_64), x2, (archsimd.BroadcastInt32x4(fdctCospi10_64)).Mul(archsimd.Int32x4{}.Sub(x3)))
+	s4 := pixel.MulAdd4(archsimd.BroadcastInt32x4(fdctCospi18_64), x4, (archsimd.BroadcastInt32x4(fdctCospi14_64)).Mul(x5))
+	s5 := pixel.MulAdd4(archsimd.BroadcastInt32x4(fdctCospi14_64), x4, (archsimd.BroadcastInt32x4(fdctCospi18_64)).Mul(archsimd.Int32x4{}.Sub(x5)))
+	s6 := pixel.MulAdd4(archsimd.BroadcastInt32x4(fdctCospi26_64), x6, (archsimd.BroadcastInt32x4(fdctCospi6_64)).Mul(x7))
+	s7 := pixel.MulAdd4(archsimd.BroadcastInt32x4(fdctCospi6_64), x6, (archsimd.BroadcastInt32x4(fdctCospi26_64)).Mul(archsimd.Int32x4{}.Sub(x7)))
 	x0 = vecRound((s0).Add(s4))
 	x1 = vecRound((s1).Add(s5))
 	x2 = vecRound((s2).Add(s6))
@@ -162,10 +165,10 @@ func forwardADST8Vec(input []archsimd.Int32x4, output []archsimd.Int32x4) {
 	s1 = x1
 	s2 = x2
 	s3 = x3
-	s4 = ((archsimd.BroadcastInt32x4(fdctCospi8_64)).Mul(x4)).Add((archsimd.BroadcastInt32x4(fdctCospi24_64)).Mul(x5))
-	s5 = ((archsimd.BroadcastInt32x4(fdctCospi24_64)).Mul(x4)).Sub((archsimd.BroadcastInt32x4(fdctCospi8_64)).Mul(x5))
-	s6 = ((archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi24_64))).Mul(x6)).Add((archsimd.BroadcastInt32x4(fdctCospi8_64)).Mul(x7))
-	s7 = ((archsimd.BroadcastInt32x4(fdctCospi8_64)).Mul(x6)).Add((archsimd.BroadcastInt32x4(fdctCospi24_64)).Mul(x7))
+	s4 = pixel.MulAdd4(archsimd.BroadcastInt32x4(fdctCospi8_64), x4, (archsimd.BroadcastInt32x4(fdctCospi24_64)).Mul(x5))
+	s5 = pixel.MulAdd4(archsimd.BroadcastInt32x4(fdctCospi24_64), x4, (archsimd.BroadcastInt32x4(fdctCospi8_64)).Mul(archsimd.Int32x4{}.Sub(x5)))
+	s6 = pixel.MulAdd4(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi24_64)), x6, (archsimd.BroadcastInt32x4(fdctCospi8_64)).Mul(x7))
+	s7 = pixel.MulAdd4(archsimd.BroadcastInt32x4(fdctCospi8_64), x6, (archsimd.BroadcastInt32x4(fdctCospi24_64)).Mul(x7))
 	x0 = (s0).Add(s2)
 	x1 = (s1).Add(s3)
 	x2 = (s0).Sub(s2)
@@ -209,22 +212,22 @@ func forwardADST16Vec(input []archsimd.Int32x4, output []archsimd.Int32x4) {
 	x13 := input[12]
 	x14 := input[1]
 	x15 := input[14]
-	s0 := ((x0).Mul(archsimd.BroadcastInt32x4(fdctCospi1_64))).Add((x1).Mul(archsimd.BroadcastInt32x4(fdctCospi31_64)))
-	s1 := ((x0).Mul(archsimd.BroadcastInt32x4(fdctCospi31_64))).Sub((x1).Mul(archsimd.BroadcastInt32x4(fdctCospi1_64)))
-	s2 := ((x2).Mul(archsimd.BroadcastInt32x4(fdctCospi5_64))).Add((x3).Mul(archsimd.BroadcastInt32x4(fdctCospi27_64)))
-	s3 := ((x2).Mul(archsimd.BroadcastInt32x4(fdctCospi27_64))).Sub((x3).Mul(archsimd.BroadcastInt32x4(fdctCospi5_64)))
-	s4 := ((x4).Mul(archsimd.BroadcastInt32x4(fdctCospi9_64))).Add((x5).Mul(archsimd.BroadcastInt32x4(fdctCospi23_64)))
-	s5 := ((x4).Mul(archsimd.BroadcastInt32x4(fdctCospi23_64))).Sub((x5).Mul(archsimd.BroadcastInt32x4(fdctCospi9_64)))
-	s6 := ((x6).Mul(archsimd.BroadcastInt32x4(fdctCospi13_64))).Add((x7).Mul(archsimd.BroadcastInt32x4(fdctCospi19_64)))
-	s7 := ((x6).Mul(archsimd.BroadcastInt32x4(fdctCospi19_64))).Sub((x7).Mul(archsimd.BroadcastInt32x4(fdctCospi13_64)))
-	s8 := ((x8).Mul(archsimd.BroadcastInt32x4(fdctCospi17_64))).Add((x9).Mul(archsimd.BroadcastInt32x4(fdctCospi15_64)))
-	s9 := ((x8).Mul(archsimd.BroadcastInt32x4(fdctCospi15_64))).Sub((x9).Mul(archsimd.BroadcastInt32x4(fdctCospi17_64)))
-	s10 := ((x10).Mul(archsimd.BroadcastInt32x4(fdctCospi21_64))).Add((x11).Mul(archsimd.BroadcastInt32x4(fdctCospi11_64)))
-	s11 := ((x10).Mul(archsimd.BroadcastInt32x4(fdctCospi11_64))).Sub((x11).Mul(archsimd.BroadcastInt32x4(fdctCospi21_64)))
-	s12 := ((x12).Mul(archsimd.BroadcastInt32x4(fdctCospi25_64))).Add((x13).Mul(archsimd.BroadcastInt32x4(fdctCospi7_64)))
-	s13 := ((x12).Mul(archsimd.BroadcastInt32x4(fdctCospi7_64))).Sub((x13).Mul(archsimd.BroadcastInt32x4(fdctCospi25_64)))
-	s14 := ((x14).Mul(archsimd.BroadcastInt32x4(fdctCospi29_64))).Add((x15).Mul(archsimd.BroadcastInt32x4(fdctCospi3_64)))
-	s15 := ((x14).Mul(archsimd.BroadcastInt32x4(fdctCospi3_64))).Sub((x15).Mul(archsimd.BroadcastInt32x4(fdctCospi29_64)))
+	s0 := pixel.MulAdd4(x0, archsimd.BroadcastInt32x4(fdctCospi1_64), (x1).Mul(archsimd.BroadcastInt32x4(fdctCospi31_64)))
+	s1 := pixel.MulAdd4(x0, archsimd.BroadcastInt32x4(fdctCospi31_64), (x1).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi1_64))))
+	s2 := pixel.MulAdd4(x2, archsimd.BroadcastInt32x4(fdctCospi5_64), (x3).Mul(archsimd.BroadcastInt32x4(fdctCospi27_64)))
+	s3 := pixel.MulAdd4(x2, archsimd.BroadcastInt32x4(fdctCospi27_64), (x3).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi5_64))))
+	s4 := pixel.MulAdd4(x4, archsimd.BroadcastInt32x4(fdctCospi9_64), (x5).Mul(archsimd.BroadcastInt32x4(fdctCospi23_64)))
+	s5 := pixel.MulAdd4(x4, archsimd.BroadcastInt32x4(fdctCospi23_64), (x5).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi9_64))))
+	s6 := pixel.MulAdd4(x6, archsimd.BroadcastInt32x4(fdctCospi13_64), (x7).Mul(archsimd.BroadcastInt32x4(fdctCospi19_64)))
+	s7 := pixel.MulAdd4(x6, archsimd.BroadcastInt32x4(fdctCospi19_64), (x7).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi13_64))))
+	s8 := pixel.MulAdd4(x8, archsimd.BroadcastInt32x4(fdctCospi17_64), (x9).Mul(archsimd.BroadcastInt32x4(fdctCospi15_64)))
+	s9 := pixel.MulAdd4(x8, archsimd.BroadcastInt32x4(fdctCospi15_64), (x9).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi17_64))))
+	s10 := pixel.MulAdd4(x10, archsimd.BroadcastInt32x4(fdctCospi21_64), (x11).Mul(archsimd.BroadcastInt32x4(fdctCospi11_64)))
+	s11 := pixel.MulAdd4(x10, archsimd.BroadcastInt32x4(fdctCospi11_64), (x11).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi21_64))))
+	s12 := pixel.MulAdd4(x12, archsimd.BroadcastInt32x4(fdctCospi25_64), (x13).Mul(archsimd.BroadcastInt32x4(fdctCospi7_64)))
+	s13 := pixel.MulAdd4(x12, archsimd.BroadcastInt32x4(fdctCospi7_64), (x13).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi25_64))))
+	s14 := pixel.MulAdd4(x14, archsimd.BroadcastInt32x4(fdctCospi29_64), (x15).Mul(archsimd.BroadcastInt32x4(fdctCospi3_64)))
+	s15 := pixel.MulAdd4(x14, archsimd.BroadcastInt32x4(fdctCospi3_64), (x15).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi29_64))))
 	x0 = vecRound((s0).Add(s8))
 	x1 = vecRound((s1).Add(s9))
 	x2 = vecRound((s2).Add(s10))
@@ -249,14 +252,14 @@ func forwardADST16Vec(input []archsimd.Int32x4, output []archsimd.Int32x4) {
 	s5 = x5
 	s6 = x6
 	s7 = x7
-	s8 = ((x8).Mul(archsimd.BroadcastInt32x4(fdctCospi4_64))).Add((x9).Mul(archsimd.BroadcastInt32x4(fdctCospi28_64)))
-	s9 = ((x8).Mul(archsimd.BroadcastInt32x4(fdctCospi28_64))).Sub((x9).Mul(archsimd.BroadcastInt32x4(fdctCospi4_64)))
-	s10 = ((x10).Mul(archsimd.BroadcastInt32x4(fdctCospi20_64))).Add((x11).Mul(archsimd.BroadcastInt32x4(fdctCospi12_64)))
-	s11 = ((x10).Mul(archsimd.BroadcastInt32x4(fdctCospi12_64))).Sub((x11).Mul(archsimd.BroadcastInt32x4(fdctCospi20_64)))
-	s12 = ((archsimd.Int32x4{}.Sub(x12)).Mul(archsimd.BroadcastInt32x4(fdctCospi28_64))).Add((x13).Mul(archsimd.BroadcastInt32x4(fdctCospi4_64)))
-	s13 = ((x12).Mul(archsimd.BroadcastInt32x4(fdctCospi4_64))).Add((x13).Mul(archsimd.BroadcastInt32x4(fdctCospi28_64)))
-	s14 = ((archsimd.Int32x4{}.Sub(x14)).Mul(archsimd.BroadcastInt32x4(fdctCospi12_64))).Add((x15).Mul(archsimd.BroadcastInt32x4(fdctCospi20_64)))
-	s15 = ((x14).Mul(archsimd.BroadcastInt32x4(fdctCospi20_64))).Add((x15).Mul(archsimd.BroadcastInt32x4(fdctCospi12_64)))
+	s8 = pixel.MulAdd4(x8, archsimd.BroadcastInt32x4(fdctCospi4_64), (x9).Mul(archsimd.BroadcastInt32x4(fdctCospi28_64)))
+	s9 = pixel.MulAdd4(x8, archsimd.BroadcastInt32x4(fdctCospi28_64), (x9).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi4_64))))
+	s10 = pixel.MulAdd4(x10, archsimd.BroadcastInt32x4(fdctCospi20_64), (x11).Mul(archsimd.BroadcastInt32x4(fdctCospi12_64)))
+	s11 = pixel.MulAdd4(x10, archsimd.BroadcastInt32x4(fdctCospi12_64), (x11).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi20_64))))
+	s12 = pixel.MulAdd4(archsimd.Int32x4{}.Sub(x12), archsimd.BroadcastInt32x4(fdctCospi28_64), (x13).Mul(archsimd.BroadcastInt32x4(fdctCospi4_64)))
+	s13 = pixel.MulAdd4(x12, archsimd.BroadcastInt32x4(fdctCospi4_64), (x13).Mul(archsimd.BroadcastInt32x4(fdctCospi28_64)))
+	s14 = pixel.MulAdd4(archsimd.Int32x4{}.Sub(x14), archsimd.BroadcastInt32x4(fdctCospi12_64), (x15).Mul(archsimd.BroadcastInt32x4(fdctCospi20_64)))
+	s15 = pixel.MulAdd4(x14, archsimd.BroadcastInt32x4(fdctCospi20_64), (x15).Mul(archsimd.BroadcastInt32x4(fdctCospi12_64)))
 	x0 = (s0).Add(s4)
 	x1 = (s1).Add(s5)
 	x2 = (s2).Add(s6)
@@ -277,18 +280,18 @@ func forwardADST16Vec(input []archsimd.Int32x4, output []archsimd.Int32x4) {
 	s1 = x1
 	s2 = x2
 	s3 = x3
-	s4 = ((x4).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))).Add((x5).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64)))
-	s5 = ((x4).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))).Sub((x5).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64)))
-	s6 = ((archsimd.Int32x4{}.Sub(x6)).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))).Add((x7).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64)))
-	s7 = ((x6).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))).Add((x7).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64)))
+	s4 = pixel.MulAdd4(x4, archsimd.BroadcastInt32x4(fdctCospi8_64), (x5).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64)))
+	s5 = pixel.MulAdd4(x4, archsimd.BroadcastInt32x4(fdctCospi24_64), (x5).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi8_64))))
+	s6 = pixel.MulAdd4(archsimd.Int32x4{}.Sub(x6), archsimd.BroadcastInt32x4(fdctCospi24_64), (x7).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64)))
+	s7 = pixel.MulAdd4(x6, archsimd.BroadcastInt32x4(fdctCospi8_64), (x7).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64)))
 	s8 = x8
 	s9 = x9
 	s10 = x10
 	s11 = x11
-	s12 = ((x12).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))).Add((x13).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64)))
-	s13 = ((x12).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))).Sub((x13).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64)))
-	s14 = ((archsimd.Int32x4{}.Sub(x14)).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64))).Add((x15).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64)))
-	s15 = ((x14).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64))).Add((x15).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64)))
+	s12 = pixel.MulAdd4(x12, archsimd.BroadcastInt32x4(fdctCospi8_64), (x13).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64)))
+	s13 = pixel.MulAdd4(x12, archsimd.BroadcastInt32x4(fdctCospi24_64), (x13).Mul(archsimd.Int32x4{}.Sub(archsimd.BroadcastInt32x4(fdctCospi8_64))))
+	s14 = pixel.MulAdd4(archsimd.Int32x4{}.Sub(x14), archsimd.BroadcastInt32x4(fdctCospi24_64), (x15).Mul(archsimd.BroadcastInt32x4(fdctCospi8_64)))
+	s15 = pixel.MulAdd4(x14, archsimd.BroadcastInt32x4(fdctCospi8_64), (x15).Mul(archsimd.BroadcastInt32x4(fdctCospi24_64)))
 	x0 = (s0).Add(s2)
 	x1 = (s1).Add(s3)
 	x2 = (s0).Sub(s2)

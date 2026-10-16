@@ -97,6 +97,14 @@ func Filter(src []byte, ss int, dst []byte, ds, w, h, step int, taps []int16) {
 		return
 	}
 
+	if filterWide8(src, ss, dst, ds, w, h, step, taps) {
+		return
+	}
+
+	if filterNarrow8(src, ss, dst, ds, w, h, step, taps) {
+		return
+	}
+
 	if step == ss && filterVertical8(src, ss, dst, ds, w, h, taps) {
 		return
 	}
@@ -366,11 +374,11 @@ func SubpelStats(src []byte, ss int, ref []byte, rs, w, h int, fx, fy [2]int16) 
 		n = 4
 	}
 	for x := 0; x < w; x += n {
-		a := widen8(loadNPtr(unsafe.Add(sp, x), n)).Mul(x0).Add(widen8(loadNPtr(unsafe.Add(sp, x+1), n)).Mul(x1)).Add(round).ShiftAllRight(7)
+		a := filterShift7(widen8(loadNPtr(unsafe.Add(sp, x), n)).Mul(x0).Add(widen8(loadNPtr(unsafe.Add(sp, x+1), n)).Mul(x1)).Add(round))
 		for y := range h {
 			p := unsafe.Add(sp, (y+1)*ss+x)
-			b := widen8(loadNPtr(p, n)).Mul(x0).Add(widen8(loadNPtr(unsafe.Add(p, 1), n)).Mul(x1)).Add(round).ShiftAllRight(7)
-			v := a.Mul(y0).Add(b.Mul(y1)).Add(round).ShiftAllRight(7)
+			b := filterShift7(widen8(loadNPtr(p, n)).Mul(x0).Add(widen8(loadNPtr(unsafe.Add(p, 1), n)).Mul(x1)).Add(round))
+			v := filterShift7(a.Mul(y0).Add(b.Mul(y1)).Add(round))
 			a = b
 			d := v.Sub(widen8(loadNPtr(unsafe.Add(rp, y*rs+x), n)))
 			lo, hi := d.ExtendLo4ToInt32(), high4(d)

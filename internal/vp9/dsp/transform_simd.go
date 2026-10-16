@@ -7,10 +7,8 @@ import (
 	"simd/archsimd"
 )
 
-func vecRound(v archsimd.Int32x4) archsimd.Int32x4 {
-	return v.Add(archsimd.BroadcastInt32x4(dctConstRounding)).ShiftAllRight(dctConstBits)
-}
-func vecWrap(v archsimd.Int32x4) archsimd.Int32x4 { return v.ShiftAllLeft(16).ShiftAllRight(16) }
+func vecRound(v archsimd.Int32x4) archsimd.Int32x4 { return pixel.RoundTransform4(v) }
+func vecWrap(v archsimd.Int32x4) archsimd.Int32x4  { return pixel.WrapTransform4(v) }
 func inverseNetwork(in, out []archsimd.Int32x4, n int, adst bool) {
 	switch n {
 	case 4:
@@ -40,6 +38,9 @@ func inverseTransformGo(input []int16, dst []byte, stride, n, rows, tx int) bool
 		return false
 	}
 	if tx == 0 {
+		if inverseDCTWideGo(input, dst, stride, n, rows) {
+			return true
+		}
 		switch n {
 		case 4:
 			return inverseDCT4Go(input, dst, stride, rows)
