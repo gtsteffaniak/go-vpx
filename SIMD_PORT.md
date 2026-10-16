@@ -460,7 +460,7 @@ uses stride increments and integer multiply-adds: 16x16 improves from 72.7
 to 50.5 ns, 64x64 from 1,138 to 770 ns. All kernels report zero allocations.
 
 The EPYC 7763 profile exposed legacy SSE register moves while AVX2 upper
-halves remained live. Go1.27.2's archsimd explicitly provides
+halves remained live. Go 1.27.2's archsimd explicitly provides
 ClearAVXUpperBits for this boundary. Wide kernels now clear on scalar/memory
 return; loop-filter stores hand off six VEX memory stores to a 128-bit
 callee which clears before loading them. Packing uses a VEX zero load.
@@ -489,7 +489,7 @@ ordinary thresholds. The full int16 path retains the255-threshold boundary.
 Native ARM and Rosetta AVX2 pixel/DSP/encoder suites pass; native x64 timing
 of this alternative is pending.
 
-Six fresh ARM encoder pairs improve VP8720p from12.443 to11.202ms/frame
+Six fresh ARM encoder pairs improve VP8 720p from12.443 to11.202ms/frame
 (-10.0%) versus6a7b0345. VP9 varies+0.8% at320x180 and+0.6% at720p; those
 small differences do not establish an improvement. Counts, quantizers and
 allocations match in every sample. The original ARM assembly baseline
@@ -929,3 +929,35 @@ purego (112.845s), five-package race/checkptr1, strict encoder bytes (34.302s),
 18/18 parity report, no-assembly audit, all six selection modes, formatting
 and exact-source PGO checks. The preceding c49e9d60 hosted and native jobs
 are both green.
+
+### Paired residual packets and safe bounds elimination
+
+VP8 gather now interleaves two four-coefficient rows per vector store and
+executes two packets per four-row block group. This halves stores for both
+luma and chroma, retaining exact scan order and overlapping read-row support.
+Checking output size once with a bounded block index lets Go remove repeated
+output bounds checks, confirmed by BCE diagnostics. No unsafe operations or
+dependencies are added.
+
+On native M4 Max, six fresh final triples improve 16x16 from 40.230 to 16.010 ns
+(-60.20%) and 8x8 from 18.760 to 8.084 ns (-56.91%), all zero allocations.
+VP8 720p improves 8.574611 to 8.406684 ms (-1.958%), every pair faster
+(0.716–4.326%). The stronger four-row alternative already improves 1.273%;
+the final design's additional 0.694% public change is mixed, while both kernels
+improve clearly. All 84 public design/control samples preserve their full
+non-timing/allocation fields. VP9 control changes are mixed and establish
+no stable gain. Five ARM/Rosetta packages and 80 new repeated/overlap cases
+pass; a live profile confirms Gather. Native x64 timing remains pending.
+[Raw designs, fresh comparisons, codegen and parity evidence](benchmarks/baselines/go127-simd-arm64/2026-10-16-paired-gather)
+retain the results; PGO was refreshed only after final source freeze.
+
+Final gather gates pass full native (45.872s), focused purego pixel coverage,
+five-package race/checkptr1, strict encoder bytes (34.267s), 18/18 report,
+no-assembly audit, all six selection modes, formatting and exact-source PGO.
+Production purego sources are unchanged from the preceding full passing suite.
+
+A final six-pair native ARM assembly control measures original assembly
+6.651471 ms versus current 8.420126 ms/input: 26.590% more time remains
+(all six pairs slower, 19.265–27.910%). All 12 control samples preserve every
+recorded non-timing/allocation field. This is the current measured ARM VP8
+limit; the kernel/parent gains do not establish assembly parity.
