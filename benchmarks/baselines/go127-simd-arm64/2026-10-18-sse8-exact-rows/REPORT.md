@@ -82,3 +82,12 @@ confirm it independently of those exploratory measurements. Generated code
 is diagnostic evidence, never a substitute for timing. No competing local
 Go builds/tests/profiles ran during native measurements. README files are
 untouched; experiment records belong here.
+
+Successor integration: rebased onto PR #37's AMD widened-row repair
+f3a02aee81979d0c822f5814343f2287d9d86194 before native submission. SSE source
+is unchanged, and all 228 ARM SSE8 instruction words exactly match the timed
+prototype. Combined AMD SSE/subpixel checkptr correctness passes under Rosetta;
+PGO/fingerprint/noasm/SIMD-selection/pre-commit gates pass again. The rebased
+validation archive preserves all logs and source hashes. Native x64 CI compares
+this successor with that exact repaired parent; neither a cross-CPU comparison
+nor the old uncorrected AMD vertical path is substituted as its baseline.
