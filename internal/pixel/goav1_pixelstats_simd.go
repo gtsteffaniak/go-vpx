@@ -75,6 +75,8 @@ func pixelStatsQuads4(src []byte, ss int, ref []byte, rs, h int) (uint32, int32)
 
 func pixelStatsSIMD(src []byte, srcStride int, ref []byte, refStride int, w, h int) (sse uint32, sum int32) {
 	switch {
+	case narrowPixelStats16 && w == 16 && h > 0 && h <= 64:
+		return pixelStats16Narrow(src, srcStride, ref, refStride, h)
 	case w == 4 && h%4 == 0:
 		return pixelStatsQuads4(src, srcStride, ref, refStride, h)
 	case w == 8:

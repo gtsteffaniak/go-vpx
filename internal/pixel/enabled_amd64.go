@@ -13,3 +13,6 @@ const internalVerticalGeneric = true
 
 // Retain the independently measured x64 edge paths.
 const internalFused = false
+
+const narrowPixelStats16 = false
+const transposeLFColumns16 = false

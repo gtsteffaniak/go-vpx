@@ -11,3 +11,6 @@ const internalVerticalGeneric = false
 
 // M4 measurements select three-edge row/column reuse.
 const internalFused = true
+
+const narrowPixelStats16 = true
+const transposeLFColumns16 = true

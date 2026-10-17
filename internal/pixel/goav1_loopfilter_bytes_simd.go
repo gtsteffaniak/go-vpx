@@ -73,6 +73,10 @@ func joinLFBytes(a, b archsimd.Uint8x16) archsimd.Uint8x16 {
 	return a.ReshapeToUint64s().InterleaveLo(b.ReshapeToUint64s()).ReshapeToUint8s()
 }
 func loadLFColumns[Size [4]byte | [8]byte](p []byte, off, pitch, lanes int) (archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16, archsimd.Uint8x16) {
+	var size Size
+	if transposeLFColumns16 && lanes == 16 && unsafe.Sizeof(size) == 8 {
+		return loadLFColumns16(p, off, pitch)
+	}
 	a0, a1, a2, a3, a4, a5, a6, a7 := loadLFColumnTile[Size](p, off, pitch)
 	if lanes == 8 {
 		return a0, a1, a2, a3, a4, a5, a6, a7

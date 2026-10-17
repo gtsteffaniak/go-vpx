@@ -982,3 +982,63 @@ the old assembly fixture includes its required class walk. Encoder timing
 remains the acceptance criterion, since production callers can skip some
 classes after EOB. No speedup or regression fix is claimed before the
 fresh native run. See `benchmarks/baselines/go127-simd-amd64/2026-10-17-fp-class-indices`.
+
+## ARM variance and transpose follow-up (2026-10-17)
+
+Six fresh balanced native M4 Max comparisons against611f47fe improve
+VP8 720p8.621926 ->8.320135ms/frame (-3.500%), every pair3.208–4.365%
+faster. All non-timing fields match, including zero allocations. The same
+run measures original assembly7.065953ms/frame: SIMD is still17.750%
+slower, and every assembly/current pair remains slower. The parent is
+22.021% above assembly in this run; the older26.590% gap is separate
+evidence and its full change cannot be attributed to this optimization.
+VP9 changes are mixed, so no stable VP9 encoder gain is claimed.
+
+The ARM sixteen-column variance kernel keeps signed sums in int16 for
+1..64rows under a32640-per-lane bound, removes per-row bounds checks only
+after overflow-safe final-row proofs, and reduces in SIMD registers.
+Matched public B.Loop h1..h64 cases improve24.9–45.5%; h16 improves40.24%.
+The 16x8 loop-filter transpose pairs rows eight apart and uses24 TRN
+instructions, replacing two8x8 transposes and eight joins. Reads remain
+exactly eight bytes per row. Independent numeric/lane/minimal-buffer tests,
+race/checkptr, native-required Rosetta correctness and fallback tests pass.
+The selected x64 variance bodies are instruction-identical; the column
+helper differs only in three reordered argument-save instructions, with
+unchanged instruction count/arithmetic. Native x64 checks remain required.
+
+Separate macro-filter specializations, a3.5x direct-kernel denoiser gain,
+and two/four-accumulator full-plane SSE designs were rejected or left
+experimental because encoder results were mixed. Fresh results, design
+controls and exact generated-code evidence are under
+`benchmarks/baselines/go127-simd-arm64/2026-10-17-variance-transpose`.
+
+
+### Native FP follow-up at 611f47fe
+
+[Hosted CI](https://github.com/thesyncim/govpx/actions/runs/39028739727)
+and the [native three-way run](https://github.com/thesyncim/govpx/actions/runs/39028739721)
+both pass on exact head `611f47fe`. The native EPYC 7763 run retains all six
+variant permutations, PGO off and the same original ASM / parent `63c2f188`
+controls. VP9 320p improves 4.427351 to 4.360532 ms (-1.509% median), with
+five of six pairs faster (-2.510..+0.155% time). The paired mean is -1.270%
+with a descriptive t95 interval [-2.253,-0.288]%; six balanced rounds are
+limited evidence and do not establish a universal code-layout or CPU fix.
+VP9 720p improves 2.192% by medians, but paired changes cross zero. VP8's
++0.854% median control change also has mixed pairs and is not attributed
+to this VP9-only kernel change. Current takes 37.915% / 45.985% less VP9
+320p / 720p time and 3.030% less VP8 time than same-run ASM, all six pairs.
+
+Nine equivalent full-class-output composite fixtures improve 2.043–4.258%
+over parent medians, while the no-class control changes -0.579% with mixed
+pairs and still takes 53.477% more time than bare ASM. Full class output
+can require more work than zero/EOB-limited production callers; the public
+encoder measurements remain the acceptance evidence. Every one of the 75
+kernel cases has six samples per variant with zero allocations. All 22
+non-timing semantic/configuration fields and allocations match across all
+18 samples per public workload and across corresponding profile runs.
+There is no allocation outlier in this run. Separate short profiles confirm
+the quantizer remains live; unchanged scalar-DCT controls show timing
+variation, so a universal regression fix is not claimed. CPU-specific EPYC
+9V45 VP8 and ARM ASM gaps remain open. All 85 raw files and complete analysis
+are preserved in
+[the 611f evidence folder](benchmarks/baselines/go127-simd-amd64/2026-10-17-611f47fe).
