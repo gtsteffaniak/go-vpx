@@ -32,7 +32,7 @@ func quantizeFPBlockSIMD(coeff, iscan, qcoeff, dqcoeff []int16, n int, r, q, d [
 		t.Mul(vd).Store(dqcoeff[i:])
 		last = last.Max(archsimd.LoadInt16x8(iscan[i:]).Masked(t.NotEqual(zero)))
 		if classes != nil {
-			indices := packBytes(magnitude.Min(archsimd.BroadcastInt16x8(11)))
+			indices := fpClassIndices(magnitude.Min(archsimd.BroadcastInt16x8(11)))
 			storeBytes8(classes[i:], permute16(lut, indices))
 		}
 	}

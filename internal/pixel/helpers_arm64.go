@@ -198,3 +198,6 @@ func vp8MulHighU16(a, b archsimd.Uint16x8) archsimd.Uint16x8 {
 	hi := a.HiToLo().MulWidenLo(b.HiToLo()).ReshapeToUint16s()
 	return lo.ConcatOdd(hi)
 }
+
+// ARM already narrows with one native saturated instruction.
+func fpClassIndices(v archsimd.Int16x8) archsimd.Uint8x16 { return v.SaturateToUint8() }

@@ -961,3 +961,24 @@ A final six-pair native ARM assembly control measures original assembly
 (all six pairs slower, 19.265–27.910%). All 12 control samples preserve every
 recorded non-timing/allocation field. This is the current measured ARM VP8
 limit; the kernel/parent gains do not establish assembly parity.
+
+## VP9 x64 class-index follow-up (2026-10-17)
+
+The previous native EPYC7763 run left VP9 320p 0.48% slower than its
+parent despite identical VP9 instruction bodies. A VP9-only linked control
+is byte-identical; mixed-codec link layout is an investigation lead, not an
+established cause. This follow-up improves actual encoder-reachable work:
+the quantizer already proves token LUT indices are in [0,11], so x64 now
+extracts their low bytes without the general pixel saturation clamps.
+Go1.27.2 removes five redundant instructions per eight-coefficient class
+packet. The ARM quantizer remains byte-identical. No ISA requirement,
+public contract, dependency, or fallback changes.
+
+The independent quantizer oracle and 144 mixed-lane index packets pass on
+ARM and under Rosetta; experiment-off and purego package suites pass.
+Native x64 performance is pending. Ten identical public B.Loop fixtures
+measure quantization, EOB and every raster class on all three references;
+the old assembly fixture includes its required class walk. Encoder timing
+remains the acceptance criterion, since production callers can skip some
+classes after EOB. No speedup or regression fix is claimed before the
+fresh native run. See `benchmarks/baselines/go127-simd-amd64/2026-10-17-fp-class-indices`.

@@ -107,3 +107,9 @@ func lfShift3(v archsimd.Int16x8) archsimd.Int16x8 { return v.ShiftAllRight(3) }
 func lfShift1(v archsimd.Int16x8) archsimd.Int16x8 { return v.ShiftAllRight(1) }
 
 func vp8MulHighU16(a, b archsimd.Uint16x8) archsimd.Uint16x8 { return a.MulHigh(b) }
+
+// fpClassIndices receives magnitudes already clamped to [0,11]. Their low
+// bytes are exact LUT indices; the general pixel clamp is unnecessary here.
+func fpClassIndices(v archsimd.Int16x8) archsimd.Uint8x16 {
+	return v.ToBits().ReshapeToUint8s().PermuteOrZero(archsimd.LoadInt8x16Array(&packByteIndices))
+}
