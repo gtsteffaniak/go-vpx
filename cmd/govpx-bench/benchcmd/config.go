@@ -61,6 +61,7 @@ func registerBenchFlags(fs *flag.FlagSet, cfg *benchConfig, opts *benchCLIOption
 	fs.BoolVar(&cfg.PhaseTiming, "phase-timing", false, "include opt-in govpx encoder phase timing in the report")
 	fs.StringVar(&cfg.LibvpxVpxenc, "libvpx-vpxenc", "", "optional libvpx vpxenc path for VP8 reference comparison")
 	fs.StringVar(&cfg.LibvpxVpxencVP9, "libvpx-vpxenc-vp9", "", "optional libvpx vpxenc-vp9 path for VP9 reference comparison")
+	fs.BoolVar(&cfg.ReferenceFirst, "reference-first", false, "run the configured libvpx encode reference before govpx to balance comparison order")
 	fs.StringVar(&cfg.LibvpxVpxencVP9Stats, "libvpx-vpxenc-vp9-stats", "", "optional libvpx vpxenc-vp9-callstats path for VP9 phase diagnostics")
 	fs.StringVar(&cfg.LibvpxOracle, "libvpx-oracle", "", "optional libvpx checksum oracle path for decoder reference timing")
 	fs.StringVar(&cfg.Codec, "codec", codecVP8, "codec to benchmark: vp8 or vp9")

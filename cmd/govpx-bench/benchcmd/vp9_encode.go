@@ -53,6 +53,14 @@ func runVP9BenchmarkInternal(cfg benchConfig, source func(int, int, int) govpx.I
 		frames[i] = source(cfg.Width, cfg.Height, i)
 		ycbcr[i] = imageToYCbCr(frames[i])
 	}
+	var reference *referenceReport
+	if cfg.ReferenceFirst && vp9LibvpxEncoderPath(cfg) != "" {
+		ref, err := runLibvpxVP9Benchmark(cfg, frames, deadlineName)
+		if err != nil {
+			return benchReport{}, err
+		}
+		reference = &ref
+	}
 
 	packet := make([]byte, max(4096, cfg.Width*cfg.Height*6))
 
@@ -250,12 +258,16 @@ func runVP9BenchmarkInternal(cfg benchConfig, source func(int, int, int) govpx.I
 		Options:       benchSummary(deadlineName),
 	}
 	if vp9LibvpxEncoderPath(cfg) != "" {
-		reference, err := runLibvpxVP9Benchmark(cfg, frames, deadlineName)
-		if err != nil {
-			return benchReport{}, err
+		if reference == nil {
+			ref, err := runLibvpxVP9Benchmark(cfg, frames, deadlineName)
+			if err != nil {
+				return benchReport{}, err
+			}
+			reference = &ref
 		}
-		report.Reference = &reference
-		report.Comparison = buildComparisonReport(report, reference)
+		report.Reference = reference
+		report.ReferenceFirst = cfg.ReferenceFirst
+		report.Comparison = buildComparisonReport(report, *reference)
 	}
 	if stats := phaseStats.report(); stats != nil {
 		report.PhaseNS = stats

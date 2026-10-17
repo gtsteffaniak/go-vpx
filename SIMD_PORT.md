@@ -1042,3 +1042,42 @@ variation, so a universal regression fix is not claimed. CPU-specific EPYC
 9V45 VP8 and ARM ASM gaps remain open. All 85 raw files and complete analysis
 are preserved in
 [the 611f evidence folder](benchmarks/baselines/go127-simd-amd64/2026-10-17-611f47fe).
+
+
+### Native x64 control at ARM checkpoint 211125e5
+
+[Hosted CI](https://github.com/thesyncim/govpx/actions/runs/39029805350)
+and the [native control](https://github.com/thesyncim/govpx/actions/runs/39029805450)
+both pass on exact head `211125e5`. Native EPYC 7763, Go 1.27.2, AVX2,
+PGO off and six balanced permutations compare ASM / parent `611f47fe` /
+current. VP9 320p changes 4.344040 to 4.337680 ms (-0.146%), VP8 720p
+22.197201 to 22.124264 ms (-0.329%), and VP9 720p 32.569408 to 32.311997 ms
+(-0.790%). Every parent/current paired range crosses zero; no new x64 gain
+is attributed to the ARM checkpoint. Same-run ASM comparisons use 38.480%
+less VP9 320p time, 5.020% less VP8 time and 46.120% less VP9 720p time,
+with every assembly/current pair faster. All 22 recorded non-timing
+semantic/configuration fields and allocations agree across all 18 public
+samples and corresponding profiles. All 75 kernel cases retain six samples
+per variant with zero allocations. CPU-specific EPYC 9V45 VP8 and ARM gaps
+remain open; cross-job absolute times do not isolate improvements.
+[All 85 raw files and analysis](benchmarks/baselines/go127-simd-amd64/2026-10-17-211125e5)
+are preserved with the passing exact-head status.
+
+
+### Optimized upstream libvpx baseline
+
+The benchmark now supports `-reference-first` and a six-round, alternating-order
+comparison with pristine optimized libvpx v1.16.0, pinned to peeled commit
+`1024874c5919305883187e2953de8fcb4c3d7fa6`. A separate native x64 CI job
+builds upstream assembly/intrinsics and records source/configuration hashes,
+CPU dispatch, codec-internal timing, wall overhead, controls and decoded quality.
+
+On Apple M4 Max, codec checkpoint `211125e5` with the new order harness and PGO
+off takes 8.471075 ms/input for adaptive VP8 720p versus C 5.115767 ms
+(+65.59%), and 12.588807 ms for VP9 720p versus C 4.842000 ms (+159.99%).
+All six paired comparisons show a remaining C gap. VP8 measured quality, payload
+and frame/drop counts match; VP9 quality and output differ slightly, so equivalent
+work is not assumed. Fixed-speed VP8 and VP9 320p controls, complete quality
+results, timing contracts and raw samples are preserved in the
+[ARM libvpx evidence](benchmarks/baselines/go127-simd-arm64/2026-10-17-libvpx).
+These C results are distinct from comparisons against the removed Go assembly.
