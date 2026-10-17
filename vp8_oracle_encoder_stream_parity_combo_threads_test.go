@@ -17,7 +17,10 @@ import (
 // The base matrix pins Threads alone or TokenPartitions alone at
 // these sizes, but never both together. With both flags non-zero the
 // row workers and the per-partition writer are active simultaneously,
-// so this cross product is the natural unifying probe.
+// so this cross product is the natural unifying probe. Realtime cpu-used=0
+// invokes libvpx's wall-clock speed adaptation and cannot be a stable byte
+// oracle on a shared CI runner. Pin its cold-start/floor speed explicitly
+// with cpu-used=-4 while retaining the separate fixed -3 speed lane.
 func TestVP8OracleEncoderStreamByteParityComboThreadsTokens(t *testing.T) {
 	vp8test.RequireOracle(t, "encoder stream byte-parity gate")
 	vpxencOracle := vp8test.VpxencOracle(t)
@@ -47,12 +50,12 @@ func TestVP8OracleEncoderStreamByteParityComboThreadsTokens(t *testing.T) {
 		extraArgs       []string
 	}{
 		// panning-128x128 cross product. 8 combos.
-		{name: "threads2-tokens1-panning128-cpu0", deadline: DeadlineRealtime, cpuUsed: 0, fx: panning128, threads: 2, tokenPartitions: 1, extraArgs: []string{"--threads=2", "--token-parts=1"}},
-		{name: "threads2-tokens2-panning128-cpu0", deadline: DeadlineRealtime, cpuUsed: 0, fx: panning128, threads: 2, tokenPartitions: 2, extraArgs: []string{"--threads=2", "--token-parts=2"}},
-		{name: "threads2-tokens3-panning128-cpu0", deadline: DeadlineRealtime, cpuUsed: 0, fx: panning128, threads: 2, tokenPartitions: 3, extraArgs: []string{"--threads=2", "--token-parts=3"}},
-		{name: "threads4-tokens1-panning128-cpu0", deadline: DeadlineRealtime, cpuUsed: 0, fx: panning128, threads: 4, tokenPartitions: 1, extraArgs: []string{"--threads=4", "--token-parts=1"}},
-		{name: "threads4-tokens2-panning128-cpu0", deadline: DeadlineRealtime, cpuUsed: 0, fx: panning128, threads: 4, tokenPartitions: 2, extraArgs: []string{"--threads=4", "--token-parts=2"}},
-		{name: "threads4-tokens3-panning128-cpu0", deadline: DeadlineRealtime, cpuUsed: 0, fx: panning128, threads: 4, tokenPartitions: 3, extraArgs: []string{"--threads=4", "--token-parts=3"}},
+		{name: "threads2-tokens1-panning128-cpu-4", deadline: DeadlineRealtime, cpuUsed: -4, fx: panning128, threads: 2, tokenPartitions: 1, extraArgs: []string{"--threads=2", "--token-parts=1"}},
+		{name: "threads2-tokens2-panning128-cpu-4", deadline: DeadlineRealtime, cpuUsed: -4, fx: panning128, threads: 2, tokenPartitions: 2, extraArgs: []string{"--threads=2", "--token-parts=2"}},
+		{name: "threads2-tokens3-panning128-cpu-4", deadline: DeadlineRealtime, cpuUsed: -4, fx: panning128, threads: 2, tokenPartitions: 3, extraArgs: []string{"--threads=2", "--token-parts=3"}},
+		{name: "threads4-tokens1-panning128-cpu-4", deadline: DeadlineRealtime, cpuUsed: -4, fx: panning128, threads: 4, tokenPartitions: 1, extraArgs: []string{"--threads=4", "--token-parts=1"}},
+		{name: "threads4-tokens2-panning128-cpu-4", deadline: DeadlineRealtime, cpuUsed: -4, fx: panning128, threads: 4, tokenPartitions: 2, extraArgs: []string{"--threads=4", "--token-parts=2"}},
+		{name: "threads4-tokens3-panning128-cpu-4", deadline: DeadlineRealtime, cpuUsed: -4, fx: panning128, threads: 4, tokenPartitions: 3, extraArgs: []string{"--threads=4", "--token-parts=3"}},
 		// Same cross at cpu_used=-3 (the slower realtime preset that
 		// exercises more of the picker).
 		{name: "threads2-tokens2-panning128-cpu-3", deadline: DeadlineRealtime, cpuUsed: -3, fx: panning128, threads: 2, tokenPartitions: 2, extraArgs: []string{"--threads=2", "--token-parts=2"}},
@@ -60,12 +63,12 @@ func TestVP8OracleEncoderStreamByteParityComboThreadsTokens(t *testing.T) {
 		{name: "threads8-tokens3-panning128-cpu-3", deadline: DeadlineRealtime, cpuUsed: -3, fx: panning128, threads: 8, tokenPartitions: 3, extraArgs: []string{"--threads=8", "--token-parts=3"}},
 
 		// splitmv-96x96 cross product. 6 combos.
-		{name: "threads2-tokens1-splitmv96-cpu0", deadline: DeadlineRealtime, cpuUsed: 0, fx: splitmv96, threads: 2, tokenPartitions: 1, extraArgs: []string{"--threads=2", "--token-parts=1"}},
-		{name: "threads2-tokens2-splitmv96-cpu0", deadline: DeadlineRealtime, cpuUsed: 0, fx: splitmv96, threads: 2, tokenPartitions: 2, extraArgs: []string{"--threads=2", "--token-parts=2"}},
-		{name: "threads2-tokens3-splitmv96-cpu0", deadline: DeadlineRealtime, cpuUsed: 0, fx: splitmv96, threads: 2, tokenPartitions: 3, extraArgs: []string{"--threads=2", "--token-parts=3"}},
-		{name: "threads4-tokens2-splitmv96-cpu0", deadline: DeadlineRealtime, cpuUsed: 0, fx: splitmv96, threads: 4, tokenPartitions: 2, extraArgs: []string{"--threads=4", "--token-parts=2"}},
-		{name: "threads4-tokens3-splitmv96-cpu0", deadline: DeadlineRealtime, cpuUsed: 0, fx: splitmv96, threads: 4, tokenPartitions: 3, extraArgs: []string{"--threads=4", "--token-parts=3"}},
-		{name: "threads8-tokens3-splitmv96-cpu0", deadline: DeadlineRealtime, cpuUsed: 0, fx: splitmv96, threads: 8, tokenPartitions: 3, extraArgs: []string{"--threads=8", "--token-parts=3"}},
+		{name: "threads2-tokens1-splitmv96-cpu-4", deadline: DeadlineRealtime, cpuUsed: -4, fx: splitmv96, threads: 2, tokenPartitions: 1, extraArgs: []string{"--threads=2", "--token-parts=1"}},
+		{name: "threads2-tokens2-splitmv96-cpu-4", deadline: DeadlineRealtime, cpuUsed: -4, fx: splitmv96, threads: 2, tokenPartitions: 2, extraArgs: []string{"--threads=2", "--token-parts=2"}},
+		{name: "threads2-tokens3-splitmv96-cpu-4", deadline: DeadlineRealtime, cpuUsed: -4, fx: splitmv96, threads: 2, tokenPartitions: 3, extraArgs: []string{"--threads=2", "--token-parts=3"}},
+		{name: "threads4-tokens2-splitmv96-cpu-4", deadline: DeadlineRealtime, cpuUsed: -4, fx: splitmv96, threads: 4, tokenPartitions: 2, extraArgs: []string{"--threads=4", "--token-parts=2"}},
+		{name: "threads4-tokens3-splitmv96-cpu-4", deadline: DeadlineRealtime, cpuUsed: -4, fx: splitmv96, threads: 4, tokenPartitions: 3, extraArgs: []string{"--threads=4", "--token-parts=3"}},
+		{name: "threads8-tokens3-splitmv96-cpu-4", deadline: DeadlineRealtime, cpuUsed: -4, fx: splitmv96, threads: 8, tokenPartitions: 3, extraArgs: []string{"--threads=8", "--token-parts=3"}},
 		{name: "threads2-tokens3-splitmv96-cpu-3", deadline: DeadlineRealtime, cpuUsed: -3, fx: splitmv96, threads: 2, tokenPartitions: 3, extraArgs: []string{"--threads=2", "--token-parts=3"}},
 	}
 

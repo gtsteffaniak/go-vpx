@@ -1,8 +1,9 @@
-//go:build (!arm64 && !amd64) || purego
-
 package dsp
 
-import "unsafe"
+import (
+	"github.com/thesyncim/govpx/internal/pixel"
+	"unsafe"
+)
 
 // Pure-Go fallback for the non-16x16 variance block kernels on architectures
 // without a SIMD port. Mirrors libvpx v1.16.0 vpx_dsp/variance.c semantics;
@@ -10,6 +11,11 @@ import "unsafe"
 // fully generic fallback.
 
 func varianceBlockSized(src []byte, srcStride int, ref []byte, refStride int, width, height int) (int, int) {
+	if pixel.Enabled {
+		sum, sse := pixel.Stats(src, srcStride, ref, refStride, width, height)
+		return sum, int(sse)
+	}
+
 	switch width {
 	case 16:
 		return varianceBlock16xNScalar(src, srcStride, ref, refStride, height)
@@ -25,17 +31,15 @@ func varianceBlockSized(src []byte, srcStride int, ref []byte, refStride int, wi
 // VarianceBlock8x8PtrFast is the pointer-form fallback used when callers
 // have already validated the 8x8 window is in-bounds.
 func VarianceBlock8x8PtrFast(src *byte, srcStride int, ref *byte, refStride int) (int, int) {
-	return varianceBlock8xNPtrScalar(src, srcStride, ref, refStride, 8)
+	return variancePtr(src, srcStride, ref, refStride, 8, 8)
 }
 
 func sse8x8PtrFast(src *byte, srcStride int, ref *byte, refStride int) int {
-	_, sse := VarianceBlock8x8PtrFast(src, srcStride, ref, refStride)
-	return sse
+	return int(pixel.SSE8(unsafe.Slice(src, 7*srcStride+8), srcStride, unsafe.Slice(ref, 7*refStride+8), refStride, 8))
 }
 
 func SSE16xNPtrFast(src *byte, srcStride int, ref *byte, refStride int, height int) int {
-	_, sse := varianceBlock16xNPtrScalar(src, srcStride, ref, refStride, height)
-	return sse
+	return int(pixel.SSE16(unsafe.Slice(src, (height-1)*srcStride+16), srcStride, unsafe.Slice(ref, (height-1)*refStride+16), refStride, height))
 }
 
 func varianceBlock16xNPtrScalar(src *byte, srcStride int, ref *byte, refStride int, height int) (int, int) {
@@ -115,4 +119,9 @@ func varianceBlock4xNScalar(src []byte, srcStride int, ref []byte, refStride int
 		sse += d0*d0 + d1*d1 + d2*d2 + d3*d3
 	}
 	return sum, sse
+}
+
+func variancePtr(src *byte, ss int, ref *byte, rs, w, h int) (int, int) {
+	sum, sse := pixel.Stats(unsafe.Slice(src, (h-1)*ss+w), ss, unsafe.Slice(ref, (h-1)*rs+w), rs, w, h)
+	return sum, int(sse)
 }

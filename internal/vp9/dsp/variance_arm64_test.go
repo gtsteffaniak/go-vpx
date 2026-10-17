@@ -3,9 +3,9 @@
 package dsp
 
 import (
+	"github.com/thesyncim/govpx/internal/pixel"
 	"math/rand/v2"
 	"testing"
-	"unsafe"
 )
 
 var varianceKernelBenchSink VarianceStats
@@ -20,63 +20,57 @@ func benchmarkVarianceKernel(b *testing.B, w, h int, dot bool) {
 		src[i] = uint8(r.UintN(256))
 		ref[i] = uint8(r.UintN(256))
 	}
-	srcPtr := unsafe.SliceData(src[off*stride+off:])
-	refPtr := unsafe.SliceData(ref[off*stride+off:])
 	b.ResetTimer()
 	var sum int32
 	var sse uint32
 	for i := 0; i < b.N; i++ {
 		if dot {
-			if w == 16 {
-				varianceDot16xNNEON(srcPtr, stride, refPtr, stride, h, &sum, &sse)
-			} else {
-				varianceDotChunksNEON(srcPtr, stride, refPtr, stride, h, w/16, &sum, &sse)
-			}
-		} else if w == 16 {
-			varianceBlock16xNNEON(srcPtr, stride, refPtr, stride, h, &sum, &sse)
+			su, se := pixel.Stats(src[off*stride+off:], stride, ref[off*stride+off:], stride, w, h)
+			sum, sse = int32(su), se
 		} else {
-			varianceBlock16ChunksNEON(srcPtr, stride, refPtr, stride, h, w/16, &sum, &sse)
+			sse0, sum0 := computeVariance(src, off*stride+off, stride, ref, off*stride+off, stride, w, h)
+			sum, sse = int32(sum0), sse0
 		}
 	}
 	varianceKernelBenchSink = varianceStatsFromSumSSE(sum, sse, w, h)
 }
 
-func BenchmarkVP9VarianceKernels16x16Base(b *testing.B) {
+func BenchmarkVP9VarianceKernels16x16Scalar(b *testing.B) {
 	benchmarkVarianceKernel(b, 16, 16, false)
 }
 
-func BenchmarkVP9VarianceKernels16x16Dot(b *testing.B) {
+func BenchmarkVP9VarianceKernels16x16GoSIMD(b *testing.B) {
 	benchmarkVarianceKernel(b, 16, 16, true)
 }
 
-func BenchmarkVP9VarianceKernels32x16Base(b *testing.B) {
+func BenchmarkVP9VarianceKernels32x16Scalar(b *testing.B) {
 	benchmarkVarianceKernel(b, 32, 16, false)
 }
 
-func BenchmarkVP9VarianceKernels32x16Dot(b *testing.B) {
+func BenchmarkVP9VarianceKernels32x16GoSIMD(b *testing.B) {
 	benchmarkVarianceKernel(b, 32, 16, true)
 }
 
-func BenchmarkVP9VarianceKernels32x32Base(b *testing.B) {
+func BenchmarkVP9VarianceKernels32x32Scalar(b *testing.B) {
 	benchmarkVarianceKernel(b, 32, 32, false)
 }
 
-func BenchmarkVP9VarianceKernels32x32Dot(b *testing.B) {
+func BenchmarkVP9VarianceKernels32x32GoSIMD(b *testing.B) {
 	benchmarkVarianceKernel(b, 32, 32, true)
 }
 
-func BenchmarkVP9VarianceKernels64x32Base(b *testing.B) {
+func BenchmarkVP9VarianceKernels64x32Scalar(b *testing.B) {
 	benchmarkVarianceKernel(b, 64, 32, false)
 }
 
-func BenchmarkVP9VarianceKernels64x32Dot(b *testing.B) {
+func BenchmarkVP9VarianceKernels64x32GoSIMD(b *testing.B) {
 	benchmarkVarianceKernel(b, 64, 32, true)
 }
 
-func BenchmarkVP9VarianceKernels64x64Base(b *testing.B) {
+func BenchmarkVP9VarianceKernels64x64Scalar(b *testing.B) {
 	benchmarkVarianceKernel(b, 64, 64, false)
 }
 
-func BenchmarkVP9VarianceKernels64x64Dot(b *testing.B) {
+func BenchmarkVP9VarianceKernels64x64GoSIMD(b *testing.B) {
 	benchmarkVarianceKernel(b, 64, 64, true)
 }

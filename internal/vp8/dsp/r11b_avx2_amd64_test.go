@@ -6,21 +6,21 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/cpu"
+	"github.com/thesyncim/govpx/internal/pixel"
 	"github.com/thesyncim/govpx/internal/vp8/tables"
 )
 
-// AVX2-specific parity tests for the R11-B kernels (sixtap16x16, SAD,
+// Native-specific parity tests for the R11-B kernels (sixtap16x16, SAD,
 // LF horizontal edges). These bypass the runtime dispatch and call
-// the AVX2 entry points directly, comparing against the scalar /
-// SSE2 reference. Skipped on hosts without AVX2 (e.g. baseline
+// the Native entry points directly, comparing against the scalar /
+// Reference reference. Skipped on hosts without Native (e.g. baseline
 // Rosetta without ROSETTA_ADVERTISE_AVX=1).
 
 // === sixtap16x16 ===
 
-func TestSixTapPredict16x16AVX2MatchesScalar(t *testing.T) {
-	if !cpu.HasAVX2 {
-		t.Skip("AVX2 not available on this host")
+func TestSixTapPredict16x16NativeMatchesScalar(t *testing.T) {
+	if !pixel.Enabled {
+		t.Skip("Native not available on this host")
 	}
 	rng := rand.New(rand.NewSource(0x6a31))
 	const stride = 32
@@ -36,7 +36,7 @@ func TestSixTapPredict16x16AVX2MatchesScalar(t *testing.T) {
 			var tmp [21 * 16]byte
 			hF := &tables.SubPelFilters[xoff]
 			vF := &tables.SubPelFilters[yoff]
-			sixTapPredict16x16AVX2(&dst[0], 16, &src[0], stride, hF, vF, &tmp)
+			sixTapPredict16x16Native(&dst[0], 16, &src[0], stride, hF, vF, &tmp)
 			sixTapPredict(src, stride, xoff, yoff, ref, 16, 16, 16)
 			for i := range 16 * 16 {
 				if dst[i] != ref[i] {
@@ -48,9 +48,9 @@ func TestSixTapPredict16x16AVX2MatchesScalar(t *testing.T) {
 	}
 }
 
-func BenchmarkSixTapPredict16x16AVX2(b *testing.B) {
-	if !cpu.HasAVX2 {
-		b.Skip("AVX2 not available on this host")
+func BenchmarkSixTapPredict16x16Native(b *testing.B) {
+	if !pixel.Enabled {
+		b.Skip("Native not available on this host")
 	}
 	const stride = 32
 	src := make([]byte, stride*21)
@@ -63,11 +63,11 @@ func BenchmarkSixTapPredict16x16AVX2(b *testing.B) {
 	vF := &tables.SubPelFilters[5]
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sixTapPredict16x16AVX2(&dst[0], 16, &src[0], stride, hF, vF, &tmp)
+		sixTapPredict16x16Native(&dst[0], 16, &src[0], stride, hF, vF, &tmp)
 	}
 }
 
-func BenchmarkSixTapPredict16x16SSE2Direct(b *testing.B) {
+func BenchmarkSixTapPredict16x16ReferenceDirect(b *testing.B) {
 	const stride = 32
 	src := make([]byte, stride*21)
 	for i := range src {
@@ -79,15 +79,15 @@ func BenchmarkSixTapPredict16x16SSE2Direct(b *testing.B) {
 	vF := &tables.SubPelFilters[5]
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sixTapPredict16x16SSE2(&dst[0], 16, &src[0], stride, hF, vF, &tmp)
+		sixTapPredict16x16Reference(&dst[0], 16, &src[0], stride, hF, vF, &tmp)
 	}
 }
 
-// === SAD AVX2 parity ===
+// === SAD Native parity ===
 
-func TestSADAVX2MatchesScalar(t *testing.T) {
-	if !cpu.HasAVX2 {
-		t.Skip("AVX2 not available on this host")
+func TestSADNativeMatchesScalar(t *testing.T) {
+	if !pixel.Enabled {
+		t.Skip("Native not available on this host")
 	}
 	const planeStride = 64
 	const planeRows = 64
@@ -103,10 +103,10 @@ func TestSADAVX2MatchesScalar(t *testing.T) {
 		fn   func(src *byte, srcStride int, ref *byte, refStride int) int32
 		w, h int
 	}{
-		{"16x16", sadBlock16x16AVX2, 16, 16},
-		{"16x8", sadBlock16x8AVX2, 16, 8},
-		{"8x16", sadBlock8x16AVX2, 8, 16},
-		{"8x8", sadBlock8x8AVX2, 8, 8},
+		{"16x16", sadBlock16x16Native, 16, 16},
+		{"16x8", sadBlock16x8Native, 16, 8},
+		{"8x16", sadBlock8x16Native, 8, 16},
+		{"8x8", sadBlock8x8Native, 8, 8},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
@@ -125,9 +125,9 @@ func TestSADAVX2MatchesScalar(t *testing.T) {
 	}
 }
 
-func TestSAD16x16x4AVX2MatchesScalar(t *testing.T) {
-	if !cpu.HasAVX2 {
-		t.Skip("AVX2 not available on this host")
+func TestSAD16x16x4NativeMatchesScalar(t *testing.T) {
+	if !pixel.Enabled {
+		t.Skip("Native not available on this host")
 	}
 	const planeStride = 64
 	const planeRows = 64
@@ -146,7 +146,7 @@ func TestSAD16x16x4AVX2MatchesScalar(t *testing.T) {
 			ref2 := ref[(refOff+1)*planeStride+refOff:]
 			ref3 := ref[(refOff+1)*planeStride+refOff+1:]
 			var got [4]uint32
-			sadBlock16x16x4AVX2(&srcSlice[0], planeStride, &ref0[0],
+			sadBlock16x16x4Native(&srcSlice[0], planeStride, &ref0[0],
 				&ref1[0], &ref2[0], &ref3[0], planeStride, &got)
 			refs := [][]byte{ref0, ref1, ref2, ref3}
 			for i, refSlice := range refs {
@@ -161,9 +161,9 @@ func TestSAD16x16x4AVX2MatchesScalar(t *testing.T) {
 	}
 }
 
-func BenchmarkSAD16x16AVX2(b *testing.B) {
-	if !cpu.HasAVX2 {
-		b.Skip("AVX2 not available on this host")
+func BenchmarkSAD16x16Native(b *testing.B) {
+	if !pixel.Enabled {
+		b.Skip("Native not available on this host")
 	}
 	src := make([]byte, 64*64)
 	ref := make([]byte, 64*64)
@@ -173,13 +173,13 @@ func BenchmarkSAD16x16AVX2(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sadBlock16x16AVX2(&src[0], 64, &ref[0], 64)
+		sadBlock16x16Native(&src[0], 64, &ref[0], 64)
 	}
 }
 
-func BenchmarkSAD16x16x4AVX2(b *testing.B) {
-	if !cpu.HasAVX2 {
-		b.Skip("AVX2 not available on this host")
+func BenchmarkSAD16x16x4Native(b *testing.B) {
+	if !pixel.Enabled {
+		b.Skip("Native not available on this host")
 	}
 	const stride = 64
 	src := make([]byte, stride*32)
@@ -196,12 +196,12 @@ func BenchmarkSAD16x16x4AVX2(b *testing.B) {
 	var out [4]uint32
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sadBlock16x16x4AVX2(srcPtr, stride, ref0, ref1, ref2, ref3,
+		sadBlock16x16x4Native(srcPtr, stride, ref0, ref1, ref2, ref3,
 			stride, &out)
 	}
 }
 
-func BenchmarkSAD16x16SSE2Direct(b *testing.B) {
+func BenchmarkSAD16x16ReferenceDirect(b *testing.B) {
 	src := make([]byte, 64*64)
 	ref := make([]byte, 64*64)
 	for i := range src {
@@ -210,78 +210,78 @@ func BenchmarkSAD16x16SSE2Direct(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sadBlock16x16SSE2(&src[0], 64, &ref[0], 64)
+		sadBlock16x16Reference(&src[0], 64, &ref[0], 64)
 	}
 }
 
-func BenchmarkSAD16x8AVX2(b *testing.B) {
-	if !cpu.HasAVX2 {
-		b.Skip("AVX2 not available on this host")
+func BenchmarkSAD16x8Native(b *testing.B) {
+	if !pixel.Enabled {
+		b.Skip("Native not available on this host")
 	}
 	src := make([]byte, 64*64)
 	ref := make([]byte, 64*64)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sadBlock16x8AVX2(&src[0], 64, &ref[0], 64)
+		sadBlock16x8Native(&src[0], 64, &ref[0], 64)
 	}
 }
 
-func BenchmarkSAD16x8SSE2Direct(b *testing.B) {
+func BenchmarkSAD16x8ReferenceDirect(b *testing.B) {
 	src := make([]byte, 64*64)
 	ref := make([]byte, 64*64)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sadBlock16x8SSE2(&src[0], 64, &ref[0], 64)
+		sadBlock16x8Reference(&src[0], 64, &ref[0], 64)
 	}
 }
 
-func BenchmarkSAD8x16AVX2(b *testing.B) {
-	if !cpu.HasAVX2 {
-		b.Skip("AVX2 not available on this host")
-	}
-	src := make([]byte, 64*64)
-	ref := make([]byte, 64*64)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		sadBlock8x16AVX2(&src[0], 64, &ref[0], 64)
-	}
-}
-
-func BenchmarkSAD8x16SSE2Direct(b *testing.B) {
-	src := make([]byte, 64*64)
-	ref := make([]byte, 64*64)
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		sadBlock8x16SSE2(&src[0], 64, &ref[0], 64)
-	}
-}
-
-func BenchmarkSAD8x8AVX2(b *testing.B) {
-	if !cpu.HasAVX2 {
-		b.Skip("AVX2 not available on this host")
+func BenchmarkSAD8x16Native(b *testing.B) {
+	if !pixel.Enabled {
+		b.Skip("Native not available on this host")
 	}
 	src := make([]byte, 64*64)
 	ref := make([]byte, 64*64)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sadBlock8x8AVX2(&src[0], 64, &ref[0], 64)
+		sadBlock8x16Native(&src[0], 64, &ref[0], 64)
 	}
 }
 
-func BenchmarkSAD8x8SSE2Direct(b *testing.B) {
+func BenchmarkSAD8x16ReferenceDirect(b *testing.B) {
 	src := make([]byte, 64*64)
 	ref := make([]byte, 64*64)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		sadBlock8x8SSE2(&src[0], 64, &ref[0], 64)
+		sadBlock8x16Reference(&src[0], 64, &ref[0], 64)
 	}
 }
 
-// === LoopFilter AVX2 parity ===
+func BenchmarkSAD8x8Native(b *testing.B) {
+	if !pixel.Enabled {
+		b.Skip("Native not available on this host")
+	}
+	src := make([]byte, 64*64)
+	ref := make([]byte, 64*64)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sadBlock8x8Native(&src[0], 64, &ref[0], 64)
+	}
+}
 
-func TestLoopFilterEdgeH16AVX2MatchesSSE2(t *testing.T) {
-	if !cpu.HasAVX2 {
-		t.Skip("AVX2 not available on this host")
+func BenchmarkSAD8x8ReferenceDirect(b *testing.B) {
+	src := make([]byte, 64*64)
+	ref := make([]byte, 64*64)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		sadBlock8x8Reference(&src[0], 64, &ref[0], 64)
+	}
+}
+
+// === LoopFilter Native parity ===
+
+func TestLoopFilterEdgeH16NativeMatchesReference(t *testing.T) {
+	if !pixel.Enabled {
+		t.Skip("Native not available on this host")
 	}
 	rng := rand.New(rand.NewSource(0xACEFACE))
 	type params struct {
@@ -306,8 +306,8 @@ func TestLoopFilterEdgeH16AVX2MatchesSSE2(t *testing.T) {
 			}
 			gotBuf := append([]byte(nil), base...)
 			wantBuf := append([]byte(nil), base...)
-			loopFilterEdgeH16AVX2(&gotBuf[0], stride, p.blimit, p.limit, p.thresh)
-			loopFilterEdgeH16SSE2(&wantBuf[0], stride, p.blimit, p.limit, p.thresh)
+			loopFilterEdgeH16Native(&gotBuf[0], stride, p.blimit, p.limit, p.thresh)
+			loopFilterEdgeH16Reference(&wantBuf[0], stride, p.blimit, p.limit, p.thresh)
 			for i, w := range wantBuf {
 				if g := gotBuf[i]; g != w {
 					t.Fatalf("blimit=%d limit=%d thresh=%d trial=%d byte %d avx2=%d sse2=%d",
@@ -318,9 +318,9 @@ func TestLoopFilterEdgeH16AVX2MatchesSSE2(t *testing.T) {
 	}
 }
 
-func TestMBLoopFilterEdgeH16AVX2MatchesSSE2(t *testing.T) {
-	if !cpu.HasAVX2 {
-		t.Skip("AVX2 not available on this host")
+func TestMBLoopFilterEdgeH16NativeMatchesReference(t *testing.T) {
+	if !pixel.Enabled {
+		t.Skip("Native not available on this host")
 	}
 	rng := rand.New(rand.NewSource(0xBEEFBABE))
 	type params struct {
@@ -345,8 +345,8 @@ func TestMBLoopFilterEdgeH16AVX2MatchesSSE2(t *testing.T) {
 			}
 			gotBuf := append([]byte(nil), base...)
 			wantBuf := append([]byte(nil), base...)
-			mbLoopFilterEdgeH16AVX2(&gotBuf[0], stride, p.blimit, p.limit, p.thresh)
-			mbLoopFilterEdgeH16SSE2(&wantBuf[0], stride, p.blimit, p.limit, p.thresh)
+			mbLoopFilterEdgeH16Native(&gotBuf[0], stride, p.blimit, p.limit, p.thresh)
+			mbLoopFilterEdgeH16Reference(&wantBuf[0], stride, p.blimit, p.limit, p.thresh)
 			for i, w := range wantBuf {
 				if g := gotBuf[i]; g != w {
 					t.Fatalf("blimit=%d limit=%d thresh=%d trial=%d byte %d avx2=%d sse2=%d",
@@ -357,9 +357,9 @@ func TestMBLoopFilterEdgeH16AVX2MatchesSSE2(t *testing.T) {
 	}
 }
 
-func BenchmarkLoopFilterEdgeH16AVX2(b *testing.B) {
-	if !cpu.HasAVX2 {
-		b.Skip("AVX2 not available on this host")
+func BenchmarkLoopFilterEdgeH16Native(b *testing.B) {
+	if !pixel.Enabled {
+		b.Skip("Native not available on this host")
 	}
 	const stride = 32
 	buf := make([]byte, stride*16)
@@ -368,11 +368,11 @@ func BenchmarkLoopFilterEdgeH16AVX2(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		loopFilterEdgeH16AVX2(&buf[0], stride, 32, 16, 8)
+		loopFilterEdgeH16Native(&buf[0], stride, 32, 16, 8)
 	}
 }
 
-func BenchmarkLoopFilterEdgeH16SSE2Direct(b *testing.B) {
+func BenchmarkLoopFilterEdgeH16ReferenceDirect(b *testing.B) {
 	const stride = 32
 	buf := make([]byte, stride*16)
 	for i := range buf {
@@ -380,13 +380,13 @@ func BenchmarkLoopFilterEdgeH16SSE2Direct(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		loopFilterEdgeH16SSE2(&buf[0], stride, 32, 16, 8)
+		loopFilterEdgeH16Reference(&buf[0], stride, 32, 16, 8)
 	}
 }
 
-func BenchmarkMBLoopFilterEdgeH16AVX2(b *testing.B) {
-	if !cpu.HasAVX2 {
-		b.Skip("AVX2 not available on this host")
+func BenchmarkMBLoopFilterEdgeH16Native(b *testing.B) {
+	if !pixel.Enabled {
+		b.Skip("Native not available on this host")
 	}
 	const stride = 32
 	buf := make([]byte, stride*16)
@@ -395,11 +395,11 @@ func BenchmarkMBLoopFilterEdgeH16AVX2(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		mbLoopFilterEdgeH16AVX2(&buf[0], stride, 32, 16, 8)
+		mbLoopFilterEdgeH16Native(&buf[0], stride, 32, 16, 8)
 	}
 }
 
-func BenchmarkMBLoopFilterEdgeH16SSE2Direct(b *testing.B) {
+func BenchmarkMBLoopFilterEdgeH16ReferenceDirect(b *testing.B) {
 	const stride = 32
 	buf := make([]byte, stride*16)
 	for i := range buf {
@@ -407,6 +407,6 @@ func BenchmarkMBLoopFilterEdgeH16SSE2Direct(b *testing.B) {
 	}
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		mbLoopFilterEdgeH16SSE2(&buf[0], stride, 32, 16, 8)
+		mbLoopFilterEdgeH16Reference(&buf[0], stride, 32, 16, 8)
 	}
 }

@@ -117,6 +117,10 @@ func VpxIntProCol(ref []uint8, refOff, width int) int16 {
 // (vpx_dsp/arm/avg_neon.c vpx_int_pro_col_neon per row); elsewhere it
 // falls back to the scalar VpxIntProCol per row.
 func IntProCols(vbuf []int16, ref []uint8, refOff, refStride, width, rows, normFactor int) {
+	// Empty projections do not read the source or write output.
+	if rows <= 0 {
+		return
+	}
 	if intProColsAsm(vbuf, ref, refOff, refStride, width, rows, normFactor) {
 		return
 	}

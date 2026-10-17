@@ -119,3 +119,32 @@ func BenchmarkFastQuantizeBlockScalar(b *testing.B) {
 		_ = fastQuantizeBlockScalar(&coeff, &quant, &qcoeff, &dqcoeff)
 	}
 }
+
+func TestFastQuantizeFullSignedCoefficientsAndTables(t *testing.T) {
+	r := rand.New(rand.NewSource(0x8176))
+	for trial := range 2000 {
+		var coeff [16]int16
+		var quant BlockQuant
+		for i := range coeff {
+			coeff[i] = int16(r.Uint32())
+			if trial%3 == 0 && i%3 == 0 {
+				coeff[i] = -32768
+			}
+			quant.Round[i] = int16(r.Uint32() & 32767)
+			quant.QuantFast[i] = int16(r.Uint32() & 32767)
+			quant.Dequant[i] = int16(r.Uint32())
+			if trial%4 == 0 {
+				quant.Round[i] = int16(r.Uint32())
+			}
+			if trial%5 == 0 {
+				quant.QuantFast[i] = int16(r.Uint32())
+			}
+		}
+		var gotQ, gotDQ, wantQ, wantDQ [16]int16
+		got := fastQuantizeBlockSIMD(&coeff, &quant, &gotQ, &gotDQ)
+		want := fastQuantizeBlockScalar(&coeff, &quant, &wantQ, &wantDQ)
+		if got != want || gotQ != wantQ || gotDQ != wantDQ {
+			t.Fatalf("trial%d EOB%d/%d q%v/%v dq%v/%v", trial, got, want, gotQ, wantQ, gotDQ, wantDQ)
+		}
+	}
+}

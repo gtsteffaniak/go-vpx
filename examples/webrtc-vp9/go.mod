@@ -1,6 +1,6 @@
 module github.com/thesyncim/govpx/examples/webrtc-vp9
 
-go 1.26
+go 1.27.0
 
 require (
 	github.com/pion/rtcp v1.2.16

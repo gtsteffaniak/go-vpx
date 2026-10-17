@@ -12,6 +12,7 @@ git_cmd=${GIT:-git}
 		$0 == "scripts/pgo-fingerprint.sh" { print; next }
 		/^cmd\/govpx-bench\// { print; next }
 		/^internal\/cpu\// { print; next }
+		/^internal\/pixel\// { print; next }
 		/^internal\/vp8\// { print; next }
 		/^internal\/vp9\// { print; next }
 		/^vp8_encoder/ { print; next }
@@ -28,6 +29,7 @@ git_cmd=${GIT:-git}
 	LC_ALL=C sort |
 	while IFS= read -r file; do
 		[ -n "$file" ] || continue
+		[ -f "$file" ] || continue
 		if [ "${file##*.}" = "go" ] && head -n 5 "$file" | grep -qx '//go:build govpx_oracle_trace'; then
 			continue
 		fi

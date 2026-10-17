@@ -1,5 +1,3 @@
-//go:build !arm64 || purego
-
 package dsp
 
 // Pointer-threshold loopfilter entry points for targets without the

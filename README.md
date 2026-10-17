@@ -27,9 +27,8 @@ encode/decode.
   byte-exactly on the pinned production fixtures. Every hot-path change lands
   behind byte-parity gates.
 - **Pure Go.** No cgo, no shared libraries, no build headaches. Cross-compile
-  a static media server for any GOOS/GOARCH with a plain `go build`. A
-  `-tags purego` build drops even govpx's own assembly.
-- **Fast.** Hand-written NEON (arm64) and SSE (amd64) kernels, profile-guided
+  a static media server for any GOOS/GOARCH with a plain `go build`. There is no hand-written assembly in govpx.
+- **Fast.** Go-native SIMD kernels for arm64 and amd64, profile-guided
   optimization, allocation-free steady state, and libvpx-shaped threading:
   VP8 row multithreading, VP9 tile-column + row-based encoder MT, and
   row-based decoder MT with a threaded loop filter. See the numbers below.
@@ -41,6 +40,8 @@ encode/decode.
 
 ## Performance
 
+Historical assembly baseline (before the Go 1.27 SIMD migration; see
+[SIMD_PORT.md](SIMD_PORT.md) for current measurements and limitations):
 720p realtime, 30 fps, 2.5 Mbps CBR, `cpu-used=8`, Apple M4 Max, Go 1.26.3,
 measured 2026-07-16 against libvpx v1.16.0's own reported encode times
 (identical output bytes and drop topology in every encode row):
@@ -65,17 +66,18 @@ program.
 
 ## Install
 
-Go 1.26 or newer is required. The module pins the default toolchain to Go
-1.26.3 so local `go` commands use the same patch level as CI.
+Go 1.27 or newer is required. The module pins the default toolchain to Go
+1.27.2 so local `go` commands use the same patch level as CI.
 
 ```sh
 go get github.com/thesyncim/govpx
 ```
 
-Build with `-tags purego` for a scalar build. The tag excludes govpx's
-architecture-specific assembly and selects the Go fallbacks under
-`internal/vp8/dsp`, `internal/vp8/encoder`, `internal/vp9/dsp`, and
-`internal/vp9/encoder`.
+Use `GOEXPERIMENT=simd go build ./...` to enable Go's experimental
+`simd/archsimd` kernels. `make` targets and `scripts/go.sh` enable SIMD by
+default. On amd64, runtime AVX2 detection guards the SIMD kernels; arm64 uses
+mandatory ASIMD. Plain `go build` and `-tags purego` select scalar Go fallbacks.
+See [SIMD_PORT.md](SIMD_PORT.md) for migration and performance validation.
 
 ## Decode
 
@@ -340,9 +342,9 @@ VP8 through pion/webrtc to a browser.
 ## Benchmarking
 
 ```sh
-go run ./cmd/govpx-bench
-go run ./cmd/govpx-bench -decode -frames=120
-go run ./cmd/govpx-bench -format=json
+scripts/go.sh run ./cmd/govpx-bench
+scripts/go.sh run ./cmd/govpx-bench -decode -frames=120
+scripts/go.sh run ./cmd/govpx-bench -format=json
 ```
 
 By default the encode benchmark compares against libvpx when
@@ -362,7 +364,7 @@ Plotting is optional and requires an ffmpeg binary with both the
 `libvpx` encoder and the `libvmaf` filter:
 
 ```sh
-go run ./cmd/govpx-bench \
+scripts/go.sh run ./cmd/govpx-bench \
     -plot benchmarks/govpx-vs-libvpx.svg \
     -width=1280 -height=720 -frames=120 -fps=30 \
     -bitrate=2500 -mode=realtime -threads=1

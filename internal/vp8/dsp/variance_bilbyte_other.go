@@ -1,13 +1,19 @@
-//go:build !arm64 || purego
-
 package dsp
 
-import "github.com/thesyncim/govpx/internal/vp8/tables"
+import (
+	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/thesyncim/govpx/internal/vp8/tables"
+)
 
 // Ported from libvpx v1.16.0 vpx_dsp/arm/subpel_variance_neon.c
 // var_filter_block2d_bil_w16 specialized for byte output.
 
 func bilinearFilter16x16Horizontal(src []byte, srcStride int, dst []byte, height int, filter [2]int16) {
+	if pixel.Enabled {
+		pixel.Filter(src, srcStride, dst, 16, 16, height, 1, filter[:])
+		return
+	}
+
 	for y := range height {
 		srcRow := y * srcStride
 		dstRow := y * 16
@@ -19,6 +25,11 @@ func bilinearFilter16x16Horizontal(src []byte, srcStride int, dst []byte, height
 }
 
 func bilinearFilter16x16Vertical(src []byte, srcStride int, dst []byte, height int, filter [2]int16) {
+	if pixel.Enabled {
+		pixel.Filter(src, srcStride, dst, 16, 16, height, srcStride, filter[:])
+		return
+	}
+
 	for y := range height {
 		srcRow := y * srcStride
 		dstRow := y * 16

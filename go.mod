@@ -1,5 +1,5 @@
 module github.com/thesyncim/govpx
 
-go 1.26
+go 1.27.0
 
-toolchain go1.26.3
+toolchain go1.27.2

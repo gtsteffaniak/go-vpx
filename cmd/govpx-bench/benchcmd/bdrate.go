@@ -81,11 +81,12 @@ type BDRateResult struct {
 var (
 	errBDRateInsufficientPoints = errors.New("bdrate: need at least 4 operating points per curve")
 	errBDRateBadPoint           = errors.New("bdrate: rate and psnr must be positive and finite")
+	errBDRateDuplicateAxis      = errors.New("bdrate: duplicate independent-axis values")
 	errBDRateNoOverlap          = errors.New("bdrate: overlap range is empty")
 )
 
 // BDRate computes the Bjøntegaard-Delta-rate between reference and test
-// curves. Inputs are sorted internally by rate; duplicate rates are
+// curves. Inputs are sorted internally by PSNR; duplicate PSNR values are
 // rejected (they make the cubic fit singular). Returns the percentage
 // bitrate difference (test vs reference): negative means test saves
 // bitrate at equal quality, positive means test needs more bitrate.
@@ -101,11 +102,11 @@ func BDPSNR(reference, test []QualityPoint) (float64, error) {
 }
 
 func bdMetric(reference, test []QualityPoint, rateMode bool) (float64, error) {
-	refPts, err := sanitizeBDPoints(reference)
+	refPts, err := sanitizeBDPoints(reference, rateMode)
 	if err != nil {
 		return 0, err
 	}
-	testPts, err := sanitizeBDPoints(test)
+	testPts, err := sanitizeBDPoints(test, rateMode)
 	if err != nil {
 		return 0, err
 	}
@@ -157,15 +158,23 @@ func bdMetric(reference, test []QualityPoint, rateMode bool) (float64, error) {
 	return (intTest - intRef) / (hi - lo), nil
 }
 
-// sanitizeBDPoints sorts by rate ascending, validates positivity, and
-// rejects duplicate rates (which would make the cubic system singular).
-func sanitizeBDPoints(in []QualityPoint) ([]QualityPoint, error) {
+// sanitizeBDPoints validates points and rejects duplicates only on the
+// independent axis of the requested fit: PSNR for BD-rate, rate for BD-PSNR.
+// Equal dependent values are valid, such as two distinct qualities encoded
+// to the same byte count in a short CBR sequence.
+func sanitizeBDPoints(in []QualityPoint, rateMode bool) ([]QualityPoint, error) {
 	if len(in) < 4 {
 		return nil, errBDRateInsufficientPoints
 	}
 	pts := make([]QualityPoint, len(in))
 	copy(pts, in)
-	sort.Slice(pts, func(i, j int) bool { return pts[i].Rate < pts[j].Rate })
+	axis := func(p QualityPoint) float64 {
+		if rateMode {
+			return p.PSNR
+		}
+		return p.Rate
+	}
+	sort.Slice(pts, func(i, j int) bool { return axis(pts[i]) < axis(pts[j]) })
 	for i := range pts {
 		if !(pts[i].Rate > 0) || math.IsInf(pts[i].Rate, 0) || math.IsNaN(pts[i].Rate) {
 			return nil, errBDRateBadPoint
@@ -173,8 +182,8 @@ func sanitizeBDPoints(in []QualityPoint) ([]QualityPoint, error) {
 		if math.IsNaN(pts[i].PSNR) || math.IsInf(pts[i].PSNR, 0) {
 			return nil, errBDRateBadPoint
 		}
-		if i > 0 && pts[i].Rate == pts[i-1].Rate {
-			return nil, errBDRateBadPoint
+		if i > 0 && axis(pts[i]) == axis(pts[i-1]) {
+			return nil, errBDRateDuplicateAxis
 		}
 	}
 	return pts, nil

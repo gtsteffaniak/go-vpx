@@ -1,12 +1,9 @@
-//go:build (!amd64 && !arm64) || purego
-
 package dsp
 
 import "github.com/thesyncim/govpx/internal/vp9/tables"
 
-// Scalar fallback for VpxConvolve8Horiz / Vert / 8 / 8Avg. The
-// amd64 / arm64 build paths implement these on SSE2 / NEON via
-// convolve_amd64.go / convolve_arm64.go.
+// Shared convolution entry points select Go SIMD for supported filter
+// shapes and retain scalar handling of scaled coordinates.
 
 // VpxConvolve8Horiz applies the horizontal 8-tap subpel filter.
 // Mirrors vpx_convolve8_horiz_c.

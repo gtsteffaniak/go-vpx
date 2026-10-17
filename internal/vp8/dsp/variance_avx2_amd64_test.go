@@ -6,17 +6,17 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/cpu"
+	"github.com/thesyncim/govpx/internal/pixel"
 	"github.com/thesyncim/govpx/internal/vp8/tables"
 )
 
-// AVX2-specific parity tests that bypass the runtime dispatch and call
-// the AVX2 entry points directly, comparing against the scalar
-// reference. Skipped on hosts without AVX2 (e.g. Rosetta).
+// Native-specific parity tests that bypass the runtime dispatch and call
+// the Native entry points directly, comparing against the scalar
+// reference. Skipped on hosts without Native (e.g. Rosetta).
 
-func TestVarianceBlock16xNAVX2MatchesScalar(t *testing.T) {
-	if !cpu.HasAVX2 {
-		t.Skip("AVX2 not available on this host")
+func TestVarianceBlock16xNNativeMatchesScalar(t *testing.T) {
+	if !pixel.Enabled {
+		t.Skip("Native not available on this host")
 	}
 	const seed int64 = 0xa1b2c3d4
 	rng := rand.New(rand.NewSource(seed))
@@ -38,7 +38,7 @@ func TestVarianceBlock16xNAVX2MatchesScalar(t *testing.T) {
 			refOff := rng.Intn(64*64 - h*refStride - 16)
 			var sum int32
 			var sse uint32
-			varianceBlock16xNAVX2(&src[srcOff], srcStride, &ref[refOff], refStride, h, &sum, &sse)
+			varianceBlock16xNNative(&src[srcOff], srcStride, &ref[refOff], refStride, h, &sum, &sse)
 			wantSum, wantSSE := referenceVarianceBlockSized(src[srcOff:], srcStride, ref[refOff:], refStride, 16, h)
 			if int(sum) != wantSum || int(sse) != wantSSE {
 				t.Fatalf("h=%d iter=%d: got (%d,%d), want (%d,%d)", h, iter, sum, sse, wantSum, wantSSE)
@@ -47,9 +47,9 @@ func TestVarianceBlock16xNAVX2MatchesScalar(t *testing.T) {
 	}
 }
 
-func TestVarianceBlock8x16AVX2MatchesScalar(t *testing.T) {
-	if !cpu.HasAVX2 {
-		t.Skip("AVX2 not available on this host")
+func TestVarianceBlock8x16NativeMatchesScalar(t *testing.T) {
+	if !pixel.Enabled {
+		t.Skip("Native not available on this host")
 	}
 	const seed int64 = 0xb2c3d4e5
 	rng := rand.New(rand.NewSource(seed))
@@ -67,7 +67,7 @@ func TestVarianceBlock8x16AVX2MatchesScalar(t *testing.T) {
 		refOff := rng.Intn(64*64 - 16*refStride - 8)
 		var sum int32
 		var sse uint32
-		varianceBlock8x16AVX2(&src[srcOff], srcStride, &ref[refOff], refStride, &sum, &sse)
+		varianceBlock8x16Native(&src[srcOff], srcStride, &ref[refOff], refStride, &sum, &sse)
 		wantSum, wantSSE := referenceVarianceBlockSized(src[srcOff:], srcStride, ref[refOff:], refStride, 8, 16)
 		if int(sum) != wantSum || int(sse) != wantSSE {
 			t.Fatalf("iter=%d: got (%d,%d), want (%d,%d)", iter, sum, sse, wantSum, wantSSE)
@@ -75,9 +75,9 @@ func TestVarianceBlock8x16AVX2MatchesScalar(t *testing.T) {
 	}
 }
 
-func TestFirstPass16AVX2MatchesScalar(t *testing.T) {
-	if !cpu.HasAVX2 {
-		t.Skip("AVX2 not available on this host")
+func TestFirstPass16NativeMatchesScalar(t *testing.T) {
+	if !pixel.Enabled {
+		t.Skip("Native not available on this host")
 	}
 	const seed int64 = 0xc3d4e5f6
 	rng := rand.New(rand.NewSource(seed))
@@ -94,7 +94,7 @@ func TestFirstPass16AVX2MatchesScalar(t *testing.T) {
 				var got, want [17 * 16]uint16
 				f0u := uint64(uint16(filter[0])) * 0x0001000100010001
 				f1u := uint64(uint16(filter[1])) * 0x0001000100010001
-				varFilterBlock2DBilinearFirstPass16AVX2(&src[0], stride, &got[0], height, f0u, f1u)
+				varFilterBlock2DBilinearFirstPass16Native(&src[0], stride, &got[0], height, f0u, f1u)
 				referenceFirstPass16(src, stride, &want, height, filter)
 				for i := 0; i < height*16; i++ {
 					if got[i] != want[i] {
@@ -107,9 +107,9 @@ func TestFirstPass16AVX2MatchesScalar(t *testing.T) {
 	}
 }
 
-func TestSecondPass16AVX2MatchesScalar(t *testing.T) {
-	if !cpu.HasAVX2 {
-		t.Skip("AVX2 not available on this host")
+func TestSecondPass16NativeMatchesScalar(t *testing.T) {
+	if !pixel.Enabled {
+		t.Skip("Native not available on this host")
 	}
 	const seed int64 = 0xd4e5f607
 	rng := rand.New(rand.NewSource(seed))
@@ -126,7 +126,7 @@ func TestSecondPass16AVX2MatchesScalar(t *testing.T) {
 				want := make([]byte, 16*16)
 				f0u := uint64(uint16(filter[0])) * 0x0001000100010001
 				f1u := uint64(uint16(filter[1])) * 0x0001000100010001
-				varFilterBlock2DBilinearSecondPass16AVX2(&src, &got[0], height, f0u, f1u)
+				varFilterBlock2DBilinearSecondPass16Native(&src, &got[0], height, f0u, f1u)
 				referenceSecondPass16(&src, want, height, filter)
 				for i := 0; i < height*16; i++ {
 					if got[i] != want[i] {
@@ -139,81 +139,81 @@ func TestSecondPass16AVX2MatchesScalar(t *testing.T) {
 	}
 }
 
-// BenchmarkVarianceBlock16x16AVX2 measures the AVX2 16x16 variance
-// block kernel directly. Falls through to the SSE2 path on hosts
-// without AVX2 (the dispatch wrapper picks).
-func BenchmarkVarianceBlock16x16AVX2(b *testing.B) {
-	if !cpu.HasAVX2 {
-		b.Skip("AVX2 not available on this host")
+// BenchmarkVarianceBlock16x16Native measures the Native 16x16 variance
+// block kernel directly. Falls through to the Reference path on hosts
+// without Native (the dispatch wrapper picks).
+func BenchmarkVarianceBlock16x16Native(b *testing.B) {
+	if !pixel.Enabled {
+		b.Skip("Native not available on this host")
 	}
 	src, ref := benchSrc16x16()
 	var sum int32
 	var sse uint32
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		varianceBlock16xNAVX2(&src[0], 64, &ref[0], 64, 16, &sum, &sse)
+		varianceBlock16xNNative(&src[0], 64, &ref[0], 64, 16, &sum, &sse)
 	}
 }
 
-func BenchmarkVarianceBlock16x16SSE2Direct(b *testing.B) {
+func BenchmarkVarianceBlock16x16ReferenceDirect(b *testing.B) {
 	src, ref := benchSrc16x16()
 	var sum int32
 	var sse uint32
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		varianceBlock16x16SSE2(&src[0], 64, &ref[0], 64, &sum, &sse)
+		varianceBlock16x16Reference(&src[0], 64, &ref[0], 64, &sum, &sse)
 	}
 }
 
-func BenchmarkVarianceBlock16x8AVX2(b *testing.B) {
-	if !cpu.HasAVX2 {
-		b.Skip("AVX2 not available on this host")
-	}
-	src, ref := benchSrc16x16()
-	var sum int32
-	var sse uint32
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		varianceBlock16xNAVX2(&src[0], 64, &ref[0], 64, 8, &sum, &sse)
-	}
-}
-
-func BenchmarkVarianceBlock16x8SSE2Direct(b *testing.B) {
-	src, ref := benchSrc16x16()
-	var sum int32
-	var sse uint32
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		varianceBlock16xNSSE2(&src[0], 64, &ref[0], 64, 8, &sum, &sse)
-	}
-}
-
-func BenchmarkVarianceBlock8x16AVX2(b *testing.B) {
-	if !cpu.HasAVX2 {
-		b.Skip("AVX2 not available on this host")
+func BenchmarkVarianceBlock16x8Native(b *testing.B) {
+	if !pixel.Enabled {
+		b.Skip("Native not available on this host")
 	}
 	src, ref := benchSrc16x16()
 	var sum int32
 	var sse uint32
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		varianceBlock8x16AVX2(&src[0], 64, &ref[0], 64, &sum, &sse)
+		varianceBlock16xNNative(&src[0], 64, &ref[0], 64, 8, &sum, &sse)
 	}
 }
 
-func BenchmarkVarianceBlock8x16SSE2Direct(b *testing.B) {
+func BenchmarkVarianceBlock16x8ReferenceDirect(b *testing.B) {
 	src, ref := benchSrc16x16()
 	var sum int32
 	var sse uint32
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		varianceBlock8xNSSE2(&src[0], 64, &ref[0], 64, 16, &sum, &sse)
+		varianceBlock16xNReference(&src[0], 64, &ref[0], 64, 8, &sum, &sse)
 	}
 }
 
-func BenchmarkBilinearFirstPass16AVX2(b *testing.B) {
-	if !cpu.HasAVX2 {
-		b.Skip("AVX2 not available on this host")
+func BenchmarkVarianceBlock8x16Native(b *testing.B) {
+	if !pixel.Enabled {
+		b.Skip("Native not available on this host")
+	}
+	src, ref := benchSrc16x16()
+	var sum int32
+	var sse uint32
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		varianceBlock8x16Native(&src[0], 64, &ref[0], 64, &sum, &sse)
+	}
+}
+
+func BenchmarkVarianceBlock8x16ReferenceDirect(b *testing.B) {
+	src, ref := benchSrc16x16()
+	var sum int32
+	var sse uint32
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		varianceBlock8xNReference(&src[0], 64, &ref[0], 64, 16, &sum, &sse)
+	}
+}
+
+func BenchmarkBilinearFirstPass16Native(b *testing.B) {
+	if !pixel.Enabled {
+		b.Skip("Native not available on this host")
 	}
 	src, _ := benchSrc16x16()
 	var dst [17 * 16]uint16
@@ -222,11 +222,11 @@ func BenchmarkBilinearFirstPass16AVX2(b *testing.B) {
 	f1u := uint64(uint16(filter[1])) * 0x0001000100010001
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		varFilterBlock2DBilinearFirstPass16AVX2(&src[0], 64, &dst[0], 17, f0u, f1u)
+		varFilterBlock2DBilinearFirstPass16Native(&src[0], 64, &dst[0], 17, f0u, f1u)
 	}
 }
 
-func BenchmarkBilinearFirstPass16SSE2Direct(b *testing.B) {
+func BenchmarkBilinearFirstPass16ReferenceDirect(b *testing.B) {
 	src, _ := benchSrc16x16()
 	var dst [17 * 16]uint16
 	filter := tables.BilinearFilters[3]
@@ -234,13 +234,13 @@ func BenchmarkBilinearFirstPass16SSE2Direct(b *testing.B) {
 	f1u := uint64(uint16(filter[1])) * 0x0001000100010001
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		varFilterBlock2DBilinearFirstPass16SSE2(&src[0], 64, &dst[0], 17, f0u, f1u)
+		varFilterBlock2DBilinearFirstPass16Reference(&src[0], 64, &dst[0], 17, f0u, f1u)
 	}
 }
 
-func BenchmarkBilinearSecondPass16AVX2(b *testing.B) {
-	if !cpu.HasAVX2 {
-		b.Skip("AVX2 not available on this host")
+func BenchmarkBilinearSecondPass16Native(b *testing.B) {
+	if !pixel.Enabled {
+		b.Skip("Native not available on this host")
 	}
 	var src [17 * 16]uint16
 	for i := range src {
@@ -252,11 +252,11 @@ func BenchmarkBilinearSecondPass16AVX2(b *testing.B) {
 	f1u := uint64(uint16(filter[1])) * 0x0001000100010001
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		varFilterBlock2DBilinearSecondPass16AVX2(&src, &dst[0], 16, f0u, f1u)
+		varFilterBlock2DBilinearSecondPass16Native(&src, &dst[0], 16, f0u, f1u)
 	}
 }
 
-func BenchmarkBilinearSecondPass16SSE2Direct(b *testing.B) {
+func BenchmarkBilinearSecondPass16ReferenceDirect(b *testing.B) {
 	var src [17 * 16]uint16
 	for i := range src {
 		src[i] = uint16(i)
@@ -267,6 +267,6 @@ func BenchmarkBilinearSecondPass16SSE2Direct(b *testing.B) {
 	f1u := uint64(uint16(filter[1])) * 0x0001000100010001
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		varFilterBlock2DBilinearSecondPass16SSE2(&src, &dst[0], 16, f0u, f1u)
+		varFilterBlock2DBilinearSecondPass16Reference(&src, &dst[0], 16, f0u, f1u)
 	}
 }

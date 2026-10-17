@@ -1,9 +1,10 @@
-//go:build !arm64 || purego
-
 package dsp
 
-// Scalar-only builds: Avg8x8Quad falls through to four VpxAvg8x8 calls.
+import "github.com/thesyncim/govpx/internal/pixel"
 
 func avg8x8QuadAsm(src []uint8, off, stride int, out *[4]int32) bool {
-	return false
+	if !pixel.Enabled {
+		return false
+	}
+	return pixel.AverageQuad16(src[off:], stride, out)
 }

@@ -3,6 +3,8 @@ package dsp
 import (
 	"unsafe"
 
+	"github.com/thesyncim/govpx/internal/pixel"
+
 	"github.com/thesyncim/govpx/internal/vp8/tables"
 )
 
@@ -10,8 +12,7 @@ import (
 // primitives and vpx_dsp/variance.c sub-pixel variance primitives.
 
 func SSE16x16(src []byte, srcStride int, ref []byte, refStride int) int {
-	_, sse := varianceBlock(src, srcStride, ref, refStride, 16, 16)
-	return sse
+	return int(pixel.SSE16(src, srcStride, ref, refStride, 16))
 }
 
 // SSE16x16PtrFast is the SIMD-bypass entry point used by hot callers
@@ -34,23 +35,19 @@ func SSE8x8PtrFast(src *byte, srcStride int, ref *byte, refStride int) int {
 }
 
 func SSE16x8(src []byte, srcStride int, ref []byte, refStride int) int {
-	_, sse := varianceBlock(src, srcStride, ref, refStride, 16, 8)
-	return sse
+	return int(pixel.SSE16(src, srcStride, ref, refStride, 8))
 }
 
 func SSE8x16(src []byte, srcStride int, ref []byte, refStride int) int {
-	_, sse := varianceBlock(src, srcStride, ref, refStride, 8, 16)
-	return sse
+	return int(pixel.SSE8(src, srcStride, ref, refStride, 16))
 }
 
 func SSE8x8(src []byte, srcStride int, ref []byte, refStride int) int {
-	_, sse := varianceBlock(src, srcStride, ref, refStride, 8, 8)
-	return sse
+	return int(pixel.SSE8(src, srcStride, ref, refStride, 8))
 }
 
 func SSE8x4(src []byte, srcStride int, ref []byte, refStride int) int {
-	_, sse := varianceBlock(src, srcStride, ref, refStride, 8, 4)
-	return sse
+	return int(pixel.SSE8(src, srcStride, ref, refStride, 4))
 }
 
 func SSE4x8(src []byte, srcStride int, ref []byte, refStride int) int {
@@ -177,6 +174,12 @@ func subpelVariance(src []byte, srcStride int, xOffset int, yOffset int, ref []b
 		// (sse - sum*sum/N, sse) contract.
 		sum, sse := varianceBlock(src, srcStride, ref, refStride, width, height)
 		return sse - sum*sum/(width*height), sse
+	}
+	// Both fractional axes require the same extra row/column as the scalar
+	// two-pass path. Split blocks can reuse the fused SIMD statistics kernel.
+	if pixel.Enabled && (width != 16 || height != 16) && xOffset != 0 && yOffset != 0 {
+		sum, sse := pixel.SubpelStats(src, srcStride, ref, refStride, width, height, tables.BilinearFilters[xOffset], tables.BilinearFilters[yOffset])
+		return int(sse) - sum*sum/(width*height), int(sse)
 	}
 	if width == 16 && height == 16 && (xOffset == 0 || yOffset == 0) {
 		if xOffset == 0 {

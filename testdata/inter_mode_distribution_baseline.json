@@ -1,17 +1,6 @@
 {
   "fixtures": {
-    "rt-cpu8-1280x720-bench-noise": {
-      "diff_pp": {
-        "zeromv": -0.28174603174603174,
-        "nearestmv": -8.003968253968253,
-        "nearmv": 6.611111111111111,
-        "newmv": 1.7380952380952381,
-        "intra": -0.06349206349206349
-      },
-      "l1_pp": 16.698412698412696,
-      "eob_sum_ratio": 0.7164051025628332
-    },
-    "rt-cpu8-128x128-bench-noise": {
+    "rt-fixed-cpu8-1280x720-bench-noise": {
       "diff_pp": {
         "zeromv": 0,
         "nearestmv": 0,
@@ -22,7 +11,7 @@
       "l1_pp": 0,
       "eob_sum_ratio": 1
     },
-    "rt-cpu8-128x128-panning": {
+    "rt-fixed-cpu8-128x128-bench-noise": {
       "diff_pp": {
         "zeromv": 0,
         "nearestmv": 0,
@@ -31,20 +20,9 @@
         "intra": 0
       },
       "l1_pp": 0,
-      "eob_sum_ratio": 1.0018313676653725
+      "eob_sum_ratio": 1
     },
-    "rt-cpu8-256x256-bench-noise": {
-      "diff_pp": {
-        "zeromv": 0,
-        "nearestmv": 0.0558035714285694,
-        "nearmv": 0.055803571428571175,
-        "newmv": -0.1116071428571428,
-        "intra": 0
-      },
-      "l1_pp": 0.22321428571428337,
-      "eob_sum_ratio": 0.9708412746477619
-    },
-    "rt-cpu8-256x256-panning": {
+    "rt-fixed-cpu8-128x128-panning": {
       "diff_pp": {
         "zeromv": 0,
         "nearestmv": 0,
@@ -53,9 +31,31 @@
         "intra": 0
       },
       "l1_pp": 0,
-      "eob_sum_ratio": 1.0000924470740502
+      "eob_sum_ratio": 1
     },
-    "rt-cpu8-64x64-panning": {
+    "rt-fixed-cpu8-256x256-bench-noise": {
+      "diff_pp": {
+        "zeromv": 0,
+        "nearestmv": 0.390625,
+        "nearmv": -0.4464285714285714,
+        "newmv": 0.05580357142857162,
+        "intra": 0
+      },
+      "l1_pp": 0.892857142857143,
+      "eob_sum_ratio": 0.9748522112983277
+    },
+    "rt-fixed-cpu8-256x256-panning": {
+      "diff_pp": {
+        "zeromv": 0,
+        "nearestmv": 0,
+        "nearmv": 0,
+        "newmv": 0,
+        "intra": 0
+      },
+      "l1_pp": 0,
+      "eob_sum_ratio": 1
+    },
+    "rt-fixed-cpu8-64x64-panning": {
       "diff_pp": {
         "zeromv": 0,
         "nearestmv": 0,

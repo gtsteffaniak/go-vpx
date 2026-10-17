@@ -29,6 +29,14 @@ func runBenchmark(cfg benchConfig) (benchReport, error) {
 	for i := range frames {
 		frames[i] = makeBenchmarkFrame(cfg.Width, cfg.Height, i)
 	}
+	var reference *referenceReport
+	if cfg.ReferenceFirst && cfg.LibvpxVpxenc != "" {
+		ref, err := runLibvpxBenchmark(cfg, frames, deadlineName)
+		if err != nil {
+			return benchReport{}, err
+		}
+		reference = &ref
+	}
 
 	encoderOpts := benchmarkEncoderOptions(cfg, deadline)
 	var phaseStats phaseStatsState
@@ -187,12 +195,16 @@ func runBenchmark(cfg benchConfig) (benchReport, error) {
 		report.PhaseNS = stats
 	}
 	if cfg.LibvpxVpxenc != "" {
-		reference, err := runLibvpxBenchmark(cfg, frames, deadlineName)
-		if err != nil {
-			return benchReport{}, err
+		if reference == nil {
+			ref, err := runLibvpxBenchmark(cfg, frames, deadlineName)
+			if err != nil {
+				return benchReport{}, err
+			}
+			reference = &ref
 		}
-		report.Reference = &reference
-		report.Comparison = buildComparisonReport(report, reference)
+		report.Reference = reference
+		report.ReferenceFirst = cfg.ReferenceFirst
+		report.Comparison = buildComparisonReport(report, *reference)
 	}
 	return report, nil
 }

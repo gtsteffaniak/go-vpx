@@ -1,8 +1,9 @@
-//go:build (!arm64 && !amd64) || purego
-
 package dsp
 
-import "github.com/thesyncim/govpx/internal/vp8/tables"
+import (
+	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/thesyncim/govpx/internal/vp8/tables"
+)
 
 // Pure-Go fallback for the 16-wide first-pass bilinear filter on
 // architectures without a NEON port. Mirrors libvpx v1.16.0
@@ -10,6 +11,11 @@ import "github.com/thesyncim/govpx/internal/vp8/tables"
 
 func varFilterBlock2DBilinearFirstPass16(src []byte, srcStride int,
 	dst *[17 * 16]uint16, height int, filter [2]int16) {
+	if pixel.Enabled {
+		pixel.BilinearFirst(src, srcStride, dst[:], 16, height, filter)
+		return
+	}
+
 	f0 := int(filter[0])
 	f1 := int(filter[1])
 	const round = tables.FilterWeight / 2

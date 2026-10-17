@@ -1,8 +1,9 @@
-//go:build (!arm64 && !amd64) || purego
-
 package dsp
 
-import "github.com/thesyncim/govpx/internal/vp8/tables"
+import (
+	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/thesyncim/govpx/internal/vp8/tables"
+)
 
 // Pure-Go fallbacks for the width-8 / width-4 bilinear-filter subpel
 // kernels used by SubpelVariance{8x16,8x8,8x4,4x8,4x4}. Mirrors
@@ -10,21 +11,41 @@ import "github.com/thesyncim/govpx/internal/vp8/tables"
 
 func varFilterBlock2DBilinearFirstPass8(src []byte, srcStride int,
 	dst *[17 * 16]uint16, height int, filter [2]int16) {
+	if pixel.Enabled {
+		pixel.BilinearFirst(src, srcStride, dst[:], 8, height, filter)
+		return
+	}
+
 	bilinearFirstPassScalar(src, srcStride, dst, 8, height, filter)
 }
 
 func varFilterBlock2DBilinearFirstPass4(src []byte, srcStride int,
 	dst *[17 * 16]uint16, height int, filter [2]int16) {
+	if pixel.Enabled {
+		pixel.BilinearFirst(src, srcStride, dst[:], 4, height, filter)
+		return
+	}
+
 	bilinearFirstPassScalar(src, srcStride, dst, 4, height, filter)
 }
 
 func varFilterBlock2DBilinearSecondPass8(src *[17 * 16]uint16, dst []byte,
 	height int, filter [2]int16) {
+	if pixel.Enabled {
+		pixel.BilinearSecond(src[:], dst, 8, height, filter)
+		return
+	}
+
 	bilinearSecondPassScalar(src, dst, 8, height, filter)
 }
 
 func varFilterBlock2DBilinearSecondPass4(src *[17 * 16]uint16, dst []byte,
 	height int, filter [2]int16) {
+	if pixel.Enabled {
+		pixel.BilinearSecond(src[:], dst, 4, height, filter)
+		return
+	}
+
 	bilinearSecondPassScalar(src, dst, 4, height, filter)
 }
 

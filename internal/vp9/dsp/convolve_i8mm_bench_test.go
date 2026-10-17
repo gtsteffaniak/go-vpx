@@ -3,9 +3,9 @@
 package dsp
 
 import (
+	"github.com/thesyncim/govpx/internal/pixel"
 	"math/rand/v2"
 	"testing"
-	"unsafe"
 
 	"github.com/thesyncim/govpx/internal/vp9/tables"
 )
@@ -21,42 +21,42 @@ func benchConvolveSetup(w, h int) (src []byte, dst []byte, stride int) {
 	return src, dst, stride
 }
 
-func BenchmarkConvolveHoriz8wNEON(b *testing.B) {
+func BenchmarkConvolveHorizGoSIMD(b *testing.B) {
 	src, dst, stride := benchConvolveSetup(32, 32)
 	filterRow := &tables.SubPelFilters8[5]
+	_ = filterRow
 	b.SetBytes(32 * 32)
 	for i := 0; i < b.N; i++ {
-		convolveHoriz8wNEON(unsafe.SliceData(src[16*stride:]), stride,
-			unsafe.SliceData(dst), stride, &filterRow[0], 32, 32)
+		VpxConvolve8Horiz(src, stride, dst, stride, &tables.SubPelFilters8, 5, 16, 0, 16, 32, 32, 16*stride+3)
 	}
 }
 
-func BenchmarkConvolveHoriz8I8MM(b *testing.B) {
-	src, dst, stride := benchConvolveSetup(32, 32)
-	f8, _ := filterTapsInt8(&tables.SubPelFilters8[5])
-	b.SetBytes(32 * 32)
-	for i := 0; i < b.N; i++ {
-		convolveHoriz8I8MM(unsafe.SliceData(src[16*stride:]), stride,
-			unsafe.SliceData(dst), stride, &f8[0], 32, 32)
-	}
-}
-
-func BenchmarkConvolveVert8wNEON(b *testing.B) {
+func BenchmarkConvolveHorizDispatched(b *testing.B) {
 	src, dst, stride := benchConvolveSetup(32, 32)
 	filterRow := &tables.SubPelFilters8[5]
+	_ = filterRow
 	b.SetBytes(32 * 32)
 	for i := 0; i < b.N; i++ {
-		convolveVert8wNEON(unsafe.SliceData(src[8*stride:]), stride,
-			unsafe.SliceData(dst), stride, &filterRow[0], 32, 32)
+		pixel.Filter(src[16*stride:], stride, dst, stride, 32, 32, 1, filterRow[:])
 	}
 }
 
-func BenchmarkConvolveVert8I8MM(b *testing.B) {
+func BenchmarkConvolveVertGoSIMD(b *testing.B) {
 	src, dst, stride := benchConvolveSetup(32, 32)
-	f8, _ := filterTapsInt8(&tables.SubPelFilters8[5])
+	filterRow := &tables.SubPelFilters8[5]
+	_ = filterRow
 	b.SetBytes(32 * 32)
 	for i := 0; i < b.N; i++ {
-		convolveVert8I8MM(unsafe.SliceData(src[8*stride:]), stride,
-			unsafe.SliceData(dst), stride, &f8[0], 32, 32)
+		VpxConvolve8Vert(src, stride, dst, stride, &tables.SubPelFilters8, 0, 16, 5, 16, 32, 32, 11*stride)
+	}
+}
+
+func BenchmarkConvolveVertDispatched(b *testing.B) {
+	src, dst, stride := benchConvolveSetup(32, 32)
+	filterRow := &tables.SubPelFilters8[5]
+	_ = filterRow
+	b.SetBytes(32 * 32)
+	for i := 0; i < b.N; i++ {
+		pixel.Filter(src[8*stride:], stride, dst, stride, 32, 32, stride, filterRow[:])
 	}
 }

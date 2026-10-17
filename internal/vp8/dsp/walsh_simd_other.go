@@ -1,5 +1,3 @@
-//go:build (!arm64 && !amd64) || purego
-
 package dsp
 
 // Pure-Go fallback dispatcher for the InverseWalsh4x4 SIMD entry point.
@@ -7,5 +5,7 @@ package dsp
 // exactly via inverseWalsh4x4Scalar.
 
 func inverseWalsh4x4SIMD(input *[16]int16, mbDQCoeff []int16) {
-	inverseWalsh4x4Scalar(input, mbDQCoeff)
+	if !inverse4Go(input, nil, 0, nil, 0, true, mbDQCoeff) {
+		inverseWalsh4x4Scalar(input, mbDQCoeff)
+	}
 }

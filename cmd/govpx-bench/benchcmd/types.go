@@ -28,6 +28,7 @@ type benchConfig struct {
 	LibvpxVpxencVP9Stats string
 	LibvpxOracle         string
 	LibvpxArgs           []string
+	ReferenceFirst       bool
 
 	// QualityGate is consulted by runBenchmark/Main after the encode pass
 	// completes. When Enabled is true the bench exits non-zero on regression.
@@ -76,6 +77,7 @@ type benchReport struct {
 	DroppedFrames     int                      `json:"dropped_frames"`
 	QuantizerHist     map[string]int           `json:"quantizer_histogram"`
 	Reference         *referenceReport         `json:"reference,omitempty"`
+	ReferenceFirst    bool                     `json:"reference_first,omitempty"`
 	Comparison        *comparisonReport        `json:"comparison_vs_reference,omitempty"`
 	Options           benchConfigSummary       `json:"options"`
 }
