@@ -40,34 +40,59 @@ encode/decode.
 
 ## Performance
 
-Historical assembly baseline (before the Go 1.27 SIMD migration; see
-[SIMD_PORT.md](SIMD_PORT.md) for current measurements and limitations):
-720p realtime, 30 fps, 2.5 Mbps CBR, `cpu-used=8`, Apple M4 Max, Go 1.26.3,
-measured 2026-07-16 against libvpx v1.16.0's own reported encode times
-(identical output bytes and drop topology in every encode row):
+The Go 1.27 migration removes all handwritten assembly and uses
+`simd/archsimd` on arm64 and amd64. Performance work is ongoing: the Go SIMD
+implementation has remaining ARM and CPU-specific x64 gaps against the former
+Go assembly, and larger gaps against optimized upstream libvpx.
 
-| Workload | govpx | libvpx (C + asm) | gap |
-| --- | --- | --- | --- |
-| VP8 encode, 1 thread | 7.3 ms/frame | 5.4 ms/frame | 1.36× |
-| VP9 encode, 1 thread | 10.3 ms/frame | 5.5 ms/frame | 1.87× |
-| VP9 encode, 8 threads row-MT | 2.6 ms/frame | 1.3 ms/frame | 2.0× |
-| VP8 decode | 1.8 ms/frame | 1.6 ms/frame | 1.17× |
-| VP9 decode | 1.9 ms/frame | 1.4 ms/frame | 1.31× |
+Recent native comparisons against the removed Go assembly use Go 1.27.2,
+SIMD enabled, PGO disabled, one encoder thread, identical generated inputs and
+six balanced variant permutations. Times are medians per input frame, including
+dropped inputs; all six assembly/current pairs agree on the direction below.
 
-Quality on the same runs: VP8 PSNR/SSIM deltas are exactly 0 (byte-identical
-streams); VP9 measures −0.05 dB PSNR / +0.00002 SSIM at identical output size
-and identical encoded/dropped topology.
+| CPU | Workload | Former Go assembly | Go SIMD | Go SIMD time delta |
+| --- | --- | ---: | ---: | ---: |
+| Apple M4 Max | VP8 720p | 7.283 ms | 8.322 ms | +14.27% |
+| AMD EPYC 9V45 | VP8 720p | 11.386 ms | 13.866 ms | +21.78% |
+| AMD EPYC 9V45 | VP9 320x180 | 4.418 ms | 2.461 ms | −44.28% |
+| AMD EPYC 9V45 | VP9 720p | 37.373 ms | 19.175 ms | −48.69% |
 
-Benchmark numbers depend on hardware, content, and configuration — reproduce
-them for your workload with the bundled tool (see
-[Benchmarking](#benchmarking)). The speed gap is an active engineering front;
-see `docs/perf-phase3-structural-plan.md` for the measured optimization
-program.
+These measurements use codec checkpoint `db5b44fe`. Fresh ARM parent/current
+confirmations show 2.88% less VP8 time over 60 frames and 3.14% less over 300
+frames, all twelve pairs faster; those separate runs do not establish a new
+assembly gap. The x64 VP8 result depends on CPU: an earlier EPYC 7763 run at
+`9a442f66` takes 4.34% less time than its same-run assembly control. Absolute
+times across CPUs or jobs cannot isolate a code change. ARM VP9 performance
+also remains an open optimization target.
+
+The optimized-C comparison separately builds pristine libvpx v1.16.0 with its
+native assembly/intrinsics and runtime dispatch. It alternates Go/reference
+order over six runs, measures codec-internal time and checks decoded quality
+after timing. Both examples below use 720p, 2500 kbps CBR, one thread and PGO
+off. The ARM codec checkpoint is `211125e5`; the x64 checkpoint is `9a442f66`.
+
+| CPU | Workload | Go SIMD | Optimized libvpx | Go time delta |
+| --- | --- | ---: | ---: | ---: |
+| Apple M4 Max | VP8, fixed cpu-used=−8 | 6.997 ms | 3.221 ms | +117.26% |
+| Apple M4 Max | VP9, cpu-used=8 | 12.589 ms | 4.842 ms | +159.99% |
+| AMD EPYC 7763 | VP8, fixed cpu-used=−8 | 18.320 ms | 6.781 ms | +170.17% |
+| AMD EPYC 7763 | VP9, cpu-used=8 | 32.668 ms | 10.102 ms | +223.40% |
+
+Within each fixed-speed VP8 comparison, measured PSNR, SSIM, payload size and
+encoded/drop counts match between codecs; matching these statistics alone does
+not prove bitstream identity. VP9 quality and payload differ slightly. Adaptive
+VP8 cpu-used=8 is a separate workload: on x64, C produces better measured quality
+with fewer bytes, so its timing is not presented as equivalent-quality throughput.
+
+[SIMD_PORT.md](SIMD_PORT.md) links complete raw results, quality differences,
+controls, rejected designs and reproduction commands. These synthetic workloads
+show where optimization is needed; reproduce with your own content and settings
+using the bundled [benchmark tool](#benchmarking).
 
 ## Install
 
-Go 1.27 or newer is required. The module pins the default toolchain to Go
-1.27.2 so local `go` commands use the same patch level as CI.
+Go 1.27 or newer is required. The module selects Go 1.27.2 as its default
+toolchain, matching CI.
 
 ```sh
 go get github.com/thesyncim/govpx
@@ -77,6 +102,18 @@ Use `GOEXPERIMENT=simd go build ./...` to enable Go's experimental
 `simd/archsimd` kernels. `make` targets and `scripts/go.sh` enable SIMD by
 default. On amd64, runtime AVX2 detection guards the SIMD kernels; arm64 uses
 mandatory ASIMD. Plain `go build` and `-tags purego` select scalar Go fallbacks.
+Use `scripts/go.sh` for repository builds, tests and tools. It selects Go 1.27.2,
+enables SIMD by default and shares build caches across branches/worktrees using
+the Git common directory. It invokes `~/.codex/bin/project-env` when installed;
+set `CODEX_AGENT_ID` to a distinct value for concurrent agents. For example:
+
+```sh
+scripts/go.sh test ./...
+scripts/go.sh build ./...
+GOEXPERIMENT= scripts/go.sh test ./...  # scalar experiment-off control
+scripts/go.sh test -tags=purego ./...
+```
+
 See [SIMD_PORT.md](SIMD_PORT.md) for migration and performance validation.
 
 ## Decode
@@ -342,9 +379,9 @@ VP8 through pion/webrtc to a browser.
 ## Benchmarking
 
 ```sh
-go run ./cmd/govpx-bench
-go run ./cmd/govpx-bench -decode -frames=120
-go run ./cmd/govpx-bench -format=json
+scripts/go.sh run ./cmd/govpx-bench
+scripts/go.sh run ./cmd/govpx-bench -decode -frames=120
+scripts/go.sh run ./cmd/govpx-bench -format=json
 ```
 
 By default the encode benchmark compares against libvpx when
@@ -354,17 +391,25 @@ By default the encode benchmark compares against libvpx when
 let the bench build the pinned tools when no binary is found. Decoder
 reference timing uses `govpx-vpx-oracle` only in `-decode` mode.
 
-The table in [Performance](#performance) was produced with this tool at
-`-width=1280 -height=720 -fps=30 -bitrate=2500 -mode=realtime -cpu-used=8`
-(VP9 MT rows add `-threads=8 -row-mt -noise-sensitivity=0`). Reproduce on
-the Go version, CPU, frame size, bitrate, deadline, thread count, and build
-tags that match your workload before drawing conclusions.
+The [performance evidence](SIMD_PORT.md) records exact commands and compiler,
+CPU, frame-count, bitrate, deadline, thread-count and build controls for each
+run. Use `-pgo=off` when reproducing the migration comparisons, for example:
+
+```sh
+scripts/go.sh build -pgo=off -o /tmp/govpx-bench ./cmd/govpx-bench
+python3 scripts/benchmark-libvpx.py /tmp/govpx-bench /path/to/optimized/vpxenc /tmp/govpx-libvpx-results
+```
+
+The driver performs balanced, repeated comparisons and records quality
+separately. `scripts/benchmark-libvpx-amd64.sh` also builds the pinned optimized
+upstream on native Linux amd64. Match the recorded controls to your workload
+before drawing conclusions.
 
 Plotting is optional and requires an ffmpeg binary with both the
 `libvpx` encoder and the `libvmaf` filter:
 
 ```sh
-go run ./cmd/govpx-bench \
+scripts/go.sh run ./cmd/govpx-bench \
     -plot benchmarks/govpx-vs-libvpx.svg \
     -width=1280 -height=720 -frames=120 -fps=30 \
     -bitrate=2500 -mode=realtime -threads=1
