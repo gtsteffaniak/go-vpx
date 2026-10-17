@@ -1184,3 +1184,176 @@ cumulative / 1.62 s total CPU, versus the old batch ASM leaf's 0.02 s /
 batch candidates require new matched observable fixtures.
 [All 85 raw files and analysis](benchmarks/baselines/go127-simd-amd64/2026-10-17-db5b44fe)
 preserve the CPU-specific evidence and the outlier.
+
+## Shared-table VP8 quantization follow-up
+
+The batch path now retains shared quantization tables across blocks, using
+128-bit ARM vectors and full-block 256-bit AVX2 vectors. Batches below eight
+blocks retain the existing path. Conservative bounds/alias guards preserve
+fallback behavior, including signed tables and overlapping block buffers.
+
+On the M4 Max, six balanced 720p realtime comparisons reduce VP8 median encode
+time from 7.963865 to 7.844487 ms/input (-1.499%, all six pairs faster). The
+same-run old assembly median is 6.840786 ms: current SIMD remains +14.672%
+slower, with every pair slower. Eight/16/25-block quantization medians improve
+48.6%/52.8%/55.6% versus the parent, with zero allocations; they still trail
+assembly. The unchanged VP9 control has mixed pairs and no attributed gain.
+
+Full native tests, experiment-off/purego codec suites, race/checkptr scalar
+oracles, strict byte parity, 18/18 parity cases and refreshed PGO/source gates
+pass. Required-SIMD x64 differential tests pass under Rosetta; native AVX2
+performance remains pending CI. This is not evidence of a native x64 speedup.
+[Raw measurements, codegen and validation](benchmarks/baselines/go127-simd-arm64/2026-10-17-quant-batch)
+record the remaining assembly gap. A separate
+[rejected chroma fusion](benchmarks/baselines/go127-simd-arm64/2026-10-17-rejected-chroma-fusion)
+retains its raw results and source patch; it is excluded from production
+because integrated public comparisons did not sustain the prototype gain.
+
+A fresh optimized libvpx comparison for this codec measures VP8 adaptive at
+7.699581/4.730708 ms/input (Go/C, +62.76%) and fixed speed at 6.509613/3.011758
+ms (+116.14%). Within each VP8 workload, measured PSNR, SSIM, payload size and
+encoded/drop counts match. VP9 720p measures 12.061530/4.599933 ms (+162.21%),
+with small documented output/quality differences. Six rounds alternate
+execution order; codec-internal timers and separate quality passes exclude
+subprocess/file wall time. Optimized C remains substantially faster.
+[Current ARM Go/C raw evidence and provenance](benchmarks/baselines/go127-simd-arm64/2026-10-17-quant-batch-libvpx)
+keep these results separate from the older codec's C comparison.
+
+A fresh 300-input three-way comparison confirms the batch change at
+7.993610 to 7.857803 ms/input (-1.699%, all six pairs faster). Same-run old
+assembly is 7.150376 ms: current remains +9.894% slower, with every pair slower.
+Non-timing outputs and zero allocations match across all variants. This longer
+workload is distinct from the 60-input comparison above. Its raw reports and
+driver are retained alongside the short-run batch evidence.
+
+Further [filter and quantization-loop designs](benchmarks/baselines/go127-simd-arm64/2026-10-17-rejected-filter-and-quant-loop)
+are excluded from production after mixed or slower integrated results. The
+profile and reproducible patches are retained for future compiler/CPU work.
+
+The first x64 batch checkpoint (`048a5f3e`) regresses on EPYC 7763: eight-block
+quantization is +63.866% versus the base, and VP8 encode is +2.902%, all six
+pairs slower. All 80 kernels have six allocation-free samples per variant;
+all semantic fields match. [Raw failed candidate and analysis](benchmarks/baselines/go127-simd-amd64/2026-10-17-048a5f3e)
+remain available. Generated code exposes legacy MOVUPS for the signed-table
+zero comparison while YMM values are live; the profile concentrates in this
+check. The follow-up uses the existing VEX-loaded zero table. Its required-SIMD
+oracles, generated-code check, refreshed PGO and source gates pass. Native
+`3d485291` validation on EPYC 7763 confirms the fix: quantization batches of
+8/16/25 blocks improve 59.4%/65.9%/69.3% versus base, all six pairs faster.
+Public VP8 improves 0.685% versus base and 4.905% versus old assembly, all six
+pairs faster. Counts 1/2 regress 5.0%/6.9%; these remain recorded tradeoffs.
+[Validation](benchmarks/baselines/go127-simd-amd64/2026-10-17-quant-vex-validation).
+
+The next x64 candidate retains rolling rows in 128-bit vertical filters and
+clears AVX upper bits at quantizer exits. Its isolated filter test on EPYC
+9V74 improves public VP8 2.414%, all six pairs faster, but still trails old
+assembly by 19.070%. Horizontal dot-product and wider rolling variants are
+excluded because they do not improve the public workload. These independent
+measurements are not additive. Combined `04c05786` native validation on EPYC
+9V45 improves VP8 5.528% versus base (all six pairs faster), but still trails
+old assembly by 13.026% (all six slower). All 80 kernels have six zero-allocation
+samples per variant; all recorded semantic/configuration fields match. Its
+separate optimized-C job on 9V45 measures fixed-8 VP8 at 10.723892/4.366983 ms
+(Go/C, +145.568%) with matching measured output/quality; adaptive C output
+varies across timed samples and is not a matched-quality throughput claim.
+[Comparisons and integration checks](benchmarks/baselines/go127-simd-amd64/2026-10-17-rolling-integration).
+
+
+ARM VP8 vertical filtering now retains finalized columns and transposes them
+into exact 16-byte row stores plus one tail byte. The complete disjoint tile
+is already proved by the entry point; all edge arithmetic still occurs in
+its original order. The 720p 60-input confirmation improves 1.190% versus
+parent (all six pairs faster); 300 inputs improve 1.558%, all six faster.
+Current/assembly medians in that longer run are 7.820088/6.942207 ms/input:
+the remaining assembly gap is 12.646%, all six pairs slower. All 23 non-timing
+fields, including zero allocations, match. Short-run repeats include one
+mixed control, retained alongside the two all-six wins; no universal CPU or
+noise claim is made. Direct high-half interleaves, preloaded constants and
+an inline row-store body are excluded after unconvincing fresh comparisons.
+[Complete accepted/rejected measurements and reproduction](benchmarks/baselines/go127-simd-arm64/2026-10-17-filter-row-stores).
+
+The refreshed optimized-libvpx comparison for `d87df7a7` measures VP8 adaptive
+at 7.818055/4.910325 ms/input (Go/C, +59.217%) and fixed speed at
+6.634663/3.088625 ms (+114.810%). Measured PSNR, SSIM, output sizes and frame/drop
+counts match within each workload, including timing/quality passes; this does
+not by itself prove bitstream identity. Six rounds alternate execution order,
+with codec timers and separate quality passes. The optimized C build is the
+same pinned v1.16.0 NEON binary as the prior comparison; all timing samples
+are new. [Raw timings and controls](benchmarks/baselines/go127-simd-arm64/2026-10-17-filter-row-stores-libvpx).
+
+
+The next x64 kernel processes a full 16-byte statistics row in one AVX2
+packet, retaining exact int16 signed sums for at most 64 rows and int32
+squared-error accumulators. Native `618ff11d` on EPYC 7763 reduces VP8 encode
+time 3.363% versus its preceding SIMD source, all six pairs faster; it takes
+11.662% less time than original assembly in that run, all six faster. Shared
+statistics are also live in VP9: its 320p workload improves 2.967%, all six
+pairs faster, while 720p improves 1.299% with mixed pairs. No cross-CPU gain or
+closure of the prior 9V45 gap is inferred. All 81 kernel cases are allocation
+free; two one-allocation public VP9 outliers and an unrelated quant8 control
+regression remain in the [native evidence and raw archives](benchmarks/baselines/go127-simd-amd64/2026-10-17-stats16).
+
+
+Combined `c065a265` validation on EPYC 7763 improves VP8 7.441% versus the
+PR base and 12.409% versus original assembly, all six pairs faster. VP9
+320p improves 1.894% versus base, all six faster; 720p improves 0.996% at the
+median with mixed pairs. All 81 kernel cases have six allocation-free samples
+per variant, and every recorded public semantic/configuration and allocation
+field matches in this run. Quantization counts 1/2 still regress 3.308%/2.342%
+versus base, all six slower. Hosted tests, native selected-backend/oracle tests
+and the optimized-C job all pass. Its separate EPYC 9V45 C job measures
+fixed-speed VP8 at 10.267339/4.104000 ms (Go/C, +150.179%) with matching measured
+quality, payload and frame statistics. Adaptive output quality differs.
+This does not supply a 9V45 assembly comparison for the newer variance source.
+[Exact-head audit and complete raw archives](benchmarks/baselines/go127-simd-amd64/2026-10-17-c065a265-validation).
+
+Further ARM tail extraction, bounded squared-error loads, mask reduction and
+high-byte widening are excluded. Short comparisons have mixed pair signs;
+fresh 300-input tail, bounds and mask comparisons measure -0.135%, +0.228%
+and +0.448% versus the selected row-store implementation, with mixed pairs.
+All 23 recorded non-timing fields and zero allocations match, and scalar
+oracles pass; these changes do not establish a sustained encoder gain.
+[Reproducible rejected probes, raw samples and generated code](benchmarks/baselines/go127-simd-arm64/2026-10-17-rejected-row-tail-and-metrics).
+
+
+ARM full-width denoising now processes sixteen pixels in checked byte-vector
+loads and stores. Signed per-column adjustment sums remain exact through the
+scalar upper clamp; short spans, unsupported parameters and partial aliases
+retain the existing path. The fresh 300-input six-pair confirmation improves
+VP8 0.614% versus its preceding SIMD implementation, all six pairs faster,
+with identical recorded non-timing fields and zero allocations. A separate
+same-run assembly comparison leaves an 11.743% ARM VP8 gap. A pointer-load
+variant is excluded because its incremental encoder gain does not survive
+the direct confirmation. Full tests, race/checkptr, experiment-off, purego,
+strict byte parity and refreshed PGO checks pass.
+[Measurements, scalar oracles and generated-code proof](benchmarks/baselines/go127-simd-arm64/2026-10-17-byte-denoiser).
+
+Temporary x64 probe sources are retained in a verified Git bundle before
+remote branch cleanup. Accepted rolling and statistics implementations are
+already integrated; rejected experiments remain evidence rather than merge
+candidates. [Source archive and branch audit](benchmarks/baselines/go127-simd-amd64/2026-10-17-experiment-archive).
+
+
+The selected ARM byte denoiser has a fresh optimized-libvpx comparison:
+adaptive VP8 Go/C medians are 7.681322/4.866042 ms/input (+57.856%);
+fixed-speed medians are 6.610026/3.064633 ms/input (+115.687%). Each has
+six alternating-order rounds, separate decoded-quality verification, matching
+measured quality/output/frame statistics and unchanged binary hashes.
+[Complete controls, timings and quality](benchmarks/baselines/go127-simd-arm64/2026-10-17-byte-denoiser-libvpx).
+
+The x64 byte-zip and mask probes remain excluded: byte-zip has mixed public
+VP8 signs and a VP9 regression; mask reduction does not confirm its first
+VP8 gain and regresses VP9 in its second run. The same-run preceding selected
+SIMD source on EPYC 9V74 still trails assembly by about 16.1% in VP8. Wins
+on EPYC 7763 and Xeon 8573C therefore do not establish an all-x64 win.
+[Both rejected designs, complete native samples and control drift](benchmarks/baselines/go127-simd-amd64/2026-10-17-byte-zip-and-mask-rejections).
+
+
+A width-gated x64 horizontal dot-product probe improves VP8 2.999% versus
+its pinned SIMD parent on EPYC 7763, all six pairs faster. It is held out
+of production pending confirmation: VP9 320p regresses 0.754% in five pairs,
+720p is mixed, and unrelated controls also drift. The dot helper is live
+in VP8; VP9 supplies full eight-tap arrays and cannot select this six-tap
+helper, so the VP9 shift is not direct evidence of dot arithmetic cost.
+All 81 kernels have six zero-allocation samples; scalar/alias oracles pass.
+[Full results, controls and dispatch evidence](benchmarks/baselines/go127-simd-amd64/2026-10-17-gated-dot-hold).
