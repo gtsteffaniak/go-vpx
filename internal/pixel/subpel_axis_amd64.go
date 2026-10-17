@@ -30,6 +30,9 @@ func subpelStatsAxisHorizontal16(src []byte, ss int, ref []byte, rs, w, h int, f
 	}
 	return int(sum32(sum.GetLo().Add(sum.GetHi()))), uint32(sum32(sse.GetLo().Add(sse.GetHi())))
 }
+
+// Keep the rolling row widened: a byte-vector phi can lower to a legacy SSE
+// register copy inside the AVX2 loop and cause transitions on native x64.
 func subpelStatsAxisVertical16(src []byte, ss int, ref []byte, rs, w, h int, f [2]int16) (int, uint32) {
 	sp, rp := unsafe.Pointer(unsafe.SliceData(src)), unsafe.Pointer(unsafe.SliceData(ref))
 	defer archsimd.ClearAVXUpperBits()
@@ -37,12 +40,12 @@ func subpelStatsAxisVertical16(src []byte, ss int, ref []byte, rs, w, h int, f [
 	var sum, sse archsimd.Int32x8
 	for x := 0; x < w; x += 16 {
 		so, ro := x, x
-		a := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(sp, x)))
+		a := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(sp, x))).ExtendToUint16().BitsToInt16()
 		so += ss
 		for range h {
-			b := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(sp, so)))
+			b := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(sp, so))).ExtendToUint16().BitsToInt16()
 			r := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(rp, ro)))
-			v := a.ExtendToUint16().BitsToInt16().Mul(f0).Add(b.ExtendToUint16().BitsToInt16().Mul(f1)).Add(round).ShiftAllRight(7)
+			v := a.Mul(f0).Add(b.Mul(f1)).Add(round).ShiftAllRight(7)
 			d := v.Sub(r.ExtendToUint16().BitsToInt16())
 			sum = sum.Add(d.DotProductPairs(ones))
 			sse = sse.Add(d.DotProductPairs(d))
