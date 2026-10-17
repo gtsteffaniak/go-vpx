@@ -397,6 +397,7 @@ run. Use `-pgo=off` when reproducing the migration comparisons, for example:
 
 ```sh
 scripts/go.sh build -pgo=off -o /tmp/govpx-bench ./cmd/govpx-bench
+mkdir -p /tmp/govpx-libvpx-results
 python3 scripts/benchmark-libvpx.py /tmp/govpx-bench /path/to/optimized/vpxenc /tmp/govpx-libvpx-results
 ```
 
