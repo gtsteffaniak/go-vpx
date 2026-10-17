@@ -1081,3 +1081,62 @@ work is not assumed. Fixed-speed VP8 and VP9 320p controls, complete quality
 results, timing contracts and raw samples are preserved in the
 [ARM libvpx evidence](benchmarks/baselines/go127-simd-arm64/2026-10-17-libvpx).
 These C results are distinct from comparisons against the removed Go assembly.
+
+
+### Native x64 optimized libvpx at 9a442f66
+
+The first [native libvpx job](https://github.com/thesyncim/govpx/actions/runs/39031352624/job/117392274827)
+passes on exact `9a442f66`. Native EPYC 7763, Go 1.27.2, GCC 13.3 / NASM
+2.16, one encoder thread, PGO off and six alternating Go/reference-first
+runs compare identical generated inputs and corresponding controls against
+pristine v1.16.0 (`1024874c`) with verified optimized upstream assembly.
+Codec-internal timers are used throughout; subprocess/file overhead and
+separate decoded quality passes remain visible.
+
+| Workload | Go ms/input | C ms/input | Go time delta |
+| --- | ---: | ---: | ---: |
+| VP9 320p, cpu8 | 4.353493 | 1.428450 | +204.77% |
+| VP9 720p, cpu8 | 32.668384 | 10.101667 | +223.40% |
+| VP8 720p, adaptive cpu8 | 22.183473 | 10.259817 | +116.22% |
+| VP8 720p, fixed cpu-8 | 18.320404 | 6.781175 | +170.17% |
+
+Every paired Go/C delta is positive. The fixed-8 VP8 comparison matches
+measured PSNR 27.157611 dB, SSIM 0.925927, 723593 payload bytes and 58/2
+encoded/dropped frames; it still takes 170.17% more Go time. Both run at
+2894.372 kbps, above the common 2500 kbps target. Adaptive VP8 is different
+work: C improves PSNR 27.983951 to 29.176639 dB and SSIM 0.908504 to
+0.933088 while reducing payload 685957 to 678205 bytes. It is not presented
+as identical-quality throughput. VP9 output/quality also differs slightly,
+with the same differences as the separate ARM comparison. All quality-pass
+payload/count statistics match corresponding timing samples; no timed
+bitstream identity is asserted. These are substantial remaining optimized-C
+gaps, not a universal performance-parity claim.
+[All 74 raw files, controls, configurations and explanation](benchmarks/baselines/go127-simd-amd64/2026-10-17-9a442f66-libvpx)
+are retained without discarding any pair.
+
+
+### ARM macroblock and internal edge fusion
+
+The ARM VP8 luma path combines a macroblock boundary and its three internal
+edges while preserving their store order and exact 20x16 window. Generated
+arithmetic shares the canonical byte filter; the selected vertical layout
+packs exact four-byte rows before eight column transposes. Non-ARM builds
+compile out the entire fused call and its slice construction. The x64 decoder
+hot body remains byte-identical to parent `9a442f66` (850 bytes).
+
+Fresh 60-frame confirmation improves 8.351395 to 8.110483 ms/input (-2.885%),
+and the 300-frame sequence improves 8.368106 to 8.105590 ms (-3.137%), all
+twelve pairs faster with identical output metadata and allocations. An initial
+three-way run shows a smaller, mixed -1.407% parent change; it retains same-run
+old assembly at 7.283229 ms versus current 8.322421 ms, still +14.268%. The
+older 26.6% and 17.75% gaps come from different runs and cannot be subtracted
+to attribute a gain. The unchanged VP9 control changes +0.456% with mixed pairs.
+
+9216 comparisons against the independent scalar libvpx port and 7200 against
+the independent int16 SIMD network pass, including exact minimum windows,
+unaligned addresses, sentinels, threshold extremes, race detection and checkptr.
+Full native, fallback, strict byte parity, all 18 parity-report checks, PGO and
+source/build-selection gates pass. Further helper expansion reduced instruction
+count without establishing an additional reliable encoder gain and is excluded.
+[Complete designs, raw measurements and validation](benchmarks/baselines/go127-simd-arm64/2026-10-17-macro-fusion)
+are retained. The ARM assembly gap and optimized-C gaps remain open.
