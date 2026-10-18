@@ -374,6 +374,25 @@ func splitBlockSAD(src vp8enc.SourceImage, ref *vp8common.Image, mbRow int, mbCo
 		}
 	}
 
+	if width >= 8 && src.Height > 0 && src.Width > 0 && height > 0 && width <= 16 && height <= 16 &&
+		(baseY < 0 || baseX < 0 || baseY+height > src.Height || baseX+width > src.Width) &&
+		refBaseY >= 0 && refBaseX >= 0 && refBaseY <= ref.CodedHeight-height && refBaseX <= ref.CodedWidth-width {
+		if refBlock, ok := refFullPelYSlice(ref, refBaseY, refBaseX, width, height); ok {
+			var scratch [256]byte
+			vp8enc.GatherClampedLumaBlock(src, baseY, baseX, width, height, scratch[:], 16)
+			switch {
+			case width == 16 && height == 8:
+				return dsp.SAD16x8(scratch[:], 16, refBlock, ref.YStride)
+			case width == 8 && height == 16:
+				return dsp.SAD8x16(scratch[:], 16, refBlock, ref.YStride)
+			case width == 8 && height == 8:
+				return dsp.SAD8x8(scratch[:], 16, refBlock, ref.YStride)
+			case width == 4 && height == 4:
+				return dsp.SAD4x4(scratch[:], 16, refBlock, ref.YStride)
+			}
+		}
+	}
+
 	// libvpx allocates every reference (cm->yv12_fb[]) and lookahead source
 	// buffer with 16-aligned width/height via vp8_yv12_alloc_frame_buffer
 	// (vp8/common/alloccommon.c:56-65 rounds (width|height) up to a
