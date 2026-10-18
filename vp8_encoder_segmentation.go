@@ -675,6 +675,46 @@ func skinPixel(y int, cb int, cr int, motion int) bool {
 	if y < skinYLow || y > skinYHigh {
 		return false
 	}
+	if uint(cb) > 255 || uint(cr) > 255 {
+		return classifySkinPixel(y, cb, cr, motion)
+	}
+	shift := uint(0)
+	if y < 60 {
+		shift += 2
+	}
+	if motion == 0 {
+		shift++
+	}
+	return skinChromaClasses[cb*256+cr]&(1<<shift) != 0
+}
+
+var skinChromaClasses = func() [256 * 256]uint8 {
+	var classes [256 * 256]uint8
+	for cb := range 256 {
+		for cr := range 256 {
+			var flags uint8
+			if classifySkinPixel(60, cb, cr, 1) {
+				flags |= 1
+			}
+			if classifySkinPixel(60, cb, cr, 0) {
+				flags |= 2
+			}
+			if classifySkinPixel(40, cb, cr, 1) {
+				flags |= 4
+			}
+			if classifySkinPixel(40, cb, cr, 0) {
+				flags |= 8
+			}
+			classes[cb*256+cr] = flags
+		}
+	}
+	return classes
+}()
+
+func classifySkinPixel(y int, cb int, cr int, motion int) bool {
+	if y < skinYLow || y > skinYHigh {
+		return false
+	}
 	if cb == 128 && cr == 128 {
 		return false
 	}
