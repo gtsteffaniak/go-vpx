@@ -368,6 +368,37 @@ func (ctx *splitMotionSubsetContext) selectMotion() (vp8enc.MotionVector, vp8com
 	var bestLeft [4]uint8
 	bestHasContexts := false
 
+	// Inherited labels and NEW4X4 often name the same predictor. Only the
+	// label rate differs: transform/token state is pure for this subset.
+	type candidateResult struct {
+		mv                                      vp8enc.MotionVector
+		rd, rate, codedRate, yRate, dist, tteob int
+		above, left                             [4]uint8
+		contexts                                bool
+	}
+	var cache [3]candidateResult
+	cacheCount := 0
+	evaluate := func(mv vp8enc.MotionVector, rate int) candidateResult {
+		for i := 0; i < cacheCount; i++ {
+			if cache[i].mv == mv {
+				r := cache[i]
+				r.rate = rate + r.codedRate
+				if r.contexts {
+					r.rd = ctx.labelRD.score(ctx.qIndex, r.rate, r.dist)
+				} else {
+					r.rd = splitMotionLabelRDScore(ctx.qIndex, r.rate, r.dist)
+				}
+				return r
+			}
+		}
+		rd, lr, yr, d, te, a, l, contexts := ctx.candidateRD(block, mv, rate)
+		r := candidateResult{mv: mv, rd: rd, rate: lr, codedRate: lr - rate, yRate: yr, dist: d, tteob: te, above: a, left: l, contexts: contexts}
+		if cacheCount < len(cache) {
+			cache[cacheCount] = r
+			cacheCount++
+		}
+		return r
+	}
 	tryCandidate := func(candidateMode vp8common.BPredictionMode, mv vp8enc.MotionVector) {
 		// rd_check_segment applies the same UMV trap to inherited
 		// LEFT/ABOVE/ZERO labels as it does to searched NEW labels.
@@ -375,7 +406,8 @@ func (ctx *splitMotionSubsetContext) selectMotion() (vp8enc.MotionVector, vp8com
 			return
 		}
 		rate := vp8enc.SplitSubMotionLabelRate(candidateMode, ctx.subMVRefProbs)
-		rd, labelRate, labelYRate, distortion, tteob, nextAbove, nextLeft, hasContexts := ctx.candidateRD(block, mv, rate)
+		r := evaluate(mv, rate)
+		rd, labelRate, labelYRate, distortion, tteob, nextAbove, nextLeft, hasContexts := r.rd, r.rate, r.yRate, r.dist, r.tteob, r.above, r.left, r.contexts
 		lastTTEOB = tteob
 		if rd < bestRD {
 			bestRD = rd
@@ -462,7 +494,8 @@ func (ctx *splitMotionSubsetContext) selectMotion() (vp8enc.MotionVector, vp8com
 	} else {
 		newRate += vp8enc.SplitMotionVectorCost(delta, ctx.mvProbs, nil)
 	}
-	newRD, labelRate, labelYRate, distortion, tteob, nextAbove, nextLeft, hasContexts := ctx.candidateRD(block, newMV, newRate)
+	r := evaluate(newMV, newRate)
+	newRD, labelRate, labelYRate, distortion, tteob, nextAbove, nextLeft, hasContexts := r.rd, r.rate, r.yRate, r.dist, r.tteob, r.above, r.left, r.contexts
 	lastTTEOB = tteob
 	if newRD < bestRD {
 		bestRD = newRD
