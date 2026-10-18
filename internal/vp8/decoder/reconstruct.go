@@ -4,6 +4,7 @@ import (
 	"errors"
 	"unsafe"
 
+	"github.com/thesyncim/govpx/internal/pixel"
 	"github.com/thesyncim/govpx/internal/vp8/common"
 	"github.com/thesyncim/govpx/internal/vp8/dsp"
 	"github.com/thesyncim/govpx/internal/vp8/tables"
@@ -368,7 +369,11 @@ func dequantIDCTAddLumaBlocks(qcoeff *[25][16]int16, eob *[25]uint8, eobFloor ui
 			if eob1 != 0 || seeded {
 				dc1 = int32(qcoeff[b+1][0]) * int32(yDequant[0])
 			}
-			dsp.DCOnlyIDCT4x4AddPairInt32(dc0, dc1, y[off:], yStride, y[off:], yStride)
+			if pixel.DCPairNative {
+				dsp.DCOnlyIDCT4x4AddPairInPlaceInt32(dc0, dc1, y[off:], yStride)
+			} else {
+				dsp.DCOnlyIDCT4x4AddPairInt32(dc0, dc1, y[off:], yStride, y[off:], yStride)
+			}
 		}
 	}
 }
@@ -407,7 +412,11 @@ func dequantIDCTAddChromaPair(qcoeff *[25][16]int16, eob *[25]uint8, uvDequant *
 	if eob1 != 0 {
 		dc1 = int32(qcoeff[b+1][0]) * int32(uvDequant[0])
 	}
-	dsp.DCOnlyIDCT4x4AddPairInt32(dc0, dc1, dst, stride, dst, stride)
+	if pixel.DCPairNative {
+		dsp.DCOnlyIDCT4x4AddPairInPlaceInt32(dc0, dc1, dst, stride)
+	} else {
+		dsp.DCOnlyIDCT4x4AddPairInt32(dc0, dc1, dst, stride, dst, stride)
+	}
 }
 
 // AddMacroblockResidualWithDequant adds the dequantized residual onto the
@@ -446,7 +455,11 @@ func addYResidualBlocks(tokens *MacroblockTokens, residual *MacroblockResidual, 
 			if eob0 == 1 && eob1 == 1 {
 				dc0 := int32(residual.Block(block)[0])
 				dc1 := int32(residual.Block(block + 1)[0])
-				dsp.DCOnlyIDCT4x4AddPairInt32(dc0, dc1, y[off:], yStride, y[off:], yStride)
+				if pixel.DCPairNative {
+					dsp.DCOnlyIDCT4x4AddPairInPlaceInt32(dc0, dc1, y[off:], yStride)
+				} else {
+					dsp.DCOnlyIDCT4x4AddPairInt32(dc0, dc1, y[off:], yStride, y[off:], yStride)
+				}
 				continue
 			}
 			if eob0 != 0 {
@@ -489,7 +502,11 @@ func addUChromaResidualPair(tokens *MacroblockTokens, residual *MacroblockResidu
 		dc0 := int32(tokens.QCoeff[16+base][0]) * int32(dequant.UV[0])
 		dc1 := int32(tokens.QCoeff[16+base+1][0]) * int32(dequant.UV[0])
 		off := uvBlockOffset(base, uStride)
-		dsp.DCOnlyIDCT4x4AddPairInt32(dc0, dc1, u[off:], uStride, u[off:], uStride)
+		if pixel.DCPairNative {
+			dsp.DCOnlyIDCT4x4AddPairInPlaceInt32(dc0, dc1, u[off:], uStride)
+		} else {
+			dsp.DCOnlyIDCT4x4AddPairInt32(dc0, dc1, u[off:], uStride, u[off:], uStride)
+		}
 		return
 	}
 	pairHasFull := eob0 > 1 || eob1 > 1
@@ -508,7 +525,11 @@ func addVChromaResidualPair(tokens *MacroblockTokens, residual *MacroblockResidu
 		dc0 := int32(tokens.QCoeff[20+base][0]) * int32(dequant.UV[0])
 		dc1 := int32(tokens.QCoeff[20+base+1][0]) * int32(dequant.UV[0])
 		off := uvBlockOffset(base, vStride)
-		dsp.DCOnlyIDCT4x4AddPairInt32(dc0, dc1, v[off:], vStride, v[off:], vStride)
+		if pixel.DCPairNative {
+			dsp.DCOnlyIDCT4x4AddPairInPlaceInt32(dc0, dc1, v[off:], vStride)
+		} else {
+			dsp.DCOnlyIDCT4x4AddPairInt32(dc0, dc1, v[off:], vStride, v[off:], vStride)
+		}
 		return
 	}
 	pairHasFull := eob0 > 1 || eob1 > 1

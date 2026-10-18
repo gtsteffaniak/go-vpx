@@ -9,3 +9,9 @@ const DCPairNative = false
 func DCPairInt32Native(c0, c1 int32, pred []byte, ps int, dst []byte, ds int) {
 	dcPairNativeScalar(c0, c1, pred, ps, dst, ds)
 }
+
+// DCPairInPlaceInt32Native is the canonical disabled-DSP fallback outside
+// the ARM native selection of libvpx v1.16.0's paired DC operation.
+func DCPairInPlaceInt32Native(c0, c1 int32, b []byte, stride int) {
+	dcPairNativeScalar(c0, c1, b, stride, b, stride)
+}

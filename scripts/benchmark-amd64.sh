@@ -75,6 +75,9 @@ for source_dir in "$reference_dir" "$previous_dir"; do
 	cp "$root/internal/vp8/dsp/tmpredict_rows_common_state_test.go" "$source_dir/internal/vp8/dsp/tmpredict_rows_common_state_test.go"
 	cp "$root/copy16_rows_native_test.go" "$source_dir/copy16_rows_native_test.go"
 	cp "$root/internal/vp8/dsp/dc_pair_native_bench_test.go" "$source_dir/internal/vp8/dsp/dc_pair_native_bench_test.go"
+	cp "$root/internal/vp8/dsp/dc_pair_inplace_native_bench_test.go" "$source_dir/internal/vp8/dsp/dc_pair_inplace_native_bench_test.go"
+	# Reference-only adapter inlines into B.Loop; original public operation stays live.
+	cp "$root/scripts/benchmark-fixtures/dc_pair_inplace_reference_shim.go.txt" "$source_dir/internal/vp8/dsp/dc_pair_inplace_reference_shim_test.go"
 done
 
 export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
@@ -87,6 +90,13 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 	sha256sum "$root/internal/vp9/encoder/quant_fp_classes_native_bench_test.go"
 	sha256sum "$root/internal/pixel/quantize_fp_simd.go"
 	sha256sum "$root/internal/pixel/quantize_fp_amd64.go"
+	sha256sum "$root/internal/pixel/quantize_fp32_avx512_amd64.go"
+	sha256sum "$root/internal/pixel/quantize_fp32_avx512_amd64_test.go"
+	sha256sum "$root/internal/pixel/quantize_fp32_bounds_amd64_test.go"
+	sha256sum "$root/internal/pixel/fp32_optional_native_test.go"
+	sha256sum "$root/internal/pixel/stats_reduction_native_test.go"
+	sha256sum "$root/internal/pixel/goav1_pixelstats_simd.go"
+	sha256sum "$root/scripts/benchmark-pixel-optional.sh"
 	sha256sum "$root/internal/pixel/fp16_guard_component_native_test.go"
 	sha256sum "$root/scripts/benchmark-fp16-guard-diagnostic.sh"
 	sha256sum "$root/internal/pixel/quantize_fp16_amd64_test.go"
@@ -187,6 +197,12 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 	sha256sum "$root/internal/vp8/dsp/dc_pair_native_state_test.go"
 	sha256sum "$root/internal/vp8/dsp/dc_pair_native_disabled_amd64_test.go"
 	sha256sum "$root/internal/vp8/dsp/dc_pair_native_bench_test.go"
+	sha256sum "$root/internal/pixel/dc_pair_inplace_arm64.go"
+	sha256sum "$root/internal/vp8/decoder/reconstruct.go"
+	sha256sum "$root/internal/vp8/dsp/dc_pair_inplace_state_test.go"
+	sha256sum "$root/internal/vp8/dsp/dc_pair_inplace_disabled_amd64_test.go"
+	sha256sum "$root/internal/vp8/dsp/dc_pair_inplace_native_bench_test.go"
+	sha256sum "$root/scripts/benchmark-fixtures/dc_pair_inplace_reference_shim.go.txt"
 	scripts/go.sh version
 	scripts/go.sh env GOOS GOARCH GOAMD64 GOEXPERIMENT GOTOOLCHAIN GOCACHE
 	lscpu
@@ -291,12 +307,23 @@ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBac
  GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off ./internal/vp9/encoder -run '^TestQuantizeFP' -count=1 -v
  GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/vp9/encoder -run '^TestQuantizeFP' -count=1 -v
 } > "$output_dir/fp16-validation.txt" 2>&1
+# FP32 tests require actual features; unsupported selected tests explicitly skip.
+# No fake capability or selected-AVX512 claim from fallback runs.
+{
+ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestFP32' -count=1 -v
+ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestFP32' -count=1 -v
+ GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestFP32' -count=1 -v
+ GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestFP32' -count=1 -v
+ GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestFP32' -count=1 -v
+ GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestFP32' -count=1 -v
+} >> "$output_dir/fp16-validation.txt" 2>&1
+
 if [ -n "$previous_dir" ]; then
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh -C "$previous_dir" test -pgo=off ./internal/pixel -run '^TestBackendSelected$' -count=1 -v > "$output_dir/previous-dispatch.txt" 2>&1
 fi
 
 packages='internal/vp9/dsp internal/vp8/dsp internal/vp9/encoder internal/vp8/encoder internal/vp8/decoder'
-benchmarks='Benchmark(Avg8x8Quad|ProjectionColumnsNative|Variance16x16Native)$|BenchmarkVP9(FP16Native|WideSADNative|FusedFPClassesNative|FPNoClassesNative|Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance(8x8|16x16|32x32|64x64)|SubpelPointerNative|LoopFilter(Horizontal|Vertical)8(Dual)?NonFlat)$|BenchmarkSAD16x16$|BenchmarkForwardDCT(16x16|32x32Native)$|Benchmark(SADLimitNative|SADLimitSliceNative|SADLimitX4Native|UVRoundedZeroNative|GatherPointerNative|GatherPackedPredictionNative|ResidualGatherNative|DCPairRowsNative|SixTapPhases|SplitSubpelPhases|DenoiserFilterYNative|LoopFilterLumaSSENative|VP8PickerFilterNative|FastQuantizeBatchNative|FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|DCOnlyIDCT4x4AddPairInt32|DCOnlyPairInPlace|ResidualGather16x16|ResidualGather8x8|SSE16x720PtrFast|SSE16x16|SSE8x8|SSE8RowsNative|TMPredictRowsNative|Copy(8|16)RowsNative|IntraDCFill(Exact|Supplement)|SubtractRowsNative|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|(MB)?LoopFilter(Horizontal|Vertical)EdgeUV|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
+benchmarks='Benchmark(Avg8x8Quad|ProjectionColumnsNative|Variance16x16Native)$|BenchmarkVP9(FP16Native|WideSADNative|FusedFPClassesNative|FPNoClassesNative|Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance(8x8|16x16|32x32|64x64)|SubpelPointerNative|LoopFilter(Horizontal|Vertical)8(Dual)?NonFlat)$|BenchmarkSAD16x16$|BenchmarkForwardDCT(16x16|32x32Native)$|Benchmark(SADLimitNative|SADLimitSliceNative|SADLimitX4Native|UVRoundedZeroNative|GatherPointerNative|GatherPackedPredictionNative|ResidualGatherNative|DCPairRowsNative|DCPairInPlaceRowsNative|SixTapPhases|SplitSubpelPhases|DenoiserFilterYNative|LoopFilterLumaSSENative|VP8PickerFilterNative|FastQuantizeBatchNative|FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|DCOnlyIDCT4x4AddPairInt32|DCOnlyPairInPlace|ResidualGather16x16|ResidualGather8x8|SSE16x720PtrFast|SSE16x16|SSE8x8|SSE8RowsNative|TMPredictRowsNative|Copy(8|16)RowsNative|IntraDCFill(Exact|Supplement)|SubtractRowsNative|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|(MB)?LoopFilter(Horizontal|Vertical)EdgeUV|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
 for variant in $variants; do
 	case "$variant" in
 		assembly) source_dir=$reference_dir ;;
@@ -327,6 +354,13 @@ for variant in $variants; do
 	{
 		printf '# DC pair preflight: %s\n' "$variant"
 		GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp8-dsp.test" -test.run '^$' -test.bench '^BenchmarkDCPairRowsNative$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem
+	} >> "$output_dir/quant-batch-validation.txt" 2>&1
+	# New paired-in-place API: identical standalone18 fixture on each reference.
+	# Base/old receive only the inlined forwarding adapter to their original API.
+	# Full-state/current-only tests already match existing ^TestDCPair selectors.
+	{
+		printf '# DC inplace preflight: %s\n' "$variant"
+		GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp8-dsp.test" -test.run '^$' -test.bench '^BenchmarkDCPairInPlaceRowsNative$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem
 	} >> "$output_dir/quant-batch-validation.txt" 2>&1
 	# Oracle work is untimed and identical on every pinned production source.
 	GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp9-encoder.test" -test.run '^$' -test.bench '^BenchmarkVP9FP16Native$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem > "$output_dir/$variant-fp16-fixture-validation.txt" 2>&1
@@ -390,6 +424,15 @@ done
 # trial guard and two frozen comparators; it does not select production dispatch.
 scripts/go.sh test -pgo=off -c -o "$output_dir/simd-fp16-guard.test" ./internal/pixel
 scripts/benchmark-fp16-guard-diagnostic.sh "$output_dir/simd-fp16-guard.test" "$output_dir/fp16-guard-component.txt"
+
+# Additive two-way pixel API diagnostics only. Old691 has no pixel package;
+# do not invent an old adapter or change any existing three-way fixture.
+if [ -n "$previous_dir" ]; then
+ cp "$root/internal/pixel/fp32_optional_native_test.go" "$previous_dir/internal/pixel/fp32_optional_native_test.go"
+ cp "$root/internal/pixel/stats_reduction_native_test.go" "$previous_dir/internal/pixel/stats_reduction_native_test.go"
+ scripts/go.sh -C "$previous_dir" test -pgo=off -c -o "$output_dir/previous-pixel-optional.test" ./internal/pixel
+ scripts/benchmark-pixel-optional.sh "$output_dir/previous-pixel-optional.test" "$output_dir/simd-fp16-guard.test" "$output_dir/pixel-optional.txt"
+fi
 
 # Keep artifacts compact; raw text/JSON and environment details are sufficient
 # to reproduce and analyze these measurements.

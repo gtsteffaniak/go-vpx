@@ -18,10 +18,11 @@ func pixelDiffAcc(sse, sum archsimd.Int32x4, a, b archsimd.Uint8x16) (archsimd.I
 	return sse, sum
 }
 
-func reducePixelAcc(sse, sum archsimd.Int32x4) (total, signed int64) {
-	total = int64(sse.GetElem(0)) + int64(sse.GetElem(1)) + int64(sse.GetElem(2)) + int64(sse.GetElem(3))
-	signed = int64(sum.GetElem(0)) + int64(sum.GetElem(1)) + int64(sum.GetElem(2)) + int64(sum.GetElem(3))
-	return total, signed
+// Both public results are 32-bit modular sums. Reduce inside the vector
+// before crossing into scalar registers; the odd-row additions below retain
+// the same final uint32/int32 wrapping as the original wide scalar sums.
+func reducePixelAcc(sse, sum archsimd.Int32x4) (uint32, int32) {
+	return uint32(sum32(sse)), sum32(sum)
 }
 
 func pixelStatsRows16(src []byte, srcStride int, ref []byte, refStride int, w, h int) (sse uint32, sum int32) {
@@ -48,8 +49,8 @@ func pixelStatsPairs8(src []byte, srcStride int, ref []byte, refStride int, h in
 	total, signed := reducePixelAcc(sseAcc, sumAcc)
 	if r < h {
 		t, sg := pixelStatsPureGo(src[r*srcStride:], srcStride, ref[r*refStride:], refStride, 8, 1)
-		total += int64(t)
-		signed += int64(sg)
+		total += t
+		signed += sg
 	}
 	return uint32(total), int32(signed)
 }
