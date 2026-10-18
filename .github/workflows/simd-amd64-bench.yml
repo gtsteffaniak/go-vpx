@@ -19,6 +19,11 @@ on:
         default: false
         required: false
         type: boolean
+      oracle_only:
+        description: Run only focused parent/current quick oracles; requires test_regex
+        default: false
+        required: false
+        type: boolean
       head_ref:
         description: Quick comparison head (resolved and recorded as an exact commit)
         required: false
@@ -74,7 +79,7 @@ env:
 
 jobs:
   fp-quick:
-    if: ${{ github.event_name == 'pull_request' || inputs.fp_quick_only }}
+    if: ${{ github.event_name == 'pull_request' || inputs.fp_quick_only || inputs.oracle_only }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -94,6 +99,7 @@ jobs:
           HEAD_REF: ${{ inputs.head_ref || github.event.pull_request.head.sha || github.sha }}
           BASE_REF: ${{ inputs.base_ref || github.event.pull_request.base.sha || 'origin/main' }}
           GOVPX_QUICK_FIXTURES: ${{ inputs.quick_fixtures }}
+          QUICK_ORACLE_ONLY: ${{ inputs.oracle_only }}
           QUICK_BENCH: ${{ inputs.bench_regex }}
           QUICK_TEST: ${{ inputs.test_regex }}
           QUICK_PACKAGE: ${{ inputs.bench_package }}
@@ -105,10 +111,12 @@ jobs:
           base_sha=$(git rev-parse --verify --end-of-options "$BASE_REF^{commit}")
           set -- "$head_sha" "$base_sha" "$RUNNER_TEMP/fp-quick"
           if [ -n "$QUICK_MANIFEST" ]; then
+            [ "$QUICK_ORACLE_ONLY" != "true" ] || { echo "Oracle-only mode requires the regular quick driver" >&2; exit 1; }
             [ -z "$QUICK_CODEC$QUICK_CODEC_CPU_USED" ] || { echo "Codec options require the regular quick driver, not a variant manifest" >&2; exit 1; }
             python3 scripts/benchmark-x64-variants.py "$@" --manifest "$QUICK_MANIFEST"
             exit
           fi
+          if [ "$QUICK_ORACLE_ONLY" = "true" ]; then set -- "$@" --oracle-only; fi
           if [ -n "$QUICK_BENCH" ]; then set -- "$@" --bench "$QUICK_BENCH"; fi
           if [ -n "$QUICK_TEST" ]; then set -- "$@" --test "$QUICK_TEST"; fi
           if [ -n "$QUICK_PACKAGE" ]; then set -- "$@" --package "$QUICK_PACKAGE"; fi
@@ -130,7 +138,7 @@ jobs:
           if-no-files-found: error
 
   benchmark:
-    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.fp_quick_only && !inputs.libvpx_only }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.fp_quick_only && !inputs.libvpx_only && !inputs.oracle_only }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -159,7 +167,7 @@ jobs:
           if-no-files-found: error
 
   libvpx-reference:
-    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.fp_quick_only }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.fp_quick_only && !inputs.oracle_only }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
