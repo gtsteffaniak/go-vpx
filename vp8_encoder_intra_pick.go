@@ -105,9 +105,9 @@ func pickFastWholeBlockIntraYModeWithRDConstants(src vp8enc.SourceImage, qIndex 
 	bestMode := vp8common.DCPred
 	bestRate := 0
 	bestRD := 0
+	refs := vp8dec.BuildIntraPredictorRefs(pred, mbRow, mbCol, &scratch.Refs)
 	for i, yMode := range wholeBlockIntraYModeCandidates {
-		mode := vp8dec.MacroblockMode{RefFrame: vp8common.IntraFrame, Mode: yMode, UVMode: vp8common.DCPred}
-		if !predictAnalysisMacroblock(pred, mbRow, mbCol, &mode, scratch) {
+		if !vp8dec.PredictIntraY16x16(yMode, pred.Y[mbRow*16*pred.YStride+mbCol*16:], pred.YStride, refs.YAbove, refs.YLeft, refs.YTopLeft, refs.UpAvailable, refs.LeftAvailable) {
 			return 0, 0, 0, false
 		}
 		dist, _ := vp8enc.MacroblockLumaVarianceSSE(src, pred, mbRow, mbCol)
@@ -130,8 +130,9 @@ func pickFastWholeBlockIntraYModeWithRDConstants(src vp8enc.SourceImage, qIndex 
 func pickFastIntraChromaMode(src vp8enc.SourceImage, mbRow int, mbCol int, pred *vp8common.Image, scratch *vp8dec.IntraReconstructionScratch) (vp8common.MBPredictionMode, int, bool) {
 	bestMode := vp8common.DCPred
 	bestSSE := 0
+	refs := vp8dec.BuildIntraPredictorRefs(pred, mbRow, mbCol, &scratch.Refs)
 	for i, uvMode := range wholeBlockIntraUVModeCandidates {
-		if !predictAnalysisChroma(pred, mbRow, mbCol, uvMode, scratch) {
+		if !predictAnalysisChromaWithRefs(pred, mbRow, mbCol, uvMode, refs) {
 			return 0, 0, false
 		}
 		sse := vp8enc.MacroblockChromaSSE(src, pred, mbRow, mbCol)
