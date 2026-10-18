@@ -698,6 +698,9 @@ func intraYModeRate(keyFrame bool, mode vp8common.MBPredictionMode) int {
 
 func intraYModeRateWithProbs(keyFrame bool, mode vp8common.MBPredictionMode, interProbs []uint8) int {
 	if keyFrame {
+		if int(mode) >= 0 && int(mode) < 5 {
+			return vp8StaticModeCosts.y[int(mode)]
+		}
 		return vp8enc.TreeTokenCost(vp8tables.KeyFrameYModeTree[:], vp8tables.KeyFrameYModeProbs[:], int(mode))
 	}
 	if len(interProbs) == vp8tables.YModeProbCount {
@@ -716,6 +719,9 @@ func intraUVModeRate(keyFrame bool, mode vp8common.MBPredictionMode) int {
 
 func intraUVModeRateWithProbs(keyFrame bool, mode vp8common.MBPredictionMode, interProbs []uint8) int {
 	if keyFrame {
+		if int(mode) >= 0 && int(mode) < 4 {
+			return vp8StaticModeCosts.uv[int(mode)]
+		}
 		return vp8enc.TreeTokenCost(vp8tables.UVModeTree[:], vp8tables.KeyFrameUVModeProbs[:], int(mode))
 	}
 	if len(interProbs) == vp8tables.UVModeProbCount {
@@ -730,6 +736,9 @@ func bPredModeRate(keyFrame bool, mode vp8common.BPredictionMode, above vp8commo
 
 func bPredModeRateWithProbs(keyFrame bool, mode vp8common.BPredictionMode, above vp8common.BPredictionMode, left vp8common.BPredictionMode, interProbs []uint8) int {
 	if keyFrame {
+		if int(mode) >= 0 && int(mode) < 10 && int(above) >= 0 && int(above) < 10 && int(left) >= 0 && int(left) < 10 {
+			return vp8StaticModeCosts.b[int(above)][int(left)][int(mode)]
+		}
 		return vp8enc.TreeTokenCost(vp8tables.BModeTree[:], vp8tables.KeyFrameBModeProbs[int(above)][int(left)][:], int(mode))
 	}
 	if len(interProbs) == vp8tables.BModeProbCount {
