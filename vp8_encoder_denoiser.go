@@ -476,6 +476,9 @@ func copyMacroblockY(dst []byte, dstStride int, src []byte, srcStride int) {
 }
 
 func copyMacroblock8x8(dst []byte, dstStride int, src []byte, srcStride int) {
+	if pixel.Copy8Rows(src, srcStride, dst, dstStride) {
+		return
+	}
 	for r := range 8 {
 		copy(dst[r*dstStride:r*dstStride+8], src[r*srcStride:r*srcStride+8])
 	}

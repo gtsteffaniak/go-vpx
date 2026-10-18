@@ -33,6 +33,9 @@ Selected kernels in `internal/pixel` copy or adapt Go SIMD dataflow from
 comments identify the extracted helpers. The sixteen-column residual layout
 also adapts `residualBlockSIMD` in `internal/av1/encoder/rdstats_gosimd.go` at
 `0f40b2bd848d8c5c7bdbaa016f2ced3085f7fc7a`.
+The eight-byte ARM row-copy dataflow adapts the `w == 8` branch of
+`copyPredToReconBlockSIMD` in `internal/av1/encoder/recon_gosimd.go` at
+the same revision, with govpx-specific alias, bounds and fallback handling.
 
 These are source copies with govpx-specific bounds, dispatch and fallback
 contracts, without a Go module dependency. The associated license, notices
