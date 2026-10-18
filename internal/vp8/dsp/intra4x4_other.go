@@ -7,6 +7,9 @@ import "github.com/thesyncim/govpx/internal/pixel"
 
 func intra4x4DCPredict(dst []byte, dstStride int, above []byte, left []byte) {
 	if pixel.Enabled {
+		if pixel.Intra4x4DCFill(dst, dstStride, above, left) {
+			return
+		}
 		intraDCGo(dst, dstStride, above, left, 4, true, true)
 	} else {
 		intra4x4DCPredictScalar(dst, dstStride, above, left)

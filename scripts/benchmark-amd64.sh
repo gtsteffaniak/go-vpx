@@ -57,6 +57,7 @@ for source_dir in "$reference_dir" "$previous_dir"; do
 	cp "$root/internal/vp8/dsp/sse8_rows_native_test.go" "$source_dir/internal/vp8/dsp/sse8_rows_native_test.go"
 	cp "$root/internal/vp8/dsp/copy8_rows_native_test.go" "$source_dir/internal/vp8/dsp/copy8_rows_native_test.go"
 	cp "$root/internal/vp8/dsp/fill_exact_native_test.go" "$source_dir/internal/vp8/dsp/fill_exact_native_test.go"
+	cp "$root/internal/vp8/dsp/fused_dc_supplement_test.go" "$source_dir/internal/vp8/dsp/fused_dc_supplement_test.go"
 	cp "$root/internal/vp8/dsp/copy16_rows_native_test.go" "$source_dir/internal/vp8/dsp/copy16_rows_native_test.go"
 	cp "$root/internal/vp8/dsp/residual_gather_native_test.go" "$source_dir/internal/vp8/dsp/residual_gather_native_test.go"
 	cp "$root/internal/vp8/dsp/dc_pair_bench_test.go" "$source_dir/internal/vp8/dsp/dc_pair_bench_test.go"
@@ -66,6 +67,7 @@ for source_dir in "$reference_dir" "$previous_dir"; do
 	cp "$root/internal/vp9/dsp/projection_average_native_test.go" "$source_dir/internal/vp9/dsp/projection_average_native_test.go"
 	cp "$root/internal/vp9/encoder/dct32_bench_test.go" "$source_dir/internal/vp9/encoder/dct32_bench_test.go"
 	cp "$root/internal/vp9/encoder/quant_fp_classes_native_bench_test.go" "$source_dir/internal/vp9/encoder/quant_fp_classes_native_bench_test.go"
+	cp "$root/internal/vp9/encoder/quant_fp16_native_test.go" "$source_dir/internal/vp9/encoder/quant_fp16_native_test.go"
 	cp "$root/internal/vp9/dsp/subpel_pointer_native_test.go" "$source_dir/internal/vp9/dsp/subpel_pointer_native_test.go"
 	cp "$root/internal/vp9/dsp/subtract_rows_native_test.go" "$source_dir/internal/vp9/dsp/subtract_rows_native_test.go"
 	cp "$root/internal/vp9/dsp/sad_wide_native_test.go" "$source_dir/internal/vp9/dsp/sad_wide_native_test.go"
@@ -79,6 +81,10 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 	printf 'variants: %s\n' "$variants"
 	printf '%s\n' 'GOMAXPROCS=1 PGO=off rounds=6 kernel-benchtime=150ms'
 	sha256sum "$root/internal/vp9/encoder/quant_fp_classes_native_bench_test.go"
+	sha256sum "$root/internal/pixel/quantize_fp_simd.go"
+	sha256sum "$root/internal/pixel/quantize_fp_amd64.go"
+	sha256sum "$root/internal/pixel/quantize_fp16_amd64_test.go"
+	sha256sum "$root/internal/vp9/encoder/quant_fp16_native_test.go"
 	sha256sum "$root/internal/vp8/encoder/quant_batch_native_test.go"
 	sha256sum "$root/internal/vp8/encoder/denoiser_native_bench_test.go"
 	sha256sum "$root/internal/vp8/dsp/gather_pointer_native_test.go"
@@ -90,6 +96,17 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 	sha256sum "$root/internal/pixel/fill_fixed_other.go"
 	sha256sum "$root/internal/pixel/fill_exact_native_test.go"
 	sha256sum "$root/internal/vp8/dsp/fill_exact_native_test.go"
+	sha256sum "$root/internal/pixel/intra_dc_fill_arm64.go"
+	sha256sum "$root/internal/pixel/intra_dc_fill_other.go"
+	sha256sum "$root/internal/pixel/intra_dc_fill_probe_test.go"
+	sha256sum "$root/internal/vp8/dsp/intra_dispatch_other.go"
+	sha256sum "$root/internal/vp8/dsp/fused_dc_probe_test.go"
+	sha256sum "$root/internal/vp8/dsp/fused_dc_supplement_test.go"
+	sha256sum "$root/internal/pixel/intra4x4_dc_fill_arm64.go"
+	sha256sum "$root/internal/pixel/intra4x4_dc_fill_other.go"
+	sha256sum "$root/internal/pixel/intra4x4_dc_fill_probe_test.go"
+	sha256sum "$root/internal/vp8/dsp/intra4x4_other.go"
+	sha256sum "$root/internal/vp8/dsp/fused_dc4_probe_test.go"
 	sha256sum "$root/internal/pixel/sad_amd64.go"
 	sha256sum "$root/internal/pixel/sad_wide_amd64_test.go"
 	sha256sum "$root/internal/vp9/dsp/sad_wide_native_test.go"
@@ -167,6 +184,10 @@ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBac
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestSADLimit16Pointer' -count=1 -v
 	# Wide SAD requires the actual AVX2 feature and retains exact scalar/old
 	# behavior for disabled CPUs and all unsupported or incomplete windows.
+	# ARM-only DC helpers decline on this native x64 job; public fallback,
+	# alias and partial-panic behavior is checked in ordinary/race runs.
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/dsp -run '^Test(IntraDCFill|Intra4x4DCFill|FusedDC)' -count=1 -v
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./internal/vp8/dsp -run '^Test(IntraDCFill|Intra4x4DCFill|FusedDC)' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/dsp -run '^Test(FillExact|IntraDCFillExactState)' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./internal/vp8/dsp -run '^Test(FillExact|IntraDCFillExactState)' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestSADWideAVX2' -count=1 -v
@@ -179,12 +200,24 @@ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBac
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/dsp -run '^TestSADLimitPointerAMDDisabled$' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/decoder -run '^Test.*LoopFilter' -count=1 -v
 } > "$output_dir/quant-batch-validation.txt" 2>&1
+# The new FP16 specialization is current-only; references receive the same
+# public fixture, retaining their own production backends and class callers.
+{
+ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestFP16' -count=1 -v
+ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestFP16' -count=1 -v
+ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp9/encoder -run '^TestQuantizeFP' -count=1 -v
+ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/vp9/encoder -run '^TestQuantizeFP' -count=1 -v
+ GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP16_AVX_OFF=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestFP16' -count=1 -v
+ GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP16_AVX_OFF=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestFP16' -count=1 -v
+ GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off ./internal/vp9/encoder -run '^TestQuantizeFP' -count=1 -v
+ GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/vp9/encoder -run '^TestQuantizeFP' -count=1 -v
+} > "$output_dir/fp16-validation.txt" 2>&1
 if [ -n "$previous_dir" ]; then
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh -C "$previous_dir" test -pgo=off ./internal/pixel -run '^TestBackendSelected$' -count=1 -v > "$output_dir/previous-dispatch.txt" 2>&1
 fi
 
 packages='internal/vp9/dsp internal/vp8/dsp internal/vp9/encoder internal/vp8/encoder internal/vp8/decoder'
-benchmarks='Benchmark(Avg8x8Quad|ProjectionColumnsNative|Variance16x16Native)$|BenchmarkVP9(WideSADNative|FusedFPClassesNative|FPNoClassesNative|Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance(8x8|16x16|32x32|64x64)|SubpelPointerNative|LoopFilter(Horizontal|Vertical)8(Dual)?NonFlat)$|BenchmarkSAD16x16$|BenchmarkForwardDCT(16x16|32x32Native)$|Benchmark(SADLimitNative|SADLimitSliceNative|SADLimitX4Native|UVRoundedZeroNative|GatherPointerNative|GatherPackedPredictionNative|ResidualGatherNative|SixTapPhases|SplitSubpelPhases|DenoiserFilterYNative|LoopFilterLumaSSENative|VP8PickerFilterNative|FastQuantizeBatchNative|FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|DCOnlyIDCT4x4AddPairInt32|DCOnlyPairInPlace|ResidualGather16x16|ResidualGather8x8|SSE16x720PtrFast|SSE16x16|SSE8x8|SSE8RowsNative|Copy(8|16)RowsNative|IntraDCFillExact|SubtractRowsNative|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|(MB)?LoopFilter(Horizontal|Vertical)EdgeUV|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
+benchmarks='Benchmark(Avg8x8Quad|ProjectionColumnsNative|Variance16x16Native)$|BenchmarkVP9(FP16Native|WideSADNative|FusedFPClassesNative|FPNoClassesNative|Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance(8x8|16x16|32x32|64x64)|SubpelPointerNative|LoopFilter(Horizontal|Vertical)8(Dual)?NonFlat)$|BenchmarkSAD16x16$|BenchmarkForwardDCT(16x16|32x32Native)$|Benchmark(SADLimitNative|SADLimitSliceNative|SADLimitX4Native|UVRoundedZeroNative|GatherPointerNative|GatherPackedPredictionNative|ResidualGatherNative|SixTapPhases|SplitSubpelPhases|DenoiserFilterYNative|LoopFilterLumaSSENative|VP8PickerFilterNative|FastQuantizeBatchNative|FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|DCOnlyIDCT4x4AddPairInt32|DCOnlyPairInPlace|ResidualGather16x16|ResidualGather8x8|SSE16x720PtrFast|SSE16x16|SSE8x8|SSE8RowsNative|Copy(8|16)RowsNative|IntraDCFill(Exact|Supplement)|SubtractRowsNative|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|(MB)?LoopFilter(Horizontal|Vertical)EdgeUV|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
 for variant in $variants; do
 	case "$variant" in
 		assembly) source_dir=$reference_dir ;;
@@ -195,6 +228,16 @@ for variant in $variants; do
 		name=$(printf '%s' "$package" | tr / -)
 		scripts/go.sh -C "$source_dir" test -pgo=off -c -o "$output_dir/$variant-$name.test" "./$package"
 	done
+	# Validate all DC callers on every reference before its timed rounds.
+	{
+		printf '# DC preflight: %s\n' "$variant"
+		GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp8-dsp.test" -test.run '^TestFusedDCSupplementState$' -test.bench '^BenchmarkIntraDCFill(Exact|Supplement)$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem
+	} >> "$output_dir/quant-batch-validation.txt" 2>&1
+	# Oracle work is untimed and identical on every pinned production source.
+	GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp9-encoder.test" -test.run '^$' -test.bench '^BenchmarkVP9FP16Native$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem > "$output_dir/$variant-fp16-fixture-validation.txt" 2>&1
+	if [ "$variant" = simd ]; then
+		GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 "$output_dir/$variant-internal-vp9-encoder.test" -test.run '^$' -test.bench '^BenchmarkVP9FP16Native$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem > "$output_dir/simd-fp16-cpuoff-fixture-validation.txt" 2>&1
+	fi
 	scripts/go.sh -C "$source_dir" build -pgo=off -o "$output_dir/$variant-govpx-bench" ./cmd/govpx-bench
 done
 

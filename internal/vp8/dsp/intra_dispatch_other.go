@@ -8,6 +8,13 @@ import "github.com/thesyncim/govpx/internal/pixel"
 
 func intraDCPredict16x16(dst []byte, dstStride int, above []byte, left []byte, upAvailable bool, leftAvailable bool) {
 	if pixel.Enabled {
+		if pixel.IntraDCFillNative && !upAvailable && !leftAvailable {
+			pixel.FillBlock(dst, dstStride, 16, 16, 128)
+			return
+		}
+		if pixel.IntraDCFill(dst, dstStride, above, left, 16, upAvailable, leftAvailable) {
+			return
+		}
 		intraDCGo(dst, dstStride, above, left, 16, upAvailable, leftAvailable)
 	} else {
 		intraDCPredictScalar(dst, dstStride, above, left, 16, upAvailable, leftAvailable)
@@ -16,6 +23,13 @@ func intraDCPredict16x16(dst []byte, dstStride int, above []byte, left []byte, u
 
 func intraDCPredict8x8(dst []byte, dstStride int, above []byte, left []byte, upAvailable bool, leftAvailable bool) {
 	if pixel.Enabled {
+		if pixel.IntraDCFillNative && !upAvailable && !leftAvailable {
+			pixel.FillBlock(dst, dstStride, 8, 8, 128)
+			return
+		}
+		if pixel.IntraDCFill(dst, dstStride, above, left, 8, upAvailable, leftAvailable) {
+			return
+		}
 		intraDCGo(dst, dstStride, above, left, 8, upAvailable, leftAvailable)
 	} else {
 		intraDCPredictScalar(dst, dstStride, above, left, 8, upAvailable, leftAvailable)
