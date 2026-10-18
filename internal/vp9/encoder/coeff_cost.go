@@ -40,6 +40,12 @@ func CoeffTokenExtraCost(absVal, sign int) (token int, cost int) {
 		entry := coeffTokenExtraCostTable[absVal]
 		return int(entry.token), int(entry.cost)
 	}
+	// The signed-qcoeff table already covers the entire int16 magnitude
+	// range; its sign cost is identical because that bit uses probability128.
+	if uint(absVal) <= 32768 {
+		entry := coeffQCoeffTokenExtraCostTable[uint16(absVal)]
+		return int(entry.token), int(entry.cost)
+	}
 	return coeffTokenExtraCostSlow(absVal, sign)
 }
 
