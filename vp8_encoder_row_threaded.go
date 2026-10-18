@@ -337,7 +337,6 @@ func (rs *rowEncoderState) encodeThreadedKeyFrameMacroblock(args *threadedKeyRow
 		}
 		args.modes[index].MBSkipCoeff = vp8enc.KeyFrameMacroblockIsSkippable(&args.modes[index], &args.coeffs[index])
 		e.reconstructModes[index].MBSkipCoeff = args.modes[index].MBSkipCoeff
-		vp8enc.ConvertMacroblockCoefficients(&args.coeffs[index], true, &e.reconstructTokens[index])
 		if err := rs.updateThreadedKeyFrameTokenContextAndCount(&args.aboveTok[col], &rs.leftTok, true, args.modes[index].MBSkipCoeff, &args.coeffs[index]); err != nil {
 			return 0, err
 		}
@@ -370,11 +369,10 @@ func (rs *rowEncoderState) encodeThreadedKeyFrameMacroblock(args *threadedKeyRow
 	})
 	args.modes[index].MBSkipCoeff = vp8enc.KeyFrameMacroblockIsSkippable(&args.modes[index], &args.coeffs[index])
 	e.reconstructModes[index].MBSkipCoeff = args.modes[index].MBSkipCoeff
-	vp8enc.ConvertMacroblockCoefficients(&args.coeffs[index], is4x4, &e.reconstructTokens[index])
 	if args.modes[index].MBSkipCoeff {
 		vp8enc.ResetTokenContextPlanes(&args.aboveTok[col], &rs.leftTok, is4x4)
 	} else {
-		if !reconstructAnalysisMacroblock(&e.analysis.Img, row, col, &e.reconstructModes[index], &e.reconstructTokens[index], &e.dequants[segmentID&3], &e.reconstructScratch) {
+		if !addWholeIntraResidualToAnalysisMacroblockCoeffs(&e.analysis.Img, row, col, &e.reconstructModes[index], &args.coeffs[index], &e.dequants[segmentID&3]) {
 			return 0, ErrInvalidConfig
 		}
 		if err := rs.accumulateThreadedKeyFrameCoefCounts(is4x4, &args.aboveTok[col], &rs.leftTok, &args.coeffs[index]); err != nil {
@@ -659,11 +657,8 @@ func (rs *rowEncoderState) encodeThreadedInterFrameMacroblock(args *threadedInte
 	// full re-serialize and skips the MacroblockMode memset plus the
 	// per-MB [16]MotionVector BlockMV fill the compiler cannot prove dead.
 	e.reconstructModes[index].MBSkipCoeff = args.modes[index].MBSkipCoeff
-	// Mirror the serial builder: the inter winner path consumes
-	// args.coeffs[index] directly through the staging-free residual add
-	// below; only the whole-block intra winner still stages decoder tokens
-	// for reconstructAnalysisMacroblock, and B_PRED reconstructed inside
-	// buildReconstructingBPredMacroblockCoefficients without reading them.
+	// Accepted predictors are already resident. Consume coefficients directly
+	// for both inter and whole-intra; B_PRED rebuilt itself sequentially.
 	if args.modes[index].RefFrame == vp8common.IntraFrame && args.modes[index].Mode == vp8common.BPred {
 		if err := rs.updateThreadedInterFrameTokenContextAndCount(&args.aboveTok[col], &rs.leftTok, is4x4, args.modes[index].MBSkipCoeff, &args.coeffs[index]); err != nil {
 			return 0, 0, err
@@ -671,10 +666,7 @@ func (rs *rowEncoderState) encodeThreadedInterFrameMacroblock(args *threadedInte
 		return int(decision.projectedRate), int64(decision.predictionError), nil
 	}
 	if args.modes[index].RefFrame == vp8common.IntraFrame {
-		if !args.modes[index].MBSkipCoeff {
-			vp8enc.ConvertMacroblockCoefficients(&args.coeffs[index], is4x4, &e.reconstructTokens[index])
-		}
-		if !reconstructAnalysisMacroblock(&e.analysis.Img, row, col, &e.reconstructModes[index], &e.reconstructTokens[index], &e.dequants[segmentID&3], &e.reconstructScratch) {
+		if !addWholeIntraResidualToAnalysisMacroblockCoeffs(&e.analysis.Img, row, col, &e.reconstructModes[index], &args.coeffs[index], &e.dequants[segmentID&3]) {
 			return 0, 0, ErrInvalidConfig
 		}
 	} else if !addInterResidualToAnalysisMacroblockCoeffs(&e.analysis.Img, row, col, &e.reconstructModes[index], &args.coeffs[index], &e.dequants[segmentID&3]) {

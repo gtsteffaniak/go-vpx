@@ -359,7 +359,6 @@ func (e *VP8Encoder) buildReconstructingKeyFrameCoefficientsWithSegmentationSeri
 				}
 				modes[index].MBSkipCoeff = vp8enc.KeyFrameMacroblockIsSkippable(&modes[index], &coeffs[index])
 				e.reconstructModes[index].MBSkipCoeff = modes[index].MBSkipCoeff
-				vp8enc.ConvertMacroblockCoefficients(&coeffs[index], true, &e.reconstructTokens[index])
 				if modes[index].MBSkipCoeff {
 					vp8enc.ResetTokenContextPlanes(&aboveTok[col], &leftTok, true)
 				} else {
@@ -402,11 +401,10 @@ func (e *VP8Encoder) buildReconstructingKeyFrameCoefficientsWithSegmentationSeri
 			})
 			modes[index].MBSkipCoeff = vp8enc.KeyFrameMacroblockIsSkippable(&modes[index], &coeffs[index])
 			e.reconstructModes[index].MBSkipCoeff = modes[index].MBSkipCoeff
-			vp8enc.ConvertMacroblockCoefficients(&coeffs[index], is4x4, &e.reconstructTokens[index])
 			if modes[index].MBSkipCoeff {
 				vp8enc.ResetTokenContextPlanes(&aboveTok[col], &leftTok, is4x4)
 			} else {
-				if !reconstructAnalysisMacroblock(&e.analysis.Img, row, col, &e.reconstructModes[index], &e.reconstructTokens[index], &e.dequants[segmentID&3], &e.reconstructScratch) {
+				if !addWholeIntraResidualToAnalysisMacroblockCoeffs(&e.analysis.Img, row, col, &e.reconstructModes[index], &coeffs[index], &e.dequants[segmentID&3]) {
 					return 0, ErrInvalidConfig
 				}
 				vp8enc.UpdateTokenContextPlanesFromCoefficients(&aboveTok[col], &leftTok, is4x4, &coeffs[index])
@@ -871,16 +869,9 @@ func (e *VP8Encoder) buildReconstructingInterFrameCoefficientsWithSegmentation(s
 			// memset plus the per-MB [16]MotionVector BlockMV fill that the
 			// compiler cannot prove dead.
 			e.reconstructModes[index].MBSkipCoeff = modes[index].MBSkipCoeff
-			// The inter winner path consumes coeffs[index] directly through
-			// addInterResidualToAnalysisMacroblockCoeffs below (the libvpx
-			// vp8_inverse_transform_mb shape); only the whole-block intra
-			// winner still stages decoder tokens for
-			// reconstructAnalysisMacroblock. B_PRED reconstructed inside
-			// buildReconstructingBPredMacroblockCoefficients and never read
-			// the staged tokens.
-			if !modes[index].MBSkipCoeff && modes[index].RefFrame == vp8common.IntraFrame && modes[index].Mode != vp8common.BPred {
-				vp8enc.ConvertMacroblockCoefficients(&coeffs[index], is4x4, &e.reconstructTokens[index])
-			}
+			// Both inter and whole-intra winners consume accepted coefficients
+			// directly. Their predictor is already resident; B_PRED reconstructed
+			// itself inside its sequential coefficient builder.
 			totalRate = addProjectedMacroblockRate(totalRate, projectedRate)
 			if modes[index].RefFrame == vp8common.IntraFrame && modes[index].Mode == vp8common.BPred {
 				if err := updateInterAnalysisTokenContextAndCount(&e.interCoefTokenCounts, &e.interCoefTokenRecords, &aboveTok[col], &leftTok, is4x4, modes[index].MBSkipCoeff, &coeffs[index]); err != nil {
@@ -900,7 +891,7 @@ func (e *VP8Encoder) buildReconstructingInterFrameCoefficientsWithSegmentation(s
 				continue
 			}
 			if modes[index].RefFrame == vp8common.IntraFrame {
-				if !reconstructAnalysisMacroblock(&e.analysis.Img, row, col, &e.reconstructModes[index], &e.reconstructTokens[index], &e.dequants[segmentID&3], &e.reconstructScratch) {
+				if !addWholeIntraResidualToAnalysisMacroblockCoeffs(&e.analysis.Img, row, col, &e.reconstructModes[index], &coeffs[index], &e.dequants[segmentID&3]) {
 					return 0, ErrInvalidConfig
 				}
 			} else if !modes[index].MBSkipCoeff {

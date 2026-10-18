@@ -380,6 +380,24 @@ func addInterResidualToAnalysisMacroblockCoeffs(img *vp8common.Image, row int, c
 	return true
 }
 
+// addWholeIntraResidualToAnalysisMacroblockCoeffs consumes the predictor
+// already written before accepted coefficient generation. Reconstructing it
+// again would reload unchanged border references and overwrite the same pixels.
+// B_PRED stays on its sequential per-block reconstruction path.
+func addWholeIntraResidualToAnalysisMacroblockCoeffs(img *vp8common.Image, row int, col int, mode *vp8dec.MacroblockMode, coeffs *vp8enc.MacroblockCoefficients, dequant *vp8common.MacroblockDequant) bool {
+	if img == nil || mode == nil || coeffs == nil || dequant == nil || mode.Is4x4 || mode.Mode > vp8common.TMPred || mode.UVMode > vp8common.TMPred {
+		return false
+	}
+	if mode.MBSkipCoeff {
+		return true
+	}
+	yOff := row*16*img.YStride + col*16
+	uOff := row*8*img.UStride + col*8
+	vOff := row*8*img.VStride + col*8
+	vp8dec.DequantIDCTAddMacroblockCoefficients(&coeffs.QCoeff, &coeffs.EOB, dequant, false, img.Y[yOff:], img.YStride, img.U[uOff:], img.UStride, img.V[vOff:], img.VStride)
+	return true
+}
+
 func reconstructAnalysisMacroblock(img *vp8common.Image, row int, col int, mode *vp8dec.MacroblockMode, tokens *vp8dec.MacroblockTokens, dequant *vp8common.MacroblockDequant, scratch *vp8dec.IntraReconstructionScratch) bool {
 	refs := vp8dec.BuildIntraPredictorRefs(img, row, col, &scratch.Refs)
 	yOff := row*16*img.YStride + col*16

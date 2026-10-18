@@ -56,7 +56,13 @@ def main():
     parser.add_argument("--test", help="Ordinary oracle regex (default: packet oracles in FP mode)")
     parser.add_argument("--package", default="./internal/pixel", help="Comma-separated packages for --bench/--test overrides")
     parser.add_argument("--fixture", action="append", default=[f.strip() for f in os.environ.get("GOVPX_QUICK_FIXTURES", "").splitlines() if f.strip()], help="Shared relative _test.go path; repeatable")
+    parser.add_argument("--codec", choices=("vp8", "vp9"), help="Use two balanced 720p codec rounds (default codec: vp9; no options retains legacy 320/720 scopes)")
+    parser.add_argument("--codec-cpu-used", action="append", default=[], help="CPU-used integers; repeatable or comma-separated, e.g. --codec-cpu-used=-8,+8")
     args = parser.parse_args()
+    codec_mode = args.codec is not None or bool(args.codec_cpu_used)
+    codec = args.codec or "vp9"
+    cpu_used = [int(value.strip()) for item in args.codec_cpu_used for value in item.split(",")] if args.codec_cpu_used else [8]
+    assert len(cpu_used) == len(set(cpu_used)), "codec CPU-used values must be distinct"
     for f in args.fixture:
         assert f.endswith("_test.go") and not Path(f).is_absolute() and ".." not in Path(f).parts and ".git" not in Path(f).parts and "\\" not in f, "fixture must be a relative _test.go path without traversal"
     assert all(re.fullmatch(r"[0-9a-f]{40}", c) for c in (args.head_sha, args.base_sha)), "use exact commit SHAs"
@@ -122,6 +128,7 @@ def main():
                 ("pixel", "./internal/pixel", "^BenchmarkFP32PublicOptionalNative$"),
                 ("encoder", "./internal/vp9/encoder", "^BenchmarkVP9FP16Native$")]
             binding["benchmark_plan"] = plan
+            binding["whole_codec_plan"] = {"mode": "two720p-rounds" if codec_mode else "legacy 320/720", "codec": codec, "cpu_used": cpu_used}
             binding["oracle_override"] = args.test
             bins = {}
             phase = "build-and-ordinary-oracles"
@@ -170,16 +177,22 @@ def main():
                             assert variant == "parent" and number == 1
                             inventory[kind] = set(result)
                         samples[number, variant, kind] = result
-                # One pair per scope: 320p parent/current, then 720p current/parent.
-                width, height, frames, bitrate = (320, 180, 120, 500) if number == 1 else (1280, 720, 60, 2500)
-                whole[str(width)] = {}
-                for variant in order:
-                    text = run([bins[variant]["whole"], "-codec=vp9", f"-width={width}", f"-height={height}", f"-frames={frames}",
-                                "-fps=30", f"-bitrate={bitrate}", "-mode=realtime", "-cpu-used=8", "-threads=1", "-encode-only",
-                                "-auto-libvpx=false", "-format=json"], f"r{number}-{variant}-whole.json")
-                    whole[str(width)][variant] = json.loads(text)
-                semantic = [{k: v for k, v in row.items() if k not in IGNORED} for row in whole[str(width)].values()]
-                assert len(semantic[0]) == 22 and semantic[0] == semantic[1], "whole output semantics differ"
+                # Defaults preserve legacy scope/file names; codec options run 720p twice per CPU-used value.
+                if codec_mode:
+                    whole_plan = [(f"{codec}-720p-cpu{cpu}-r{number}", 1280, 720, 60, 2500, cpu) for cpu in cpu_used]
+                else:
+                    width, height, frames, bitrate = (320, 180, 120, 500) if number == 1 else (1280, 720, 60, 2500)
+                    whole_plan = [(str(width), width, height, frames, bitrate, 8)]
+                for scope, width, height, frames, bitrate, cpu in whole_plan:
+                    whole[scope] = {}
+                    for variant in order:
+                        filename = f"r{number}-{variant}-whole-{codec}-cpu{cpu}.json" if codec_mode else f"r{number}-{variant}-whole.json"
+                        text = run([bins[variant]["whole"], f"-codec={codec}", f"-width={width}", f"-height={height}", f"-frames={frames}",
+                                    "-fps=30", f"-bitrate={bitrate}", "-mode=realtime", f"-cpu-used={cpu}", "-threads=1", "-encode-only",
+                                    "-auto-libvpx=false", "-format=json"], filename)
+                        whole[scope][variant] = json.loads(text)
+                    semantic = [{k: v for k, v in row.items() if k not in IGNORED} for row in whole[scope].values()]
+                    assert len(semantic[0]) == 22 and semantic[0] == semantic[1], "whole output semantics differ: " + scope
             components = {}
             for kind, package, _ in plan:
                 for name in sorted(inventory[kind]):
@@ -189,9 +202,9 @@ def main():
                                         "paired_speedups": [a / b for a, b in zip(ns["parent"], ns["current"])]}
             summary = {"preliminary": True, "acceptance_claim": False, "component_rows": 4 * len(components), "component_allocations_zero": True,
                        "orders": [["parent", "current"], ["current", "parent"]], "components": components, "whole": whole,
-                       "whole_semantic_fields_equal": 22, "limit": "Two samples per component and one whole pair per scope cannot establish a robust performance win."}
+                       "whole_semantic_fields_equal": 22, "whole_codec_plan": binding["whole_codec_plan"], "limit": "Short component and codec samples are preliminary, not robust acceptance evidence."}
             (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
-            (out / "summary.md").write_text(f"Preliminary native feedback: {len(components)} cases, {4 * len(components)} zero-allocation samples; two whole VP9 scope pairs, all 22 output fields match. All losses remain in summary.json. No acceptance speed claim.\n")
+            (out / "summary.md").write_text(f"Preliminary native feedback: {len(components)} cases, {4 * len(components)} zero-allocation samples; {len(whole)} whole {codec} scope pairs, all 22 output fields match. All losses remain in summary.json. No acceptance speed claim.\n")
             phase = "complete"
     finally:
         (out / "status.json").write_text(json.dumps({"phase": phase, "complete": phase == "complete"}, indent=2) + "\n")
