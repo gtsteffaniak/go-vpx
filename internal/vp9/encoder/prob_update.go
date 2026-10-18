@@ -54,9 +54,25 @@ var updateBits = [maxProbConst]uint8{
 // compares this against the cost of leaving the slot unchanged
 // before deciding which path to emit.
 func ProbDiffUpdateCost(newp, oldp uint8) int {
-	delp := remapProb(int(newp), int(oldp))
-	return int(updateBits[delp]) << VP9ProbCostShift
+	v, m := int(newp)-1, int(oldp)-1
+	var i int
+	if m<<1 <= maxProbConst {
+		i = recenterNonneg(v, m) - 1
+	} else {
+		i = recenterNonneg(maxProbConst-1-v, maxProbConst-1-m) - 1
+	}
+	return int(probDiffMappedCostR3[i])
 }
+
+// The permutation and sub-exponential lengths are fixed codec tables.
+// Compose them once to avoid two dependent table loads for every trial.
+var probDiffMappedCostR3 = func() [maxProbConst - 1]uint16 {
+	var out [maxProbConst - 1]uint16
+	for i, v := range mapTable {
+		out[i] = uint16(updateBits[v]) << VP9ProbCostShift
+	}
+	return out
+}()
 
 // mapTable mirrors libvpx's static remap permutation. Mapping
 // `(delta_index → encoded_value)` flattens the delta-encoded
