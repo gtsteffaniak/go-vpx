@@ -23,3 +23,5 @@ This is a separate same-run M4 comparison. It is not pooled with PR47, x64 jobs 
 
 
 Publication: `raw-evidence.tar.gz` preserves all 12 original frozen files byte for byte, including nested raw archives, manifests and source/oracle evidence. Extract outside the repository to inspect historical Go/assembly references. Outer files are covered by `SHA256SUMS`.
+
+Publication binding: all1,937 compiled Go source blobs match source commit `d05c390826ad56012abf6ae501470729a6aaab88` exactly; see `compiled-source-binding.json`. Frozen inner notes saying final Git binding is pending describe their original pre-publication state. Subsequent evidence-only commits keep those runtime sources.
