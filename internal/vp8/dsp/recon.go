@@ -13,6 +13,9 @@ func Copy8x4(src []byte, srcStride int, dst []byte, dstStride int) {
 }
 
 func Copy8x8(src []byte, srcStride int, dst []byte, dstStride int) {
+	if pixel.Copy8Rows(src, srcStride, dst, dstStride) {
+		return
+	}
 	copyBlock(src, srcStride, dst, dstStride, 8, 8)
 }
 
