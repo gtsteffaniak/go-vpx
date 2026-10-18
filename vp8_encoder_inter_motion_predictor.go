@@ -162,22 +162,36 @@ func (e *VP8Encoder) improvedInterFrameSearchStart(
 			slots[7] = improvedInterFrameMVSlot{sad: cache.sad[7]}
 		}
 	}
-	biasImprovedInterFrameMVSlots(&slots, slotCount, refFrame, signBias, mbRow, mbCol, mbRows, mbCols)
-	order := improvedInterFrameMVSlotOrder(slots, slotCount)
-	// Both slots and order are length 8 (pow2). rank is bounded by
-	// slotCount ≤ 8 and each order[rank] cell is [0,8) by construction
-	// (the insertion sort writes only [0, slotCount) indices). Mask
-	// with 7 to elide bounds checks on both indexed loads.
-	for rank := 0; rank < slotCount; rank++ {
-		slot := slots[order[rank&7]&7]
-		if slot.refFrame == refFrame {
-			sr := 2
-			if rank < 3 {
-				sr = 3
-			}
-			return newInterFrameSearchStart(slot.mv, sr, order[rank&7])
+	// Only the lowest-SAD slot matching this reference can be selected.
+	// Count its stable rank directly instead of sorting every candidate.
+	bestSlot := -1
+	for i := 0; i < slotCount; i++ {
+		if slots[i].refFrame == refFrame && (bestSlot < 0 || slots[i].sad < slots[bestSlot].sad) {
+			bestSlot = i
 		}
 	}
+	if bestSlot >= 0 {
+		rank := 0
+		for i := 0; i < slotCount; i++ {
+			if slots[i].sad < slots[bestSlot].sad || (i < bestSlot && slots[i].sad == slots[bestSlot].sad) {
+				rank++
+			}
+		}
+		slot := slots[bestSlot]
+		if refFrame < vp8common.MaxRefFrames {
+			if slot.signBias != signBias[refFrame] {
+				slot.mv.Row = -slot.mv.Row
+				slot.mv.Col = -slot.mv.Col
+			}
+			slot.mv = clampInterFrameModeMotionVector(slot.mv, mbRow, mbCol, mbRows, mbCols)
+		}
+		sr := 2
+		if rank < 3 {
+			sr = 3
+		}
+		return newInterFrameSearchStart(slot.mv, sr, bestSlot)
+	}
+	biasImprovedInterFrameMVSlots(&slots, slotCount, refFrame, signBias, mbRow, mbCol, mbRows, mbCols)
 	mv := improvedInterFrameMVMedian(slots, slotCount)
 	return newInterFrameSearchStart(mv, 0, -1)
 }
