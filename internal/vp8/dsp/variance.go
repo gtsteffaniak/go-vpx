@@ -51,11 +51,17 @@ func SSE8x4(src []byte, srcStride int, ref []byte, refStride int) int {
 }
 
 func SSE4x8(src []byte, srcStride int, ref []byte, refStride int) int {
+	if sse, ok := sse4RowsGo(src, srcStride, ref, refStride, 8); ok {
+		return sse
+	}
 	_, sse := varianceBlock(src, srcStride, ref, refStride, 4, 8)
 	return sse
 }
 
 func SSE4x4(src []byte, srcStride int, ref []byte, refStride int) int {
+	if sse, ok := sse4RowsGo(src, srcStride, ref, refStride, 4); ok {
+		return sse
+	}
 	_, sse := varianceBlock(src, srcStride, ref, refStride, 4, 4)
 	return sse
 }
