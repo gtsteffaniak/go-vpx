@@ -27,7 +27,13 @@ func SSE8(src []byte, ss int, ref []byte, rs, h int) uint32 {
 		_ = src[(h-1)*ss+7]
 		_ = ref[(h-1)*rs+7]
 		sp, rp := unsafe.Pointer(unsafe.SliceData(src)), unsafe.Pointer(unsafe.SliceData(ref))
+		if h >= 8 && sse8WideAvailable {
+			return sse8RowsWide(sp, ss, rp, rs, h)
+		}
 		var lo, hi archsimd.Int32x4
+		if sse8VEXZeroAccumulators {
+			lo, hi = sse8ZeroAccumulators()
+		}
 		so, ro, y := 0, 0, 0
 		for ; y+2 <= h; y += 2 {
 			a := (archsimd.Uint64x2{}).SetElem(0, *(*uint64)(unsafe.Add(sp, so))).SetElem(1, *(*uint64)(unsafe.Add(sp, so+ss))).ReshapeToUint8s()
@@ -48,6 +54,9 @@ func SSE8(src []byte, ss int, ref []byte, rs, h int) uint32 {
 		return uint32(sum32(lo.Add(hi)))
 	}
 	var lo, hi archsimd.Int32x4
+	if sse8VEXZeroAccumulators {
+		lo, hi = sse8ZeroAccumulators()
+	}
 	y := 0
 	for ; y+2 <= h; y += 2 {
 		lo, hi = ssePacket(lo, hi, packRows8(src, y*ss, ss), packRows8(ref, y*rs, rs))
