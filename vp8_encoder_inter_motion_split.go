@@ -312,8 +312,34 @@ func iterativeInterFrameSplitBlockSubpixelMotionVector(src vp8enc.SourceImage, r
 	bounds := vp8enc.InterFrameSubpelSearchBoundsFor(bestRefMV, mbRow, mbCol, mbRows, mbCols)
 	_ = qIndex
 	var cache subpelEvalCache
+	// The same source sub-block is compared with every fractional
+	// candidate. Extend a partial visible block once for the whole search.
+	baseY := mbRow*16 + (block>>2)*4
+	baseX := mbCol*16 + (block&3)*4
+	var sourceScratch [256]byte
+	var sourceBlock []byte
+	sourceStride := src.YStride
+	if uint(baseY) <= uint(src.Height-height) && uint(baseX) <= uint(src.Width-width) {
+		sourceBlock = src.Y[baseY*src.YStride+baseX:]
+	} else {
+		vp8enc.GatherClampedLumaBlock(src, baseY, baseX, width, height, sourceScratch[:], 16)
+		sourceBlock = sourceScratch[:]
+		sourceStride = 16
+	}
 	cand := func(r, c int) int {
-		return cachedBoundedSplitBlockSubpixelMotionSearchCandidateCost(&cache, bounds, src, ref, mbRow, mbCol, block, width, height, r, c, bestRefMV, errorPerBit, mvProbs, mvCosts)
+		if eval, ok := cache.get(r, c); ok {
+			return eval.cost
+		}
+		eval := subpelCandidateEval{cost: maxInt()}
+		if bounds.Contains(r, c) {
+			dist, _, ok := splitBlockSubpixelVarianceBlock(ref, baseY+(r>>2), baseX+(c>>2), width, height, (c&3)<<1, (r&3)<<1, sourceBlock, sourceStride)
+			if ok {
+				mv := vp8enc.MotionVector{Row: int16(r * 2), Col: int16(c * 2)}
+				eval = subpelCandidateEval{cost: dist + interMotionSubpelCandidateVectorCostWithErrorPerBitAndCostTables(mv, bestRefMV, errorPerBit, mvProbs, mvCosts), ok: true}
+			}
+		}
+		cache.put(r, c, eval)
+		return eval.cost
 	}
 
 	for range 3 {
