@@ -52,6 +52,7 @@ def main():
     parser.add_argument("head_sha")
     parser.add_argument("base_sha")
     parser.add_argument("output_dir")
+    parser.add_argument("--oracle-only", action="store_true", help="Run focused parent/current oracles without benchmarks or whole-codec builds")
     parser.add_argument("--bench", help="Custom benchmark regex; case inventory is inferred from parent")
     parser.add_argument("--test", help="Ordinary oracle regex (default: packet oracles in FP mode)")
     parser.add_argument("--package", default="./internal/pixel", help="Comma-separated packages for --bench/--test overrides")
@@ -59,6 +60,7 @@ def main():
     parser.add_argument("--codec", choices=("vp8", "vp9"), help="Use two balanced 720p codec rounds (default codec: vp9; no options retains legacy 320/720 scopes)")
     parser.add_argument("--codec-cpu-used", action="append", default=[], help="CPU-used integers; repeatable or comma-separated, e.g. --codec-cpu-used=-8,+8")
     args = parser.parse_args()
+    assert not args.oracle_only or args.test, "oracle-only mode requires an explicit --test regex"
     codec_mode = args.codec is not None or bool(args.codec_cpu_used)
     codec = args.codec or "vp9"
     cpu_used = [int(value.strip()) for item in args.codec_cpu_used for value in item.split(",")] if args.codec_cpu_used else [8]
@@ -79,7 +81,7 @@ def main():
     commands = []
     phase = "environment"
 
-    def run(argv, filename):
+    def run(argv, filename, allow_failure=False):
         command = {"argv": [str(x) for x in argv], "output": filename,
                    "start_utc": datetime.datetime.now(datetime.timezone.utc).isoformat()}
         with (out / filename).open("wb") as log, (out / (filename + ".stderr")).open("wb") as err:
@@ -87,7 +89,7 @@ def main():
         command.update(exit_code=process.returncode, end_utc=datetime.datetime.now(datetime.timezone.utc).isoformat())
         commands.append(command)
         (out / "commands.json").write_text(json.dumps(commands, indent=2) + "\n")
-        assert process.returncode == 0, (filename, process.returncode)
+        assert allow_failure or process.returncode == 0, (filename, process.returncode)
         return (out / filename).read_text()
 
     try:
@@ -124,13 +126,14 @@ def main():
             assert all(p == "." or (p.startswith("./") and ".." not in Path(p).parts) for p in custom_packages)
             assert len(custom_packages) == len(set(custom_packages))
             plan = [("custom" if len(custom_packages) == 1 else f"custom{i}", package, args.bench)
-                    for i, package in enumerate(custom_packages)] if args.bench else [
+                    for i, package in enumerate(custom_packages)] if args.bench or args.oracle_only else [
                 ("pixel", "./internal/pixel", "^BenchmarkFP32PublicOptionalNative$"),
                 ("encoder", "./internal/vp9/encoder", "^BenchmarkVP9FP16Native$")]
             binding["benchmark_plan"] = plan
             binding["whole_codec_plan"] = {"mode": "two720p-rounds" if codec_mode else "legacy 320/720", "codec": codec, "cpu_used": cpu_used}
             binding["oracle_override"] = args.test
             bins = {}
+            oracle_results = {}
             phase = "build-and-ordinary-oracles"
             for variant, source in sources.items():
                 assert all(not (source / f).is_symlink() for f in fixtures), "reference fixture cannot be a symlink"
@@ -140,7 +143,9 @@ def main():
                     (source / f).write_bytes(data)
                     assert (source / f).read_bytes() == data
                 bins[variant] = {}
-                packages = {"pixel": "./internal/pixel", **{k: pkg for k, pkg, _ in plan}, "whole": "./cmd/govpx-bench"}
+                packages = {"pixel": "./internal/pixel", **{k: pkg for k, pkg, _ in plan}}
+                if not args.oracle_only:
+                    packages["whole"] = "./cmd/govpx-bench"
                 for kind, package in packages.items():
                     binary = scratch / (variant + "-" + kind)
                     build = ["build"] if kind == "whole" else ["test", "-c"]
@@ -154,15 +159,28 @@ def main():
                 if not args.bench and not args.test:
                     for name in ("Independent", "AliasOrder", "PanicWindows", "DequantWrapZero"):
                         assert "--- PASS: TestFPPacket" + name in text
-                if args.test:
-                    for test_kind in ([k for k, _, _ in plan] if args.bench else ["pixel"]):
-                        test = run([bins[variant][test_kind], "-test.run=" + args.test, "-test.count=1", "-test.v"], f"custom-oracle-{variant}-{test_kind}.txt")
-                        assert re.search(r"^--- PASS:", test, re.M), "custom oracle regex matched no passing tests"
                 binding["variants"][variant] = {"actual_SDK_features": dict(zip(("AVX512", "AVX2", "Enabled"), (x == "true" for x in feature.groups()))),
                     "original_fixture_sha256": originals, "production_source_sha256": {f: sha((source / f).read_bytes()) for f in SOURCES},
                     "binaries": {k: {"sha256": sha(f.read_bytes()), "bytes": f.stat().st_size} for k, f in bins[variant].items()}}
+                (out / "binding.json").write_text(json.dumps(binding, indent=2) + "\n")
+                if args.test:
+                    for test_kind in ([k for k, _, _ in plan] if args.bench or args.oracle_only else ["pixel"]):
+                        test = run([bins[variant][test_kind], "-test.run=" + args.test, "-test.count=1", "-test.v"], f"custom-oracle-{variant}-{test_kind}.txt", allow_failure=args.oracle_only)
+                        passed = commands[-1]["exit_code"] == 0 and re.search(r"^--- PASS:", test, re.M) is not None
+                        oracle_results.setdefault(variant, {})[test_kind] = {"passed": passed, "exit_code": commands[-1]["exit_code"], "output": commands[-1]["output"]}
+                        if not args.oracle_only:
+                            assert passed, "custom oracle regex matched no passing tests"
             assert binding["variants"]["parent"]["actual_SDK_features"] == binding["variants"]["current"]["actual_SDK_features"]
             (out / "binding.json").write_text(json.dumps(binding, indent=2) + "\n")
+            if args.oracle_only:
+                passed = all(result["passed"] for cases in oracle_results.values() for result in cases.values())
+                summary = {"oracle_only": True, "oracle_results": oracle_results, "all_passed": passed,
+                           "benchmark_calls": 0, "whole_codec_builds": 0, "oracle_regex": args.test}
+                (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+                (out / "summary.md").write_text("Focused parent/current oracle comparison only; no timings or whole-codec builds. " + ("All selected oracles passed.\n" if passed else "Selected oracle failure preserved in the raw logs.\n"))
+                phase = "complete" if passed else "focused-oracle-failed"
+                assert passed, "focused oracle comparison failed; both variants and bindings are preserved"
+                return
             phase = "preliminary-native-timing"
             samples = {}
             inventory = {} if args.bench else {k: names(k) for k, _, _ in plan}

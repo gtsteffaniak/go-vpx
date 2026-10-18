@@ -504,7 +504,10 @@ func (rs *rowEncoderState) encodeThreadedInterFrameMacroblock(args *threadedInte
 			mbSource = args.coeffSource
 		} else {
 			overlay := e.applyDenoiserToInterMacroblock(args.src, args.coeffSource, args.rows, args.cols, row, col, &decision)
-			if overlay.y {
+			if overlay.yAverage {
+				mbSource.Y = e.denoiser.runningAvg[denoiserAvgIntra].Img.Y
+				mbSource.YStride = e.denoiser.runningAvg[denoiserAvgIntra].Img.YStride
+			} else if overlay.y {
 				mbSource.Y = args.coeffSource.Y
 				mbSource.YStride = args.coeffSource.YStride
 			}

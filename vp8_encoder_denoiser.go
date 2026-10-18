@@ -171,15 +171,16 @@ func (e *VP8Encoder) initDenoiserAvgFromKeyFrame(source vp8enc.SourceImage) {
 }
 
 // denoiserPlaneOverlay reports which planes of the just-denoised macroblock
-// carry their coded signal in the denoiser overlay buffer rather than the
-// raw source. libvpx's vp8_denoiser_denoise_mb expresses the same routing
+// carry their coded signal in the denoiser overlay or running average rather
+// than the raw source. libvpx's vp8_denoiser_denoise_mb expresses the same routing
 // through x->thismb (Y) and in-place source UV writes; govpx keeps the raw
 // source immutable (it may alias the caller's frame) and points the
 // coefficient build at the overlay only for the planes the denoiser wrote.
 type denoiserPlaneOverlay struct {
-	y bool
-	u bool
-	v bool
+	yAverage bool
+	y        bool
+	u        bool
+	v        bool
 }
 
 // stageDenoiserOverlayMacroblock replicates one macroblock of the raw
@@ -325,22 +326,22 @@ func (e *VP8Encoder) applyDenoiserToInterMacroblock(source vp8enc.SourceImage, f
 	vAvgOff := row*8*avg.Img.VStride + col*8
 	aliased := sourceImagePlaneMatches(source.Y, source.YStride, filtered.Y, filtered.YStride)
 
-	// DenoiserFilterY reads the signal block through its sig pointer
-	// (libvpx vp8_denoiser_filter reads x->thismb). On the split
-	// source/overlay path the overlay's MB region holds stale pixels, so
-	// stage the raw signal there first — this is the per-MB thismb copy
-	// libvpx pays on every MB, here only on filter-candidate MBs.
+	// Filtering directly from raw input avoids the overlay pre-copy and
+	// the accepted average-to-signal copy. Partial-edge aliased blocks retain
+	// their existing staged path and unsupported layouts use the same fallback.
+	filterDecision, averageOnly := vp8enc.DenoiserCopyBlock, false
 	if !aliased {
-		copyMacroblockY(filtered.Y[ySigOff:], filtered.YStride, source.Y[yOff:], source.YStride)
+		filterDecision, averageOnly = vp8enc.DenoiserFilterYAverageOnly(mcY, mcYStride, avg.Img.Y[yAvgOff:], avg.Img.YStride, source.Y[yOff:], source.YStride, motionMag, increase)
 	}
-	filterDecision := vp8enc.DenoiserFilterY(
-		mcY, mcYStride,
-		avg.Img.Y[yAvgOff:], avg.Img.YStride,
-		filtered.Y[ySigOff:], filtered.YStride,
-		motionMag, increase,
-	)
+	if !averageOnly {
+		if !aliased {
+			copyMacroblockY(filtered.Y[ySigOff:], filtered.YStride, source.Y[yOff:], source.YStride)
+		}
+		filterDecision = vp8enc.DenoiserFilterY(mcY, mcYStride, avg.Img.Y[yAvgOff:], avg.Img.YStride, filtered.Y[ySigOff:], filtered.YStride, motionMag, increase)
+	}
 	if filterDecision == vp8enc.DenoiserFilterBlock {
-		overlay.y = !aliased
+		overlay.yAverage = averageOnly
+		overlay.y = !aliased && !averageOnly
 		if motionMag > 0 {
 			e.denoiser.state[index] = vp8enc.DenoiserStateFilterNonZero
 		} else {
@@ -353,8 +354,12 @@ func (e *VP8Encoder) applyDenoiserToInterMacroblock(source vp8enc.SourceImage, f
 
 	applySpatialFilter := func() {
 		if e.applyDenoiserSpatialLoopFilter(filtered, avg, row, col, cols, index, ySigOff, yAvgOff) {
-			copyMacroblockY(filtered.Y[ySigOff:], filtered.YStride, avg.Img.Y[yAvgOff:], avg.Img.YStride)
-			overlay.y = !aliased
+			if aliased {
+				copyMacroblockY(filtered.Y[ySigOff:], filtered.YStride, avg.Img.Y[yAvgOff:], avg.Img.YStride)
+			} else {
+				overlay.yAverage = true
+			}
+			overlay.y = !aliased && !overlay.yAverage
 		}
 	}
 	if e.denoiser.mode == vp8enc.DenoiserOnYOnly {
@@ -455,8 +460,12 @@ func (e *VP8Encoder) copyDenoiserNoFilterMacroblock(source vp8enc.SourceImage, f
 	}
 	e.denoiser.state[index] = vp8enc.DenoiserStateNoFilter
 	if e.applyDenoiserSpatialLoopFilter(filtered, avg, row, col, cols, index, ySigOff, yAvgOff) {
-		copyMacroblockY(filtered.Y[ySigOff:], filtered.YStride, avg.Img.Y[yAvgOff:], avg.Img.YStride)
-		overlay.y = !aliased
+		if aliased {
+			copyMacroblockY(filtered.Y[ySigOff:], filtered.YStride, avg.Img.Y[yAvgOff:], avg.Img.YStride)
+		} else {
+			overlay.yAverage = true
+		}
+		overlay.y = !aliased && !overlay.yAverage
 	}
 	return overlay
 }
