@@ -17,7 +17,7 @@ import (
 func blockYrdScore(src []int16, bw, bh int, tx common.TxSize,
 	r, q, d [2]int16, sse uint64, coeff []int16, nonzero bool,
 ) (BlockYrdResult, bool) {
-	if !pixel.Enabled || tx < common.Tx8x8 || tx > common.Tx16x16 ||
+	if !pixel.Enabled || tx < common.Tx4x4 || tx > common.Tx16x16 ||
 		d[0] < 3 || d[0] > 2048 || d[1] < 3 || d[1] > 2048 {
 		return BlockYrdResult{}, false
 	}
@@ -43,7 +43,16 @@ func blockYrdScore(src []int16, bw, bh int, tx common.TxSize,
 	for y := 0; y < bh; y += n {
 		for x := 0; x < bw; x += n {
 			input := src[y*bw+x:]
-			rtx, etx, uniform := blockYrdUniformScore(input, bw, n, r, q, d)
+			var rtx int
+			var etx uint32
+			uniform := false
+			if n == 4 {
+				ForwardDCT4x4Into(input, bw, coeff)
+				rtx, etx = blockYrdQuantScore(coeff, 16, r, q, d)
+				uniform = true
+			} else {
+				rtx, etx, uniform = blockYrdUniformScore(input, bw, n, r, q, d)
+			}
 			if !uniform {
 				if n == 8 {
 					rtx, etx = blockYrdHadamard8Score(input, bw, r, q, d)
@@ -66,7 +75,7 @@ func blockYrdScore(src []int16, bw, bh int, tx common.TxSize,
 	return res, true
 }
 
-// The caller supplies n=64/256 complete coefficients and the exact BlockYrd
+// The caller supplies n=16/64/256 complete coefficients and the exact BlockYrd
 // tables r=floor(factor*d/128), q=floor(65536/d), with 3<=d<=2048.
 // The usual threshold mask is redundant here: a<d implies
 // floor(a*floor(65536/d)/65536)==0. Thus q>=0 and qabs*d<=32767: dequantization cannot wrap. Sign restoration
