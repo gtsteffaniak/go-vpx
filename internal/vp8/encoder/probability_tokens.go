@@ -392,6 +392,9 @@ func countCoefficientMacroblockTokensAndRecords(is4x4 bool, above *TokenContextP
 
 	}
 
+	if zeroUVTokenRecords(above, left, coeffs, counts, records) {
+		return nil
+	}
 	for block := 16; block < 24; block++ {
 		eob := coeffs.BlockEOB(block, 0)
 		a, l := common.UVTokenContextIndex(block)
