@@ -12,3 +12,8 @@ func vp8Right4(v archsimd.Int32x4) archsimd.Int32x4  { return v.ShiftAllRight(4)
 func vp8Right12(v archsimd.Int32x4) archsimd.Int32x4 { return v.ShiftAllRight(12) }
 func vp8Right16(v archsimd.Int32x4) archsimd.Int32x4 { return v.ShiftAllRight(16) }
 func vp8Sign(v archsimd.Int32x4) archsimd.Int32x4    { return v.ShiftAllRight(31) }
+
+func vp8Zero4(v archsimd.Int32x4) bool {
+	u := v.ToBits().ReshapeToUint64s()
+	return u.GetElem(0)|u.GetElem(1) == 0
+}

@@ -1,6 +1,7 @@
 package encoder
 
 import (
+	"github.com/thesyncim/govpx/internal/pixel"
 	"unsafe"
 
 	"github.com/thesyncim/govpx/internal/vp8/dsp"
@@ -65,6 +66,12 @@ func gatherMacroblockUVResiduals4x4Unchecked(src *byte, srcStride int, pred *byt
 // (mbBaseX, mbBaseY) in src coordinates, against a 16x16 pred buffer in its
 // own local (0..15, 0..15) coordinate space with stride predStride.
 func GatherMacroblockYResiduals4x4FromPredBuffer(src []byte, srcStride int, width int, height int, pred []byte, predStride int, mbBaseX int, mbBaseY int, out []int16) {
+	if width >= 16 && height >= 16 && uint(mbBaseX) <= uint(width-16) && uint(mbBaseY) <= uint(height-16) && srcStride >= width && predStride >= 16 && len(out) >= 256 && len(src) >= mbBaseX+16 && len(pred) >= 16 && mbBaseY+15 <= (len(src)-mbBaseX-16)/srcStride && predStride <= (len(pred)-16)/15 && residualOutputDisjoint(src, pred, out[:256]) {
+		sp := (*byte)(unsafe.Add(unsafe.Pointer(unsafe.SliceData(src)), mbBaseY*srcStride+mbBaseX))
+		dsp.ResidualGather16x16PtrFast(sp, srcStride, unsafe.SliceData(pred), predStride, unsafe.SliceData(out))
+		return
+	}
+
 	for block := range 16 {
 		blockX := (block & 3) * 4
 		blockY := (block >> 2) * 4
@@ -80,6 +87,17 @@ func GatherMacroblockYResiduals4x4FromPredBuffer(src []byte, srcStride int, widt
 }
 
 func FillPredictedResidual4x4(src []byte, srcStride int, width int, height int, pred []byte, predStride int, x int, y int, out *[16]int16) {
+	FillPredictedResidual4x4Slice(src, srcStride, width, height, pred, predStride, x, y, out[:])
+}
+
+// FillPredictedResidual4x4Slice mirrors FillPredictedResidual4x4 but writes
+// into a caller-supplied slice.
+func FillPredictedResidual4x4Slice(src []byte, srcStride int, width int, height int, pred []byte, predStride int, x int, y int, out []int16) {
+	if width >= 4 && height >= 4 && uint(x) <= uint(width-4) && uint(y) <= uint(height-4) && srcStride >= width && predStride >= x+4 && len(out) >= 16 && len(src) >= x+4 && len(pred) >= x+4 && y+3 <= (len(src)-x-4)/srcStride && y+3 <= (len(pred)-x-4)/predStride && residualOutputDisjoint(src, pred, out[:16]) {
+		pixel.Subtract(src[y*srcStride+x:], srcStride, pred[y*predStride+x:], predStride, out, 4, 4, 4)
+		return
+	}
+
 	for row := range 4 {
 		sampleY := clampEncodeCoord(y+row, height)
 		for col := range 4 {
@@ -89,14 +107,12 @@ func FillPredictedResidual4x4(src []byte, srcStride int, width int, height int, 
 	}
 }
 
-// FillPredictedResidual4x4Slice mirrors FillPredictedResidual4x4 but writes
-// into a caller-supplied slice.
-func FillPredictedResidual4x4Slice(src []byte, srcStride int, width int, height int, pred []byte, predStride int, x int, y int, out []int16) {
-	for row := range 4 {
-		sampleY := clampEncodeCoord(y+row, height)
-		for col := range 4 {
-			sampleX := clampEncodeCoord(x+col, width)
-			out[row*4+col] = int16(int(src[sampleY*srcStride+sampleX]) - int(pred[(y+row)*predStride+x+col]))
-		}
+// Fast SIMD gathers change load/store grouping; preserve scalar behavior for aliased outputs.
+func residualOutputDisjoint(src, pred []byte, out []int16) bool {
+	op := uintptr(unsafe.Pointer(unsafe.SliceData(out)))
+	overlap := func(b []byte) bool {
+		bp := uintptr(unsafe.Pointer(unsafe.SliceData(b)))
+		return len(b) != 0 && len(out) != 0 && ((bp <= op && op-bp < uintptr(len(b))) || (op < bp && bp-op < uintptr(len(out))*2))
 	}
+	return !overlap(src) && !overlap(pred)
 }

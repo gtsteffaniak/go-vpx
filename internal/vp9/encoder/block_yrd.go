@@ -132,11 +132,18 @@ func ModelRDFromVarLapndz(varN uint32, nLog2 uint, qstep uint32) (rate int, dist
 	if varN == 0 {
 		return 0, 0
 	}
+	// At xsq=0 the libvpx table is exactly rQ10=65536, dQ10=0.
+	// Keep the general arithmetic for unusual shifts outside block sizes.
+	if qstep == 0 && nLog2 <= 12 {
+		return 32768 << nLog2, 0
+	}
 	xsqQ1064 := ((uint64(qstep) * uint64(qstep)) << (nLog2 + 10)) + uint64(varN>>1)
 	xsqQ1064 /= uint64(varN)
 	var xsqQ10 int
-	if xsqQ1064 > maxXsqQ10 {
-		xsqQ10 = maxXsqQ10
+	if xsqQ1064 >= maxXsqQ10 {
+		// libvpx v1.16.0 vp9_rd.c tables: model_rd_norm(245727)
+		// interpolates buckets102/103 to exactly rate0,dist1023.
+		return 0, (int64(varN)*1023 + 512) >> 10
 	} else {
 		xsqQ10 = int(xsqQ1064)
 	}

@@ -1460,23 +1460,52 @@ func (e *VP9Encoder) predictVP9KeyframeTxScratchLive(hdr *vp9dec.UncompressedHea
 
 	bounds := vp9dec.BlockBoundsEdgesForMI(miRows, miCols, miRow, miCol, bsize)
 	leftAvailable := blockCol4x4 != 0 || miCol > tile.MiColStart
+	// libvpx vp9/common/vp9_reconintra.c:300-350 only reads the edges
+	// selected by extend_modes. Intra fallback never consumes above-right
+	// for DC/V/H/TM, so avoid gathering and discarding that half-row.
+	need := vp9dec.ExtendModes[mode]
 	left := e.intraScratch.Left[:bs]
-	if leftAvailable {
-		for i := range bs {
-			sy := y0 + i
-			if bounds.MbToBottomEdge < 0 && sy >= planeHeight {
-				sy = planeHeight - 1
+	if leftAvailable && need&vp9dec.NeedLeft != 0 {
+		bottomFits := bounds.MbToBottomEdge >= 0 || y0+bs <= planeHeight
+		switch {
+		case bottomFits && localX > 0:
+			for i := range bs {
+				left[i] = dstData[(localY+i)*dstStride+localX-1]
 			}
-			left[i] = readEdge(x0-1, sy)
+		case bottomFits && x0 > 0 && x0 <= refStride && y0 >= 0 && y0+bs <= refRows:
+			for i := range bs {
+				left[i] = refData[(y0+i)*refStride+x0-1]
+			}
+		default:
+			for i := range bs {
+				sy := y0 + i
+				if bounds.MbToBottomEdge < 0 && sy >= planeHeight {
+					sy = planeHeight - 1
+				}
+				left[i] = readEdge(x0-1, sy)
+			}
 		}
 	}
 
 	upAvailable := blockRow4x4 != 0 || miRow > 0
 	above := e.intraScratch.Above[1 : 1+2*bs]
 	aboveLeft := uint8(127)
-	if upAvailable {
-		for i := range 2 * bs {
-			above[i] = readEdge(x0+i, y0-1)
+	if upAvailable && need&(vp9dec.NeedAbove|vp9dec.NeedAboveRight) != 0 {
+		span := bs
+		if need&vp9dec.NeedAboveRight != 0 {
+			span = 2 * bs
+		}
+		switch {
+		case localY > 0 && localX+span <= dstStride:
+			off := (localY-1)*dstStride + localX
+			copy(above[:span], dstData[off:off+span])
+		case localY == 0 && y0 > 0 && y0 <= refRows && x0 >= 0 && x0+span <= refStride:
+			off := (y0-1)*refStride + x0
+			copy(above[:span], refData[off:off+span])
+		default:
+			for i := range span {
+				above[i] = readEdge(x0+i, y0-1)
+			}
 		}
 		if leftAvailable {
 			aboveLeft = readEdge(x0-1, y0-1)
@@ -1487,6 +1516,32 @@ func (e *VP9Encoder) predictVP9KeyframeTxScratchLive(hdr *vp9dec.UncompressedHea
 	txw := 1 << uint(txSize)
 	rightAvailable := blockCol4x4+txw < planeBlock4x4W
 	dst = dstData[localY*dstStride+localX:]
+	// These gathered edges already have libvpx's interior values. Avoid
+	// copying them onto themselves through the general border builder.
+	if upAvailable && leftAvailable && bounds.MbToRightEdge >= 0 &&
+		bounds.MbToBottomEdge >= 0 && need&vp9dec.NeedAboveRight == 0 {
+		e.intraScratch.Above[0] = aboveLeft
+		if mode == common.DcPred {
+			vp9dec.IntraDcPredTable[1][1][txSize](dst, dstStride, e.intraScratch.Above[:1+2*bs], left)
+		} else {
+			vp9dec.IntraPredTable[mode][txSize](dst, dstStride, e.intraScratch.Above[:1+2*bs], left)
+		}
+		return dst, dstStride, x0, y0, true
+	}
+	// libvpx's four DC kernels only read available edges. Missing-edge
+	// sentinel fills cannot affect DC output, so dispatch before those fills.
+	if mode == common.DcPred && (!upAvailable || !leftAvailable) &&
+		bounds.MbToRightEdge >= 0 && bounds.MbToBottomEdge >= 0 {
+		li, ai := 0, 0
+		if leftAvailable {
+			li = 1
+		}
+		if upAvailable {
+			ai = 1
+		}
+		vp9dec.IntraDcPredTable[li][ai][txSize](dst, dstStride, e.intraScratch.Above[:1+2*bs], left)
+		return dst, dstStride, x0, y0, true
+	}
 	vp9dec.BuildIntraPredictorsWithScratch(vp9dec.BuildIntraPredictorsArgs{
 		Dst:            dst,
 		DstStride:      dstStride,

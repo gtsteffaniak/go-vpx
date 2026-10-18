@@ -12,7 +12,7 @@ import (
 func fastQuantizeBlockBatchSIMD(coeff []int16, quant *BlockQuant, qcoeff []int16, dqcoeff []int16, eobs []uint8, count int) {
 	// Shared-table SIMD amortizes setup for the production eight/16-block batches.
 	// Single blocks retain the lower-overhead per-block path.
-	if count >= 8 && pixel.QuantizeVP8Batch(coeff, &quant.Round, &quant.QuantFast, &quant.Dequant, qcoeff, dqcoeff, &tables.DefaultInvZigZag, eobs, count) {
+	if count >= 2 && pixel.QuantizeVP8Batch(coeff, &quant.Round, &quant.QuantFast, &quant.Dequant, qcoeff, dqcoeff, &tables.DefaultInvZigZag, eobs, count) {
 		return
 	}
 	for i := range count {

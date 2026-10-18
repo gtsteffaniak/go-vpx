@@ -20,3 +20,7 @@ func blockYrdSquarePairs16(v archsimd.Int16x8) archsimd.Uint32x4 {
 }
 
 func blockYrdSum32(v archsimd.Uint32x4) uint32 { return v.ReduceSum() }
+
+func blockYrdSumUnsigned16(v archsimd.Uint16x8) uint32 {
+	return v.ExtendLo4ToUint32().Add(v.HiToLo().ExtendLo4ToUint32()).ReduceSum()
+}

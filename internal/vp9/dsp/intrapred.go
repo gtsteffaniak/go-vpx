@@ -1,5 +1,7 @@
 package dsp
 
+import "github.com/thesyncim/govpx/internal/pixel"
+
 // VP9 intra prediction kernels — DC / V / H / TM families and their DC
 // fall-back variants (dc_128, dc_left, dc_top). Ported from libvpx
 // v1.16.0 vpx_dsp/intrapred.c. Each predictor takes a caller-owned
@@ -128,6 +130,11 @@ func fillBlockConstant(dst []uint8, stride, bs int, v uint8) {
 // above[c] - above[-1]). Callers must pass a slice whose backing array
 // has at least one byte before `above[0]` so the -1 lookup is valid.
 func tmPredictor(dst []uint8, stride, bs int, above, left []uint8) {
+	if intraBridgeDisjoint(dst, stride, bs, above, bs+1) &&
+		intraBridgeDisjoint(dst, stride, bs, left, bs) {
+		pixel.TMPredict(dst, stride, above[1:], left, above[0], bs)
+		return
+	}
 	// above is provided with above[0]..above[bs+...], and aboveTopLeft is
 	// passed via above[-1] in libvpx. To keep that contract in Go we
 	// expect callers to pass a sub-slice where index 0 is the top-left
@@ -176,54 +183,102 @@ func tmPredictor(dst []uint8, stride, bs int, above, left []uint8) {
 // Vpx*Predictor4x4 etc match libvpx's vpx_<type>_predictor_4x4_c.
 
 func VpxDcPredictor4x4(dst []uint8, stride int, above, left []uint8) {
+	if pixel.Intra4x4DCFill(dst, stride, above[1:], left) {
+		return
+	}
 	dcPredictor(dst, stride, 4, above[1:], left)
 }
 func VpxDcPredictor8x8(dst []uint8, stride int, above, left []uint8) {
+	if pixel.IntraDCFill(dst, stride, above[1:], left, 8, true, true) {
+		return
+	}
 	dcPredictor(dst, stride, 8, above[1:], left)
 }
 func VpxDcPredictor16x16(dst []uint8, stride int, above, left []uint8) {
+	if pixel.IntraDCFill(dst, stride, above[1:], left, 16, true, true) {
+		return
+	}
 	dcPredictor(dst, stride, 16, above[1:], left)
 }
 func VpxDcPredictor32x32(dst []uint8, stride int, above, left []uint8) {
+	if intraDCFixed(dst, stride, 32, above[1:], left, true, true) {
+		return
+	}
 	dcPredictor(dst, stride, 32, above[1:], left)
 }
 
 func VpxDcLeftPredictor4x4(dst []uint8, stride int, above, left []uint8) {
+	if intraDCFixed(dst, stride, 4, above[1:], left, false, true) {
+		return
+	}
 	dcLeftPredictor(dst, stride, 4, above[1:], left)
 }
 func VpxDcLeftPredictor8x8(dst []uint8, stride int, above, left []uint8) {
+	if pixel.IntraDCFill(dst, stride, above[1:], left, 8, false, true) {
+		return
+	}
 	dcLeftPredictor(dst, stride, 8, above[1:], left)
 }
 func VpxDcLeftPredictor16x16(dst []uint8, stride int, above, left []uint8) {
+	if pixel.IntraDCFill(dst, stride, above[1:], left, 16, false, true) {
+		return
+	}
 	dcLeftPredictor(dst, stride, 16, above[1:], left)
 }
 func VpxDcLeftPredictor32x32(dst []uint8, stride int, above, left []uint8) {
+	if intraDCFixed(dst, stride, 32, above[1:], left, false, true) {
+		return
+	}
 	dcLeftPredictor(dst, stride, 32, above[1:], left)
 }
 
 func VpxDcTopPredictor4x4(dst []uint8, stride int, above, left []uint8) {
+	if intraDCFixed(dst, stride, 4, above[1:], left, true, false) {
+		return
+	}
 	dcTopPredictor(dst, stride, 4, above[1:], left)
 }
 func VpxDcTopPredictor8x8(dst []uint8, stride int, above, left []uint8) {
+	if pixel.IntraDCFill(dst, stride, above[1:], left, 8, true, false) {
+		return
+	}
 	dcTopPredictor(dst, stride, 8, above[1:], left)
 }
 func VpxDcTopPredictor16x16(dst []uint8, stride int, above, left []uint8) {
+	if pixel.IntraDCFill(dst, stride, above[1:], left, 16, true, false) {
+		return
+	}
 	dcTopPredictor(dst, stride, 16, above[1:], left)
 }
 func VpxDcTopPredictor32x32(dst []uint8, stride int, above, left []uint8) {
+	if intraDCFixed(dst, stride, 32, above[1:], left, true, false) {
+		return
+	}
 	dcTopPredictor(dst, stride, 32, above[1:], left)
 }
 
 func VpxDc128Predictor4x4(dst []uint8, stride int, above, left []uint8) {
+	if intraDCFixed(dst, stride, 4, above[1:], left, false, false) {
+		return
+	}
 	dc128Predictor(dst, stride, 4, above[1:], left)
 }
 func VpxDc128Predictor8x8(dst []uint8, stride int, above, left []uint8) {
+	if pixel.IntraDCFill(dst, stride, above[1:], left, 8, false, false) {
+		return
+	}
 	dc128Predictor(dst, stride, 8, above[1:], left)
 }
 func VpxDc128Predictor16x16(dst []uint8, stride int, above, left []uint8) {
+	if pixel.IntraDCFill(dst, stride, above[1:], left, 16, false, false) {
+		return
+	}
 	dc128Predictor(dst, stride, 16, above[1:], left)
 }
 func VpxDc128Predictor32x32(dst []uint8, stride int, above, left []uint8) {
+	if intraDCFixed(dst, stride, 32, above[1:], left, false, false) {
+		return
+	}
 	dc128Predictor(dst, stride, 32, above[1:], left)
 }
 
@@ -234,6 +289,9 @@ func VpxVPredictor8x8(dst []uint8, stride int, above, left []uint8) {
 	vPredictor(dst, stride, 8, above[1:], left)
 }
 func VpxVPredictor16x16(dst []uint8, stride int, above, left []uint8) {
+	if intraVFixed(dst, stride, 16, above[1:]) {
+		return
+	}
 	vPredictor(dst, stride, 16, above[1:], left)
 }
 func VpxVPredictor32x32(dst []uint8, stride int, above, left []uint8) {
@@ -246,14 +304,23 @@ func VpxHPredictor4x4(dst []uint8, stride int, above, left []uint8) {
 }
 func VpxHPredictor8x8(dst []uint8, stride int, above, left []uint8) {
 	_ = above[0]
+	if intraHFixed(dst, stride, 8, left) {
+		return
+	}
 	hPredictor8(dst, stride, left)
 }
 func VpxHPredictor16x16(dst []uint8, stride int, above, left []uint8) {
 	_ = above[0]
+	if intraHFixed(dst, stride, 16, left) {
+		return
+	}
 	hPredictor16(dst, stride, left)
 }
 func VpxHPredictor32x32(dst []uint8, stride int, above, left []uint8) {
 	_ = above[0]
+	if intraHFixed(dst, stride, 32, left) {
+		return
+	}
 	hPredictor32(dst, stride, left)
 }
 
@@ -267,5 +334,10 @@ func VpxTmPredictor16x16(dst []uint8, stride int, above, left []uint8) {
 	tmPredictor(dst, stride, 16, above, left)
 }
 func VpxTmPredictor32x32(dst []uint8, stride int, above, left []uint8) {
+	if intraBridgeDisjoint(dst, stride, 32, above, 33) &&
+		intraBridgeDisjoint(dst, stride, 32, left, 32) &&
+		intraTM32Fixed(dst, stride, above[1:], left, above[0]) {
+		return
+	}
 	tmPredictor(dst, stride, 32, above, left)
 }
