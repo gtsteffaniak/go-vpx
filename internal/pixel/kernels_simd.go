@@ -409,6 +409,10 @@ func TMPredict(dst []byte, ds int, above, left []byte, top byte, w int) {
 		return
 	}
 
+	if (w == 8 || w == 16) && TMPredictBytes(dst, ds, above, left, top, w) {
+		return
+	}
+
 	t := archsimd.BroadcastInt32x4(int32(top))
 	for y := range w {
 		v := archsimd.BroadcastInt32x4(int32(left[y])).Sub(t)
