@@ -615,6 +615,12 @@ func computeSkin8x8Block(src vp8enc.SourceImage, uvWidth int, uvHeight int, mbRo
 		uvRow := mbRow*8 + (sb>>1)*4 + 1
 		uvCol := mbCol*8 + (sb&1)*4 + 1
 		ySample := average2x2Clamped(src.Y, src.YStride, src.Width, src.Height, yRow, yCol)
+		if ySample < skinYLow || ySample > skinYHigh {
+			if numSkin+3-sb < 2 {
+				return false
+			}
+			continue
+		}
 		uSample := average2x2Clamped(src.U, src.UStride, uvWidth, uvHeight, uvRow, uvCol)
 		vSample := average2x2Clamped(src.V, src.VStride, uvWidth, uvHeight, uvRow, uvCol)
 		if skinPixel(ySample, uSample, vSample, motion) {
@@ -622,6 +628,9 @@ func computeSkin8x8Block(src vp8enc.SourceImage, uvWidth int, uvHeight int, mbRo
 			if numSkin >= 2 {
 				return true
 			}
+		}
+		if numSkin+3-sb < 2 {
+			return false
 		}
 	}
 	return false
