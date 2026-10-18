@@ -1,0 +1,51 @@
+id	PR	branch	initial_measured_head	title
+mode-costs	57	codex/vp8-static-mode-costs	1213430961a12af0ad0748c8f889c2433a37b1d6	Prepare immutable VP8 keyframe mode costs once
+fast-picker-refs	58	codex/vp8-fast-picker-refs	57f15d360a72ee6f0b52b059f408d0dcd6d63000	Reuse fast VP8 intra predictor references
+112	60	codex/vp8-branch-subtree-sums	f6cc72b8085322a357bfce996a4efde08ac8979e	perf(vp8): compute VP8 coefficient branch counts from fixed subtrees
+113	59	codex/vp8-cost-table-prefix-dag	ed00b5e1501802f1cb4e981568e89bafbc579699	perf(vp8): share VP8 coefficient cost-table tree prefixes
+114	61	codex/vp8-terminal-token-contexts	4b1742ed532f395d27fbec4e18131992b345c0e3	perf(vp8): write only final VP8 coefficient token contexts
+115	62	codex/vp8-skippable-eob-words	de97464e2b52408108aa8aea9dd2c3b826a76351	perf(vp8): check VP8 macroblock EOB skippability with word masks
+116	63	codex/vp8-direct-token-path-cost	f3498d21793f12fd02238c9917b8e5e0c0fc0968	perf(vp8): evaluate VP8 coefficient token costs without path loops
+118	64	codex/vp8-contiguous-reference-equality	b230a66450c6512ed6d080137f59b71001e5c459	perf(vp8): compare packed VP8 source planes in one pass
+dsp01	65	codex/dsp01-small-bilinear	85ab3ae139b1c7b3c4972e76fa9a632141f254e9	perf(vp8): collapse identity bilinear axes and SIMD the small predictors
+dsp02	66	codex/dsp02-residual-add	d53200d3ea7589170dfc62a21ab8353e5e654d15	perf(vp8): vectorize residual-add clipping once per row
+dsp04	67	codex/dsp04-dequant-packets	5951f47cf364e41bed761e7ff56fde9a93693ab8	perf(vp8): multiply dequant blocks in vector packets with overlap fallback
+dsp05	68	codex/dsp05-walsh-direct-scatter	e59934ca428d6a909ebdee112bbf89e73a84092e	perf(vp8): remove inverse-Walsh temporary output materialization
+dsp06	69	codex/dsp06-sparse-dequant	bf25cac169ef0d1238dc0a6b0e8ad19a6445c532	perf(vp8): skip zero products and full transform for DC-only dequant packets
+dsp07	70	codex/dsp07-split-subpel	4ea36cfe99392ef02e00035440530590767d3536	perf(vp8): fuse split-block one-axis filtering and variance statistics
+dsp03r	71	codex/dsp03-zero-dc	9a121701bb0a8ae2aa2e3cf18367fcb52ca589ab	perf(vp8): skip zero-DC in-place reconstruction with a small dispatch predicate
+motion01	72	codex/motion01-predictor	b6bf1546cdd7a57d27c99e39b2145499a34bd660	perf(vp8): select motion predictor without sorting and clamping discarded slots
+motion02	73	codex/motion02-bias	0e5bc2eeef6982cf1f0dc7757000a81334ad3d13	perf(vp8): hoist frame-edge clamp bounds out of predictor slot loop
+motion03	74	codex/motion03-moments	4fbd53f868b7f4f0d2354d976e61aebc747808b5	perf(vp8): extend partial source once before SIMD motion moments
+motion06	75	codex/motion06-residual	8b8ab0b2a91abcb761ef238a4ce859341b2dd0ff	perf(vp8): use native subtraction for interior split residual blocks
+motion07	76	codex/motion07-subpelsource	3da262af467ebd0b023b97c8b60927eab789d7e7	perf(vp8): reuse extended source block throughout split subpel search
+motion08	77	codex/motion08-median	6fee10cce3b42e1f7d4dab1a395b972e71ac4db7	perf(vp8): select three-neighbor motion median without scratch sorting
+keyframe-coef-costs	78	codex/vp8-fixed-coef-cost-cache	5bf30386e9c9b8d41fa7c0bbf23fb252b7ae6b62	perf(vp8): reuse fixed keyframe coefficient costs in VP8 RD scoring
+126	79	codex/algo126-share-coefficient-cost-prefixes	11528fc109b2fce51f94ff7becea488d14192656	perf(vp9): reuse shared prefixes when building coefficient cost tables
+127	80	codex/algo127-reuse-motion-offset-bit-costs	9d68562b8cc309845eb1a34f6b3e44a29c6b142a	perf(vp9): reuse offset bit costs while building motion-vector tables
+128	81	codex/algo128-reuse-coefficient-probability-decisions	96dbac242b84b5de79cdd41cc7774b368037ad35	perf(vp9): reuse coefficient probability decisions during header emission
+129	82	codex/algo129-count-eob-by-flat-row	287c64c92e6f9971e17d0f5a31ec6334e90da36d	perf(vp9): count EOB tokens through their validated flat row index
+134	83	codex/algo134-pair-variance-partition-averages	e094b3620d5beecc0739d5277b5dfa5698ebd2e9	perf(vp9): reduce paired4x4 variance averages in one row pass
+dsp09r	85	codex/dsp09-direct-directional-averages	140fb27b2d29799af77d471e85b77538337bc959	perf(vp8): use shared direct directional averages with snapshot alias fallback
+dsp11	84	codex/dsp11-pack-four-sad-rows	a48e08cb43a58f915d46aec9b81b71d19e3798e7	perf(vp8): pack four SAD rows before the absolute-difference reduction
+dsp12	86	codex/dsp12-sse-only-four-wide	658912af858a7b8b7e646a2a8e549ce922396870	perf(vp8): avoid unused signed-sum work in four-wide SSE reductions
+130	87	codex/algo130-average-pixels-in-byte-domain	f3a7eacdfbef7c3e92fccbd4a67046549a27416d	perf(pixel): average pixels directly in the byte domain
+133	88	codex/algo133-x64-byte-true-motion	b17f9d71f4f6928ca0a74cd0962d1edc2e438a72	perf(pixel): use byte arithmetic for x64 true-motion prediction
+135	89	codex/algo135-hoist-coefficient-band-cost-rows	8cf92a7fa2537924fb12b543cf85eb5c95d1ce21	perf(vp9): hoist coefficient-band cost rows during rate scoring
+136	90	codex/algo136-skip-empty-probability-search	1098c1414c68a066ea3698f44def717fa3dfeb6d	perf(vp9): skip probability-search setup for unchanged seeds
+137	91	codex/algo137-compose-probability-update-costs	a20527f89308452655af51817c527151c818bd64	perf(vp9): compose fixed probability-update cost tables
+138	92	codex/algo138-reuse-large-coefficient-costs	a42d7ee275ec19f213c732aa4b0c52a35b07d99e	perf(vp9): reuse existing token costs for large coefficient magnitudes
+140	93	codex/algo140-stop-first-pass-on-exact-match	841ca2e3c036aa78b5a0068c93746eb69fa9cb8c	perf(vp9): stop first-pass motion search after the earliest exact match
+frame02	94	codex/frame02-skin-map-shortcuts	162c1cb8e90072773a8c814c387eb5265047f17e	perf(vp8): short-circuit skin-map smoothing without counting unnecessary neighbors
+frame03	95	codex/frame03-skin-vote-shortcuts	c4ba58ed03954666ee77fe4d7eb70168969a0e38	perf(vp8): stop skin voting once its outcome is known and skip rejected chroma samples
+frame04	96	codex/frame04-skin-chroma-table	b76c6b2ef8b43178d3e95c4c7ac200e35e813794	perf(vp8): reuse immutable chroma classifications instead of repeating Gaussian arithmetic
+frame05	97	codex/frame05-defer-source-gradients	ee158509db07b4cfae99252c03effa149dc9a711	perf(vp8): defer source corner gradients until LAST can trigger dot suppression
+frame06	98	codex/frame06-static-skin-frame	aa7450eecdd3751516a97dca6aac156cda830694	perf(vp8): skip rebuilding the skin map when every macroblock is motion-ineligible
+motion04	99	codex/motion04-splitsad	2721cd45ca458137e5ef773307cbe46e6fef6411	perf(vp8): extend partial split source once before native SAD
+motion09	100	codex/motion09-splitratebound	5acf9975633a196756c09c6e6dc5bc89906cef24	perf(vp8): reject split fullpel candidates by vector-rate lower bound before SAD
+motion10	101	codex/motion10-zerolferror	63f4e3cf454f124c3f2d23e8d1aed745919e4a95	perf(vp8): stop loop-filter trials at exact zero error
+motion11	102	codex/motion11-duplicatesplitlabels	b089cd3df80a86fbac50f4e3bfc5f8f6b898790f	perf(vp8): reuse duplicate split-label predictor transform and token work
+motion12	103	codex/motion12-direct-single-block-label	0dee51fafebb190351b175d1479f98ede8edef88	perf(vp8): fill single-block split labels without scanning 16 blocks
+121	104	codex/vp8-empty-coefficient-eob-chunks	60414e71bdd88493eae5ca59a6e87e7567a3b684	perf(vp8): skip empty VP8 coefficient EOB scans with word tests
+122	105	codex/vp8-empty-chroma-token-packet	c8427b8c059e3deb82dfee94ccac4566688f524f	perf(vp8): batch empty VP8 chroma token records and counts
+124	106	codex/vp8-firstpass-luma-variance-stats	cc781d19003041c958c06ca63767c37f5006dca8	perf(vp8): compute first-pass VP8 luma variance with fused SIMD stats

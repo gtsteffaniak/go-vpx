@@ -1,0 +1,47 @@
+{
+  "baseline": "870699ce83f3eb6de44f507ef29f6d6a429e916d",
+  "scope": "Exact source overlays and raw short screens, including losses and unselected kernel wins. No added dependency, active implementation or codec speedup claim.",
+  "archives": [
+    {
+      "name": "root.tar.gz",
+      "sha256": "944aab3c70624c6c6ee68cb0928c0ee044473423c1c32d7e770d25e93d7f242e",
+      "bytes": 646633
+    },
+    {
+      "name": "vp8-dsp.tar.gz",
+      "sha256": "18f1547430a7de09417a7a2ab31cf5c579af0eabcf1cac1a1ed17f48cfa04230",
+      "bytes": 41986
+    },
+    {
+      "name": "vp8-encoder.tar.gz",
+      "sha256": "07f37772a7e386b76772397edd7f16655c932acf015f9213fbe9354fa7f63672",
+      "bytes": 55302
+    },
+    {
+      "name": "vp8-encoder-next.tar.gz",
+      "sha256": "dc07aa72bde508f636e3b61de18d33872a898bc9a0fae3a4ffe11875d434f0e2",
+      "bytes": 50295
+    },
+    {
+      "name": "motion.tar.gz",
+      "sha256": "2d5c0abe0fc8939e241fe07fcdf43d47ac7b0d0dc4d38f803c5deffc35ed134d",
+      "bytes": 84235
+    },
+    {
+      "name": "motion-next.tar.gz",
+      "sha256": "42b70808a75fa56fbde8c244f488cdd569568300eba2f7ea5f5dd5a0a06d4dce",
+      "bytes": 73145
+    },
+    {
+      "name": "frame.tar.gz",
+      "sha256": "1bfd3f7c375c35866175d9d978f60ef9f298c1ed33c0917ad35bda210f3aa51e",
+      "bytes": 28696
+    },
+    {
+      "name": "vp9-dsp-pending.tar.gz",
+      "sha256": "ddc63a2a2960ad77f80c3e9028e9673d842291f69484788d249864ebbec804d3",
+      "bytes": 54495,
+      "status": "retained-pending-integration; read contract caveats in contained REPORT.md"
+    }
+  ]
+}
