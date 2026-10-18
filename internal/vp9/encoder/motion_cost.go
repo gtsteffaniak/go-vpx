@@ -2,6 +2,7 @@ package encoder
 
 import (
 	"math"
+	"math/bits"
 
 	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
 	"github.com/thesyncim/govpx/internal/vp9/tables"
@@ -200,11 +201,21 @@ func buildNmvComponentCostTable(mvcost []int, c *vp9dec.NmvComponent, useHP bool
 		mvcost[offset-v] = cost + signCost[1]
 	}
 	for cls := tables.MvClass1; cls < vp9dec.MvClasses; cls++ {
+		// Incrementing d flips its trailing ones and the next zero. Reuse
+		// the previous sum instead of rescanning every offset bit.
+		n := cls + vp9dec.Class0Bits - 1
+		wholeCost := classCost[cls]
+		var delta [vp9dec.MvOffsetBits]int
+		prefix := 0
+		for i := 0; i < n; i++ {
+			wholeCost += bitsCost[i][0]
+			change := bitsCost[i][1] - bitsCost[i][0]
+			delta[i] = change - prefix
+			prefix += change
+		}
 		for d := 0; d < (1 << uint(cls)); d++ {
-			wholeCost := classCost[cls]
-			n := cls + vp9dec.Class0Bits - 1
-			for i := range n {
-				wholeCost += bitsCost[i][(d>>uint(i))&1]
+			if d != 0 {
+				wholeCost += delta[bits.TrailingZeros(uint(d))]
 			}
 			for f := range vp9dec.MvFpSize {
 				cost := wholeCost + fpCost[f]
