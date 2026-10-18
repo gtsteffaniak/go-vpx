@@ -1323,6 +1323,11 @@ func storeLFRowVectors(p []byte,pitch int,cols *[16]archsimd.Uint8x16,tail archs
 	valueSource = strings.Replace(valueSource, "cols *[16]archsimd.Uint8x16, tail archsimd.Uint8x16", "c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, tail archsimd.Uint8x16", 1)
 	for i := range 16 {
 		valueSource = strings.ReplaceAll(valueSource, fmt.Sprintf("cols[%d]", i), fmt.Sprintf("c%d", i))
+		tailStore := fmt.Sprintf("p[%d*pitch+17] = tail.GetElem(%d)", i, i)
+		if strings.Count(valueSource, tailStore) != 1 {
+			panic("row tail store marker changed")
+		}
+		valueSource = strings.Replace(valueSource, tailStore, fmt.Sprintf("*(*byte)(unsafe.Add(ptr, %d*pitch+17)) = tail.GetElem(%d)", i, i), 1)
 	}
 	valueData, err := format.Source([]byte(valueSource))
 	if err != nil {

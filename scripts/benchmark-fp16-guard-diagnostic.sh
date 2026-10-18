@@ -13,7 +13,7 @@ case "$output" in /*) ;; *) output="$(pwd)/$output" ;; esac
 export GOMAXPROCS=1 GOVPX_REQUIRE_NATIVE_GUARD=1 GOVPX_REQUIRE_SIMD=1
 # The actual trial guard must remain the exact frozen unrolled production implementation.
 actual_sha=$(sha256sum internal/pixel/quantize_fp_amd64.go | awk '{print $1}')
-expected_sha=6402500232ee21792b751cad72aa24417e695f4bc0b49749308b839d93b1efdf
+expected_sha=2bae132397f14f233f4f1bed27ff5b8950ae2526eb43e7863c4b0b40f2908806
 if [ "$actual_sha" != "$expected_sha" ]; then
  echo 'Trial FP16 source changed; this frozen diagnostic needs explicit revalidation.' >&2
  exit 2
