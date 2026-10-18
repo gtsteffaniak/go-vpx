@@ -6,6 +6,12 @@
 - Report kernel and end-to-end results separately, with hardware and workload scope. Preserve raw measurements and correctness evidence.
 - Keep experiment reports and benchmark logs out of README files.
 
+## Fast performance iteration
+
+- During tuning, run affected correctness tests and a short native benchmark screen. Use broader tests and longer measurements once a candidate is ready for its PR, or when a failure requires them.
+- Reuse unchanged source, oracle and benchmark evidence. Do not repeat full audits, profile collections or evidence packaging for each small kernel change.
+- Report short screens as preliminary. Let CI run broad validation; do not block publishing a draft PR on redundant local validation.
+
 ## Build caches
 
 - Treat all branches and Codex worktrees of this Git project as one cache scope, identified by `git rev-parse --git-common-dir`.
