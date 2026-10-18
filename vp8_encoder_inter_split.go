@@ -1013,6 +1013,14 @@ func fillInterFrameSplitSubsetWithMode(mode *vp8enc.InterFrameMacroblockMode, su
 	if mode == nil || mode.Partition >= vp8tables.NumMBSplits {
 		return
 	}
+	// A 4x4 label owns exactly one block and has no same-label neighbor.
+	if mode.Partition == 3 {
+		if uint(subset) < 16 {
+			mode.BlockMV[subset] = mv
+			mode.BModes[subset] = firstMode
+		}
+		return
+	}
 	for block := range 16 {
 		// MBSplits is [4][16]uint8 indexed by validated Partition ∈ [0,4)
 		// and block ∈ [0,16). Pow2 masks elide both bounds checks.
