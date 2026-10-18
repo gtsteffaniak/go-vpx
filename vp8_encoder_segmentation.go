@@ -831,8 +831,11 @@ func dotArtifactCornerCheck(srcMB []byte, srcStride int, refMB []byte, refStride
 	}
 	for _, c := range corners {
 		gradLast := macroblockCornerGradient(refMB, refStride, c[0], c[1], c[2], c[3])
+		if gradLast < dotArtifactCornerGradLast {
+			continue
+		}
 		gradSrc := macroblockCornerGradient(srcMB, srcStride, c[0], c[1], c[2], c[3])
-		if gradLast >= dotArtifactCornerGradLast && gradSrc <= dotArtifactCornerGradSource {
+		if gradSrc <= dotArtifactCornerGradSource {
 			return true
 		}
 	}
