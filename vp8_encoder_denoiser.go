@@ -1,6 +1,7 @@
 package govpx
 
 import (
+	"github.com/thesyncim/govpx/internal/pixel"
 	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
 	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
 	"github.com/thesyncim/govpx/internal/vp8/dsp"
@@ -466,6 +467,9 @@ func sourceImagePlaneMatches(a []byte, aStride int, b []byte, bStride int) bool 
 }
 
 func copyMacroblockY(dst []byte, dstStride int, src []byte, srcStride int) {
+	if pixel.Copy16Rows(src, srcStride, dst, dstStride) {
+		return
+	}
 	for r := range 16 {
 		copy(dst[r*dstStride:r*dstStride+16], src[r*srcStride:r*srcStride+16])
 	}

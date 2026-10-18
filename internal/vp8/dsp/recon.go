@@ -1,5 +1,7 @@
 package dsp
 
+import "github.com/thesyncim/govpx/internal/pixel"
+
 // Ported from libvpx v1.16.0 vp8/common/reconinter.c copy helpers.
 
 func Copy4x4(src []byte, srcStride int, dst []byte, dstStride int) {
@@ -15,6 +17,9 @@ func Copy8x8(src []byte, srcStride int, dst []byte, dstStride int) {
 }
 
 func Copy16x16(src []byte, srcStride int, dst []byte, dstStride int) {
+	if pixel.Copy16Rows(src, srcStride, dst, dstStride) {
+		return
+	}
 	copyBlock(src, srcStride, dst, dstStride, 16, 16)
 }
 
