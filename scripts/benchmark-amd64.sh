@@ -71,6 +71,9 @@ for source_dir in "$reference_dir" "$previous_dir"; do
 	cp "$root/internal/vp9/dsp/subpel_pointer_native_test.go" "$source_dir/internal/vp9/dsp/subpel_pointer_native_test.go"
 	cp "$root/internal/vp9/dsp/subtract_rows_native_test.go" "$source_dir/internal/vp9/dsp/subtract_rows_native_test.go"
 	cp "$root/internal/vp9/dsp/sad_wide_native_test.go" "$source_dir/internal/vp9/dsp/sad_wide_native_test.go"
+	cp "$root/internal/vp8/dsp/tmpredict_bytes_native_test.go" "$source_dir/internal/vp8/dsp/tmpredict_bytes_native_test.go"
+	cp "$root/internal/vp8/dsp/tmpredict_rows_common_state_test.go" "$source_dir/internal/vp8/dsp/tmpredict_rows_common_state_test.go"
+	cp "$root/copy16_rows_native_test.go" "$source_dir/copy16_rows_native_test.go"
 done
 
 export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
@@ -143,6 +146,20 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 	sha256sum "$root/copy16_rows_native_test.go"
 	sha256sum "$root/internal/vp8/dsp/sse8_rows_native_test.go"
 	sha256sum "$root/internal/vp9/dsp/subpel_pointer_native_test.go"
+	sha256sum "$root/internal/pixel/copy16_rows_amd64.go"
+	sha256sum "$root/internal/pixel/copy16_amd64_probe_test.go"
+	sha256sum "$root/copy16_frozen_probe_test.go"
+	sha256sum "$root/internal/vp8/dsp/copy16_frozen_probe_test.go"
+	sha256sum "$root/internal/pixel/tmpredict_bytes_arm64.go"
+	sha256sum "$root/internal/pixel/tmpredict_bytes_other.go"
+	sha256sum "$root/internal/pixel/tmpredict_bytes_test.go"
+	sha256sum "$root/internal/pixel/tmpredict_bytes_guards_test.go"
+	sha256sum "$root/internal/pixel/tmpredict_bytes_simd_reference_test.go"
+	sha256sum "$root/internal/pixel/tmpredict_bytes_generic_reference_test.go"
+	sha256sum "$root/internal/pixel/tmpredict_left_packet_arm64_test.go"
+	sha256sum "$root/internal/vp8/dsp/tmpredict_bytes_state_test.go"
+	sha256sum "$root/internal/vp8/dsp/tmpredict_bytes_native_test.go"
+	sha256sum "$root/internal/vp8/dsp/tmpredict_rows_common_state_test.go"
 	scripts/go.sh version
 	scripts/go.sh env GOOS GOARCH GOAMD64 GOEXPERIMENT GOTOOLCHAIN GOCACHE
 	lscpu
@@ -199,6 +216,25 @@ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBac
 
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/dsp -run '^TestSADLimitPointerAMDDisabled$' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/decoder -run '^Test.*LoopFilter' -count=1 -v
+
+	# AMD Copy16 is current-only. Require the actual selected backend and the
+	# actual AVX-off fallback, preserving frozen partial-panic/backing checks.
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel ./ ./internal/vp8/dsp -run '^TestCopy16(AMDProbe|FrozenPartialPanic)' -count=1 -v
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./ ./internal/vp8/dsp -run '^TestCopy16(AMDProbe|FrozenPartialPanic)' -count=1 -v
+	GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_SCALAR=1 scripts/go.sh test -pgo=off ./internal/pixel ./ ./internal/vp8/dsp -run '^TestCopy16(AMDProbe|FrozenPartialPanic)' -count=1 -v
+	GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_SCALAR=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./ ./internal/vp8/dsp -run '^TestCopy16(AMDProbe|FrozenPartialPanic)' -count=1 -v
+	# Both actual callers get their existing eight live fixtures. These are
+	# one-shot oracle/allocation preflights, outside the timed kernel inventory.
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./ ./internal/vp8/dsp -run '^$' -bench '^BenchmarkCopy16RowsNative$' -benchtime=1x -count=1 -cpu=1 -benchmem
+	GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off ./ ./internal/vp8/dsp -run '^$' -bench '^BenchmarkCopy16RowsNative$' -benchtime=1x -count=1 -cpu=1 -benchmem
+	# TM's ARM-only arithmetic/lane tests retain their architecture guards;
+	# x64 validates the declining entry and exact current fallback state.
+	# The frozen state imports pixel and is deliberately never copied to old
+	# references with different malformed-window/alias contracts.
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/dsp -run '^TestTMPredict' -count=1 -v
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./internal/vp8/dsp -run '^TestTMPredict' -count=1 -v
+	GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/dsp -run '^TestTMPredict' -count=1 -v
+	GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./internal/vp8/dsp -run '^TestTMPredict' -count=1 -v
 } > "$output_dir/quant-batch-validation.txt" 2>&1
 # The new FP16 specialization is current-only; references receive the same
 # public fixture, retaining their own production backends and class callers.
@@ -217,7 +253,7 @@ if [ -n "$previous_dir" ]; then
 fi
 
 packages='internal/vp9/dsp internal/vp8/dsp internal/vp9/encoder internal/vp8/encoder internal/vp8/decoder'
-benchmarks='Benchmark(Avg8x8Quad|ProjectionColumnsNative|Variance16x16Native)$|BenchmarkVP9(FP16Native|WideSADNative|FusedFPClassesNative|FPNoClassesNative|Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance(8x8|16x16|32x32|64x64)|SubpelPointerNative|LoopFilter(Horizontal|Vertical)8(Dual)?NonFlat)$|BenchmarkSAD16x16$|BenchmarkForwardDCT(16x16|32x32Native)$|Benchmark(SADLimitNative|SADLimitSliceNative|SADLimitX4Native|UVRoundedZeroNative|GatherPointerNative|GatherPackedPredictionNative|ResidualGatherNative|SixTapPhases|SplitSubpelPhases|DenoiserFilterYNative|LoopFilterLumaSSENative|VP8PickerFilterNative|FastQuantizeBatchNative|FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|DCOnlyIDCT4x4AddPairInt32|DCOnlyPairInPlace|ResidualGather16x16|ResidualGather8x8|SSE16x720PtrFast|SSE16x16|SSE8x8|SSE8RowsNative|Copy(8|16)RowsNative|IntraDCFill(Exact|Supplement)|SubtractRowsNative|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|(MB)?LoopFilter(Horizontal|Vertical)EdgeUV|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
+benchmarks='Benchmark(Avg8x8Quad|ProjectionColumnsNative|Variance16x16Native)$|BenchmarkVP9(FP16Native|WideSADNative|FusedFPClassesNative|FPNoClassesNative|Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance(8x8|16x16|32x32|64x64)|SubpelPointerNative|LoopFilter(Horizontal|Vertical)8(Dual)?NonFlat)$|BenchmarkSAD16x16$|BenchmarkForwardDCT(16x16|32x32Native)$|Benchmark(SADLimitNative|SADLimitSliceNative|SADLimitX4Native|UVRoundedZeroNative|GatherPointerNative|GatherPackedPredictionNative|ResidualGatherNative|SixTapPhases|SplitSubpelPhases|DenoiserFilterYNative|LoopFilterLumaSSENative|VP8PickerFilterNative|FastQuantizeBatchNative|FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|DCOnlyIDCT4x4AddPairInt32|DCOnlyPairInPlace|ResidualGather16x16|ResidualGather8x8|SSE16x720PtrFast|SSE16x16|SSE8x8|SSE8RowsNative|TMPredictRowsNative|Copy(8|16)RowsNative|IntraDCFill(Exact|Supplement)|SubtractRowsNative|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|(MB)?LoopFilter(Horizontal|Vertical)EdgeUV|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
 for variant in $variants; do
 	case "$variant" in
 		assembly) source_dir=$reference_dir ;;
@@ -228,10 +264,19 @@ for variant in $variants; do
 		name=$(printf '%s' "$package" | tr / -)
 		scripts/go.sh -C "$source_dir" test -pgo=off -c -o "$output_dir/$variant-$name.test" "./$package"
 	done
+	# Time the actual root denoiser caller as well as the DSP caller. Its
+	# larger dispatch body can change inlining independently of the DSP path.
+	scripts/go.sh -C "$source_dir" test -pgo=off -c -o "$output_dir/$variant-root-copy16.test" .
 	# Validate all DC callers on every reference before its timed rounds.
 	{
 		printf '# DC preflight: %s\n' "$variant"
 		GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp8-dsp.test" -test.run '^TestFusedDCSupplementState$' -test.bench '^BenchmarkIntraDCFill(Exact|Supplement)$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem
+	} >> "$output_dir/quant-batch-validation.txt" 2>&1
+	# Same standalone state oracle and untouched 27-case public TM fixture on
+	# all three references; no pixel import or cross-era alias assumptions.
+	{
+		printf '# TM preflight: %s\n' "$variant"
+		GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp8-dsp.test" -test.run '^TestTMPredictRowsNativeState$' -test.bench '^BenchmarkTMPredictRowsNative$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem -test.v
 	} >> "$output_dir/quant-batch-validation.txt" 2>&1
 	# Oracle work is untimed and identical on every pinned production source.
 	GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp9-encoder.test" -test.run '^$' -test.bench '^BenchmarkVP9FP16Native$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem > "$output_dir/$variant-fp16-fixture-validation.txt" 2>&1
@@ -264,6 +309,12 @@ for round in 1 2 3 4 5 6; do
 				GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-$name.test" -test.run '^$' -test.bench "$benchmarks" -test.benchtime=150ms -test.count=1 -test.cpu=1 -test.benchmem
 			} >> "$output_dir/$variant-kernels.txt" 2>&1
 		done
+		# Distinct root-package header keeps all eight actual root Copy16 cases
+		# separate from the existing eight DSP cases in the same raw artifact.
+		{
+			printf '# round %s, .\n' "$round"
+			GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-root-copy16.test" -test.run '^$' -test.bench '^BenchmarkCopy16RowsNative$' -test.benchtime=150ms -test.count=1 -test.cpu=1 -test.benchmem
+		} >> "$output_dir/$variant-kernels.txt" 2>&1
 		"$output_dir/$variant-govpx-bench" -codec=vp9 -width=320 -height=180 -frames=120 -fps=30 -bitrate=500 -mode=realtime -cpu-used=8 -threads=1 -encode-only -auto-libvpx=false -format=json > "$output_dir/$variant-encoder-$round.json"
 		for codec in vp8 vp9; do
 			"$output_dir/$variant-govpx-bench" -codec="$codec" -width=1280 -height=720 -frames=60 -fps=30 -bitrate=2500 -mode=realtime -cpu-used=8 -threads=1 -encode-only -auto-libvpx=false -format=json > "$output_dir/$variant-$codec-720p-encoder-$round.json"
