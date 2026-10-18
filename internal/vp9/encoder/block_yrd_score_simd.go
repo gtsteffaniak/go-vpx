@@ -17,7 +17,7 @@ import (
 func blockYrdScore(src []int16, bw, bh int, tx common.TxSize,
 	r, q, d [2]int16, sse uint64, coeff []int16, nonzero bool,
 ) (BlockYrdResult, bool) {
-	if !pixel.Enabled || tx < common.Tx8x8 || tx > common.Tx16x16 ||
+	if !pixel.Enabled || tx < common.Tx4x4 || tx > common.Tx16x16 ||
 		d[0] < 3 || d[0] > 2048 || d[1] < 3 || d[1] > 2048 {
 		return BlockYrdResult{}, false
 	}
@@ -43,7 +43,16 @@ func blockYrdScore(src []int16, bw, bh int, tx common.TxSize,
 	for y := 0; y < bh; y += n {
 		for x := 0; x < bw; x += n {
 			input := src[y*bw+x:]
-			rtx, etx, uniform := blockYrdUniformScore(input, bw, n, r, q, d)
+			var rtx int
+			var etx uint32
+			uniform := false
+			if n == 4 {
+				ForwardDCT4x4Into(input, bw, coeff)
+				rtx, etx = blockYrdQuantScore(coeff, 16, r, q, d)
+				uniform = true
+			} else {
+				rtx, etx, uniform = blockYrdUniformScore(input, bw, n, r, q, d)
+			}
 			if !uniform {
 				if n == 8 {
 					rtx, etx = blockYrdHadamard8Score(input, bw, r, q, d)
@@ -66,7 +75,7 @@ func blockYrdScore(src []int16, bw, bh int, tx common.TxSize,
 	return res, true
 }
 
-// The caller supplies n=64/256 complete coefficients and the exact BlockYrd
+// The caller supplies n=16/64/256 complete coefficients and the exact BlockYrd
 // tables r=floor(factor*d/128), q=floor(65536/d), with 3<=d<=2048.
 // The usual threshold mask is redundant here: a<d implies
 // floor(a*floor(65536/d)/65536)==0. Thus q>=0 and qabs*d<=32767: dequantization cannot wrap. Sign restoration
@@ -76,6 +85,11 @@ func blockYrdScore(src []int16, bw, bh int, tx common.TxSize,
 // each four-lane accumulator is below 2^31, and the 256-coefficient total
 // is below 2^32. Larger or unusual tables retain the general path.
 func blockYrdQuantScore(coeff []int16, n int, r, q, d [2]int16) (int, uint32) {
+	if n == 256 {
+		if rate, err, ok := blockYrdQuantWideR2(coeff, n, r, q, d); ok {
+			return rate, err
+		}
+	}
 	// For d>=16, each qabs<=2047. At most 32 packets contribute to
 	// a lane, so 32*2047=65504 fits uint16 without per-packet widening.
 	if d[0] >= 16 && d[1] >= 16 {

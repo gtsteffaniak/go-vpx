@@ -319,3 +319,8 @@ func varFilterBlock2DBilinearSecondPass(src *[17 * 16]uint16, dst []byte, srcStr
 		}
 	}
 }
+
+// PixelStats4x4 returns the signed residual sum and its sum of squares.
+func PixelStats4x4(src []byte, ss int, ref []byte, rs int) (int, int) {
+	return varianceBlock(src, ss, ref, rs, 4, 4)
+}

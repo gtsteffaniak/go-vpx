@@ -105,7 +105,7 @@ func InitSegmentMacroblockQuants(baseQIndex int, deltas common.QuantDeltas, segm
 	}
 	var tables common.FrameDequantTables
 	var dequant common.MacroblockDequant
-	common.BuildFrameDequantTables(deltas, &tables)
+	var previousQ [common.MaxMBSegments]int
 	for segment := range common.MaxMBSegments {
 		qIndex := baseQIndex
 		if segmentation.Enabled && segmentation.FeatureEnabled[common.MBLvlAltQ][segment] {
@@ -116,6 +116,22 @@ func InitSegmentMacroblockQuants(baseQIndex int, deltas common.QuantDeltas, segm
 				qIndex = baseQIndex + altQ
 			}
 		}
+		q := common.ClampQIndex(qIndex)
+		previousQ[segment] = q
+		reused := false
+		for prior := 0; prior < segment; prior++ {
+			if previousQ[prior] == q {
+				out[segment] = out[prior]
+				reused = true
+				break
+			}
+		}
+		if reused {
+			continue
+		}
+		tables.Y1[q] = [2]int16{int16(common.DCQuant(q, deltas.Y1DC)), int16(common.ACYQuant(q))}
+		tables.Y2[q] = [2]int16{int16(common.DC2Quant(q, deltas.Y2DC)), int16(common.AC2Quant(q, deltas.Y2AC))}
+		tables.UV[q] = [2]int16{int16(common.DCUVQuant(q, deltas.UVDC)), int16(common.ACUVQuant(q, deltas.UVAC))}
 		common.InitMacroblockDequant(&tables, qIndex, &dequant)
 		InitRegularMacroblockQuant(qIndex, &dequant, &out[segment])
 	}

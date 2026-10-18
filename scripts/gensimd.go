@@ -992,6 +992,19 @@ q0,q1,q2,q3=a0.InterleaveEven(a2),a0.InterleaveOdd(a2),a1.InterleaveEven(a3),a1.
 	amd := strings.Replace(arm[:horizontalEnd], "goexperiment.simd && arm64", "goexperiment.simd && amd64", 1)
 	amd = strings.Replace(amd, "// Disjoint vertical rows are packed after all dependent edges are computed.", "// Horizontal and vertical macroblock/internal edges carry exact byte dataflow.", 1)
 	amd += "\n" + amdVertical
+	amd = skipRoundedZeroMacroCorrections(amd)
+	amd = strings.ReplaceAll(amd, "if f.Abs().ToBits().ReduceMax() >= 3 {", "if !macroRoundedZeroR2(f, kind) {")
+	amd = strings.ReplaceAll(amd, "if f.Abs().ToBits().ReduceMax() >= 4 {", "if !macroRoundedZeroR2(f, kind) {")
+	amd += `
+// Exact rounded identity test: normal |f|<4, macro |f|<3.
+func macroRoundedZeroR2(f archsimd.Int8x16, kind int) bool {
+	bound := uint8(4)
+	if kind == 6 {
+		bound = 3
+	}
+	return f.Abs().ToBits().Less(archsimd.BroadcastUint8x16(bound)).ToBits() == 65535
+}
+`
 	amdData, err := format.Source([]byte(amd))
 	if err != nil {
 		panic(err)

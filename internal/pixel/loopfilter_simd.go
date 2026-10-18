@@ -135,6 +135,15 @@ func loopFilter8(p []byte, off, step, outer, blimit, limit, thresh, kind int) {
 			a[i] = edgeLoad(p, off+(i-8)*step, outer)
 		}
 	}
+	if kind == 8 {
+		same := a[4].Xor(a[5])
+		for i := 6; i < 12; i++ {
+			same = same.Or(a[4].Xor(a[i]))
+		}
+		if !any16(same.NotEqual(archsimd.Int16x8{})) {
+			return
+		}
+	}
 	for i := first; i < last; i++ {
 		b[i] = a[i]
 	}

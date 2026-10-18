@@ -54,7 +54,7 @@ def main():
     parser.add_argument("output_dir")
     parser.add_argument("--bench", help="Custom benchmark regex; case inventory is inferred from parent")
     parser.add_argument("--test", help="Ordinary oracle regex (default: packet oracles in FP mode)")
-    parser.add_argument("--package", default="./internal/pixel", help="Package for --bench/--test overrides")
+    parser.add_argument("--package", default="./internal/pixel", help="Comma-separated packages for --bench/--test overrides")
     parser.add_argument("--fixture", action="append", default=[f.strip() for f in os.environ.get("GOVPX_QUICK_FIXTURES", "").splitlines() if f.strip()], help="Shared relative _test.go path; repeatable")
     args = parser.parse_args()
     for f in args.fixture:
@@ -114,7 +114,11 @@ def main():
             binding = {"commits": commits, "PGO": "off", "CGO_ENABLED": 1, "GOMAXPROCS": 1,
                        "driver_sha256": sha(Path(__file__).read_bytes()), "shared_fixture_sha256": {f: sha(b) for f, b in fixtures.items()},
                        "scope": "Preliminary two-round feedback; no race/profiles/trace/codegen or full source audit.", "variants": {}}
-            plan = [("custom", args.package, args.bench)] if args.bench else [
+            custom_packages = args.package.split(",")
+            assert all(p == "." or (p.startswith("./") and ".." not in Path(p).parts) for p in custom_packages)
+            assert len(custom_packages) == len(set(custom_packages))
+            plan = [("custom" if len(custom_packages) == 1 else f"custom{i}", package, args.bench)
+                    for i, package in enumerate(custom_packages)] if args.bench else [
                 ("pixel", "./internal/pixel", "^BenchmarkFP32PublicOptionalNative$"),
                 ("encoder", "./internal/vp9/encoder", "^BenchmarkVP9FP16Native$")]
             binding["benchmark_plan"] = plan
@@ -144,9 +148,9 @@ def main():
                     for name in ("Independent", "AliasOrder", "PanicWindows", "DequantWrapZero"):
                         assert "--- PASS: TestFPPacket" + name in text
                 if args.test:
-                    test_kind = "custom" if args.bench else "pixel"
-                    test = run([bins[variant][test_kind], "-test.run=" + args.test, "-test.count=1", "-test.v"], f"custom-oracle-{variant}.txt")
-                    assert re.search(r"^--- PASS:", test, re.M), "custom oracle regex matched no passing tests"
+                    for test_kind in ([k for k, _, _ in plan] if args.bench else ["pixel"]):
+                        test = run([bins[variant][test_kind], "-test.run=" + args.test, "-test.count=1", "-test.v"], f"custom-oracle-{variant}-{test_kind}.txt")
+                        assert re.search(r"^--- PASS:", test, re.M), "custom oracle regex matched no passing tests"
                 binding["variants"][variant] = {"actual_SDK_features": dict(zip(("AVX512", "AVX2", "Enabled"), (x == "true" for x in feature.groups()))),
                     "original_fixture_sha256": originals, "production_source_sha256": {f: sha((source / f).read_bytes()) for f in SOURCES},
                     "binaries": {k: {"sha256": sha(f.read_bytes()), "bytes": f.stat().st_size} for k, f in bins[variant].items()}}
@@ -177,10 +181,11 @@ def main():
                 semantic = [{k: v for k, v in row.items() if k not in IGNORED} for row in whole[str(width)].values()]
                 assert len(semantic[0]) == 22 and semantic[0] == semantic[1], "whole output semantics differ"
             components = {}
-            for kind, _, _ in plan:
+            for kind, package, _ in plan:
                 for name in sorted(inventory[kind]):
                     ns = {v: [samples[i, v, kind][name] for i in (1, 2)] for v in commits}
-                    components[name] = {"raw_ns": ns, "speedup": statistics.median(ns["parent"]) / statistics.median(ns["current"]),
+                    key = f"{package}:{name}" if args.bench and len(custom_packages) > 1 else name
+                    components[key] = {"raw_ns": ns, "speedup": statistics.median(ns["parent"]) / statistics.median(ns["current"]),
                                         "paired_speedups": [a / b for a, b in zip(ns["parent"], ns["current"])]}
             summary = {"preliminary": True, "acceptance_claim": False, "component_rows": 4 * len(components), "component_allocations_zero": True,
                        "orders": [["parent", "current"], ["current", "parent"]], "components": components, "whole": whole,

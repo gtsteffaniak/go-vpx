@@ -28,6 +28,9 @@ func SAD16Limit16Ptr(src *byte, ss int, ref *byte, rs, limit int) int {
 		}
 		return sumU64(even.Add(odd))
 	}
+	if limit >= 8*16*255 {
+		return sad16Limit16FinishBound(sp, ss, rp, rs, limit)
+	}
 	var sum archsimd.Uint64x2
 	value := 0
 	for y := range 16 {
@@ -59,4 +62,25 @@ func sad16Limit16PointerScalar(src *byte, ss int, ref *byte, rs, limit int) int 
 		}
 	}
 	return sum
+}
+
+// High limits can stop checking rows once even the remaining maximum fits.
+func sad16Limit16FinishBound(sp unsafe.Pointer, ss int, rp unsafe.Pointer, rs, limit int) int {
+	var sum archsimd.Uint64x2
+	value := 0
+	for y := range 16 {
+		sum = sum.Add(load16(unsafe.Add(sp, y*ss)).SumOf8AbsDiff(load16(unsafe.Add(rp, y*rs))))
+		value = sumU64(sum)
+		if value > limit {
+			return value
+		}
+		// Once the remaining maximum fits, no later row can cross the limit.
+		if limit-value >= (15-y)*16*255 {
+			for y++; y < 16; y++ {
+				sum = sum.Add(load16(unsafe.Add(sp, y*ss)).SumOf8AbsDiff(load16(unsafe.Add(rp, y*rs))))
+			}
+			return sumU64(sum)
+		}
+	}
+	return value
 }

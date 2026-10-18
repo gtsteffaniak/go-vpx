@@ -56,6 +56,11 @@ func BlockSSE(src []byte, srcStride int, ref []byte, refStride int,
 ) uint64 {
 	srcOff := srcY*srcStride + srcX
 	refOff := refY*refStride + refX
+	if w == 8 || w == 32 || w == 64 {
+		if sse, ok := blockSSEOnlyR2(src, srcOff, srcStride, ref, refOff, refStride, w, h); ok {
+			return sse
+		}
+	}
 	if stats, ok := vp9dsp.VpxVarianceStats(src, srcOff, srcStride,
 		ref, refOff, refStride, w, h); ok {
 		return uint64(stats.SSE)
@@ -128,6 +133,10 @@ func BlockDiffStatsClampedSource(src []byte, srcStride, srcW, srcH int,
 	if srcX+w <= srcW && srcY+h <= srcH {
 		return blockDiffStats(src, srcStride, ref, refStride,
 			srcX, srcY, refX, refY, w, h), true
+	}
+
+	if w <= 64 && h <= 64 && srcX <= maxInt()-(w-1) && srcY <= maxInt()-(h-1) {
+		return blockDiffStatsPreparedEdgeR2(src, srcStride, srcW, srcH, ref, refStride, srcX, srcY, refX, refY, w, h), true
 	}
 
 	var stats BlockDiffStats
@@ -383,4 +392,39 @@ func VisibleInterScoreBlock(x0, y0, blockW, blockH int,
 	scoreH := min(blockH, srcH-y0)
 	scoreH = min(scoreH, refH-y0)
 	return scoreW, scoreH, scoreW > 0 && scoreH > 0
+}
+
+// Prepare the same replicated edge once, then reuse the native residual reducer.
+//
+//go:noinline
+func blockDiffStatsPreparedEdgeR2(src []byte, ss, sw, sh int, ref []byte, rs, sx, sy, rx, ry, w, h int) BlockDiffStats {
+	var padded [64 * 64]byte
+	x := sx
+	if x >= sw {
+		x = sw - 1
+	}
+	available := sw - x
+	if available > w {
+		available = w
+	}
+	lastY := -1
+	for y := 0; y < h; y++ {
+		yy := sy + y
+		if yy >= sh {
+			yy = sh - 1
+		}
+		row := padded[y*w : (y+1)*w]
+		if yy == lastY {
+			copy(row, padded[(y-1)*w:y*w])
+			continue
+		}
+		source := src[yy*ss+x:]
+		copy(row[:available], source[:available])
+		edge := source[available-1]
+		for i := available; i < w; i++ {
+			row[i] = edge
+		}
+		lastY = yy
+	}
+	return blockDiffStats(padded[:w*h], w, ref, rs, 0, 0, rx, ry, w, h)
 }

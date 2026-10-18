@@ -620,6 +620,9 @@ func VectorVariance(ref, src []int16, n, shift int) int {
 		return VectorVarianceScalar(ref, src, n, shift)
 	}
 
+	if value, ok := vectorVarianceWideR2(ref, src, n, shift); ok {
+		return value
+	}
 	var sum, sse archsimd.Int32x4
 	for i := 0; i < n; i += 4 {
 		d := Load4(ref[i:]).Sub(Load4(src[i:]))
