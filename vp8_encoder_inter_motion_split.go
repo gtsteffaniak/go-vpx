@@ -116,10 +116,15 @@ func diamondNstepInterFrameSplitBlockFullPixelMotionVectorWithErrorPerBitAndCost
 			row := (int(best.Row) >> 3) + int(site.Row)
 			col := (int(best.Col) >> 3) + int(site.Col)
 			if bounds.ContainsFullPelStrict(row, col) {
-				cost := search.fullPelCostFull(row, col, refRowFull, refColFull, qIndex)
-				if cost < bestWalkCost {
-					bestWalkCost = cost
-					bestSite = i
+				mvCost := vp8enc.FullPelMVSADCost4FromDeltas(row, col, refRowFull, refColFull, qIndex)
+				// SAD is nonnegative: a candidate whose vector rate already
+				// reaches the incumbent cannot improve the strict winner.
+				if mvCost < bestWalkCost {
+					cost := search.fullPelSADFull(row, col) + mvCost
+					if cost < bestWalkCost {
+						bestWalkCost = cost
+						bestSite = i
+					}
 				}
 			}
 			i++
@@ -204,7 +209,13 @@ func fullSearchInterFrameSplitBlockFullPixelMotionVectorWithErrorPerBitAndCostTa
 	for row := rowMin; row < rowMax; row++ {
 		for col := colMin; col < colMax; col++ {
 			mv := vp8enc.MotionVector{Row: int16(row * interFrameMVFullPixelStep), Col: int16(col * interFrameMVFullPixelStep)}
-			cost := search.fullPelCostFull(row, col, refRowFull, refColFull, qIndex)
+			mvCost := vp8enc.FullPelMVSADCost4FromDeltas(row, col, refRowFull, refColFull, qIndex)
+			// SAD is nonnegative: a candidate whose vector rate already
+			// reaches the incumbent cannot improve the strict winner.
+			if mvCost >= bestWalkCost {
+				continue
+			}
+			cost := search.fullPelSADFull(row, col) + mvCost
 			if cost < bestWalkCost {
 				best = mv
 				bestWalkCost = cost
