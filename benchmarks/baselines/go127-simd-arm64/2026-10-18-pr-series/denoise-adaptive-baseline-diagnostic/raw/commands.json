@@ -1,0 +1,159 @@
+[
+  {
+    "argv": [
+      "uname",
+      "-a"
+    ],
+    "output": "uname.txt",
+    "start_utc": "2026-10-18T20:14:50.024234+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:14:50.025707+00:00"
+  },
+  {
+    "argv": [
+      "lscpu"
+    ],
+    "output": "lscpu.txt",
+    "start_utc": "2026-10-18T20:14:50.025890+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:14:50.030392+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "env",
+      "GOVERSION"
+    ],
+    "output": "goversion.txt",
+    "start_utc": "2026-10-18T20:14:50.030618+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:14:50.040554+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "env",
+      "GOCACHE"
+    ],
+    "output": "gocache.txt",
+    "start_utc": "2026-10-18T20:14:50.040893+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:14:50.050851+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-ofpw9mlw/parent",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-ofpw9mlw/parent-pixel",
+      "./internal/pixel"
+    ],
+    "output": "build-parent-pixel.txt",
+    "start_utc": "2026-10-18T20:14:50.672403+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:15:09.905733+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-ofpw9mlw/parent",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-ofpw9mlw/parent-custom",
+      "."
+    ],
+    "output": "build-parent-custom.txt",
+    "start_utc": "2026-10-18T20:15:09.906269+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:15:36.836618+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-ofpw9mlw/parent-pixel",
+      "-test.run=^Test(BackendSelected$|FP32PublicHost$|FP32ActualFeature$)",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "oracle-parent.txt",
+    "start_utc": "2026-10-18T20:15:36.837092+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:15:36.839475+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-ofpw9mlw/parent-custom",
+      "-test.run=^TestDenoiserAverageStream$/^65x49$/^threads2$",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "custom-oracle-parent-custom.txt",
+    "start_utc": "2026-10-18T20:15:36.868663+00:00",
+    "exit_code": 1,
+    "end_utc": "2026-10-18T20:15:37.034742+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-ofpw9mlw/current",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-ofpw9mlw/current-pixel",
+      "./internal/pixel"
+    ],
+    "output": "build-current-pixel.txt",
+    "start_utc": "2026-10-18T20:15:37.036660+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:15:40.267655+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-ofpw9mlw/current",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-ofpw9mlw/current-custom",
+      "."
+    ],
+    "output": "build-current-custom.txt",
+    "start_utc": "2026-10-18T20:15:40.268193+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:16:06.403020+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-ofpw9mlw/current-pixel",
+      "-test.run=^Test(BackendSelected$|FP32PublicHost$|FP32ActualFeature$)",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "oracle-current.txt",
+    "start_utc": "2026-10-18T20:16:06.403613+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:16:06.406330+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-ofpw9mlw/current-custom",
+      "-test.run=^TestDenoiserAverageStream$/^65x49$/^threads2$",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "custom-oracle-current-custom.txt",
+    "start_utc": "2026-10-18T20:16:06.433603+00:00",
+    "exit_code": 1,
+    "end_utc": "2026-10-18T20:16:06.604939+00:00"
+  }
+]

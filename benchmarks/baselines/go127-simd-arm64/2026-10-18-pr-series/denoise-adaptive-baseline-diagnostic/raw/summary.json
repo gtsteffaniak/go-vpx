@@ -1,0 +1,23 @@
+{
+  "oracle_only": true,
+  "oracle_results": {
+    "parent": {
+      "custom": {
+        "passed": false,
+        "exit_code": 1,
+        "output": "custom-oracle-parent-custom.txt"
+      }
+    },
+    "current": {
+      "custom": {
+        "passed": false,
+        "exit_code": 1,
+        "output": "custom-oracle-current-custom.txt"
+      }
+    }
+  },
+  "all_passed": false,
+  "benchmark_calls": 0,
+  "whole_codec_builds": 0,
+  "oracle_regex": "^TestDenoiserAverageStream$/^65x49$/^threads2$"
+}

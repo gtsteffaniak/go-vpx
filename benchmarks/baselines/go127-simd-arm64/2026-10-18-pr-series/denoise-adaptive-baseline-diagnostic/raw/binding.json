@@ -1,0 +1,90 @@
+{
+  "commits": {
+    "parent": "88fe29f77914a38e96a23adb28bd0275b827ce87",
+    "current": "c3815d05672c7f86016b37178e5c5974d9c7a646"
+  },
+  "PGO": "off",
+  "CGO_ENABLED": 1,
+  "GOMAXPROCS": 1,
+  "driver_sha256": "762362f76441865b2850c97bf1aea02c5629d2ea728c43ee86334b3f41f3912f",
+  "shared_fixture_sha256": {
+    "internal/pixel/fp32_optional_native_test.go": "9cfc327f50e989209bd69d5dd75d51e9905379b96b09dffa4686387bea2d9bac",
+    "internal/vp9/encoder/quant_fp16_native_test.go": "6db86483a9c1a7d6cfd8c59453375a39d86a6d9d9109c75114982cd71e14f67e",
+    "internal/pixel/quantize_fp_packets_test.go": "2f596d080e68ef3f969bfda94829c827c0afa8eb386bc4f44edd5633b315e419",
+    "vp8_denoiser_average_stream_test.go": "80f332b57a41af5d1d23c647a09860aeac30c510066a04e84c3f2b189194ae39"
+  },
+  "scope": "Preliminary two-round feedback; no race/profiles/trace/codegen or full source audit.",
+  "variants": {
+    "parent": {
+      "actual_SDK_features": {
+        "AVX512": false,
+        "AVX2": true,
+        "Enabled": true
+      },
+      "original_fixture_sha256": {
+        "internal/pixel/fp32_optional_native_test.go": "9cfc327f50e989209bd69d5dd75d51e9905379b96b09dffa4686387bea2d9bac",
+        "internal/vp9/encoder/quant_fp16_native_test.go": "6db86483a9c1a7d6cfd8c59453375a39d86a6d9d9109c75114982cd71e14f67e",
+        "internal/pixel/quantize_fp_packets_test.go": "2f596d080e68ef3f969bfda94829c827c0afa8eb386bc4f44edd5633b315e419",
+        "vp8_denoiser_average_stream_test.go": null
+      },
+      "production_source_sha256": {
+        "internal/pixel/quantize_fp_amd64.go": "aa838dec9cd8733b7c74b20220b7f39f0059209573fc43c09bd61bbb093b572a",
+        "internal/pixel/quantize_fp32_avx512_amd64.go": "d487f136dbc121772b77abf7da0c49630b54acbc40ca355577f1cbb5e1b6e96b",
+        "internal/pixel/quantize_fp_simd.go": "47b401b2e9f34afc5bdaf3f2c49d41f2f6559ee4bf85a6442878960a7f830572"
+      },
+      "binaries": {
+        "pixel": {
+          "sha256": "d4f03c35757840d456552cfc5b8476cf531dd111dde003ca7537a6d7545e9a7b",
+          "bytes": 5933163
+        },
+        "custom": {
+          "sha256": "03c92d92607490540837aa019b642c13e21b34f449197977d908fd685cb18e17",
+          "bytes": 25096260
+        }
+      }
+    },
+    "current": {
+      "actual_SDK_features": {
+        "AVX512": false,
+        "AVX2": true,
+        "Enabled": true
+      },
+      "original_fixture_sha256": {
+        "internal/pixel/fp32_optional_native_test.go": "9cfc327f50e989209bd69d5dd75d51e9905379b96b09dffa4686387bea2d9bac",
+        "internal/vp9/encoder/quant_fp16_native_test.go": "6db86483a9c1a7d6cfd8c59453375a39d86a6d9d9109c75114982cd71e14f67e",
+        "internal/pixel/quantize_fp_packets_test.go": "2f596d080e68ef3f969bfda94829c827c0afa8eb386bc4f44edd5633b315e419",
+        "vp8_denoiser_average_stream_test.go": "80f332b57a41af5d1d23c647a09860aeac30c510066a04e84c3f2b189194ae39"
+      },
+      "production_source_sha256": {
+        "internal/pixel/quantize_fp_amd64.go": "aa838dec9cd8733b7c74b20220b7f39f0059209573fc43c09bd61bbb093b572a",
+        "internal/pixel/quantize_fp32_avx512_amd64.go": "d487f136dbc121772b77abf7da0c49630b54acbc40ca355577f1cbb5e1b6e96b",
+        "internal/pixel/quantize_fp_simd.go": "47b401b2e9f34afc5bdaf3f2c49d41f2f6559ee4bf85a6442878960a7f830572"
+      },
+      "binaries": {
+        "pixel": {
+          "sha256": "abd6ebfd1dfde34c36e8d946dc6fe127257e45d76d0d5f3e81f24247821ee345",
+          "bytes": 5933427
+        },
+        "custom": {
+          "sha256": "b4c467c8054781ce95c07c456471147b44790b7d436961e6d4be1c38ad0f2462",
+          "bytes": 25103787
+        }
+      }
+    }
+  },
+  "benchmark_plan": [
+    [
+      "custom",
+      ".",
+      null
+    ]
+  ],
+  "whole_codec_plan": {
+    "mode": "legacy 320/720",
+    "codec": "vp9",
+    "cpu_used": [
+      8
+    ]
+  },
+  "oracle_override": "^TestDenoiserAverageStream$/^65x49$/^threads2$"
+}

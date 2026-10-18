@@ -1,0 +1,6 @@
+=== RUN   TestDenoiserAverageStream
+=== RUN   TestDenoiserAverageStream/65x49/threads2
+    vp8_denoiser_average_stream_test.go:52: noise stream hash 731832e65341b129394786ac2aa2e361f9c17461f8787cecb0e498955937d5d0
+--- FAIL: TestDenoiserAverageStream (0.16s)
+    --- FAIL: TestDenoiserAverageStream/65x49/threads2 (0.16s)
+FAIL

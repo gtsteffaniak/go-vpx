@@ -12,7 +12,9 @@ Fixed full-validation baseline remains c4a8bd9f66805fc9b7b4f99e26752cc68505e572.
 | VP9 large model v1 | extra structs/helper overhead; mixed/slower | rejected; raw retained |
 | VP9 large model v2 | ARM fullpel32/64 component1.19–1.20x/1.164–1.168x; codec0.987–0.996x | winning component code preserved in archive for scoped native follow-up |
 | VP9 unused coefficient-cost setup | ARM720p1.0373/1.0162x;320p outlier excluded | merged PR111/e9d4d08b; x64 non-RD setup6.91x, codec0.9993/1.0185x |
-| VP8 average-backed denoiser | ARM fixed1.0404/1.0478x, adaptive1.0955/1.0156x | PR112 held: x64 partial Thread2 noisy hash mismatch; baseline-only diagnosis pending |
+| VP8 average-backed denoiser | ARM fixed1.0404/1.0478x, adaptive1.0955/1.0156x | PR112: adaptive tiny-frame hash fixture fixed to−8 after native old/new hashes matched; fixed32 pins now match both refs; x64 codec losses0.68–0.72%fixed/0.14–1.91%adaptive retained alongside21–22%component gains; merge pending fast green |
 | VP9 small-model-only fallback v3 | ARM720p1.0373/1.0074x;320p outlier excluded | merged PR113/9cdd3b7f; x64 codec1.0058/1.0079x |
 
 Codec and kernel results are separate; unchanged VP9 codec allocation count is1.25/frame on this720p workload. Setup components and VP8 codec allocate zero. Raw results retain all losses. The V2 and V3 picker variants overlap and are alternatives; the cost-table gate is independent.
+
+B_PRED complete-source preparation additionally retained under retained-bpred-source-window: component p0 +16.25–16.63%, codec fixed−1%/adaptive−2.1% aggregate short-screen loss; source kept for scoped integration. FrameContext-copy lead was found cold (once per frame/worker); no speculative code/build/benchmark.

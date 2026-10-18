@@ -1,0 +1,51 @@
+{
+  "run": 39162342059,
+  "url": "https://github.com/thesyncim/govpx/actions/runs/39162342059",
+  "job_outcome": "FAIL-originalpinnedassertionbothrefs",
+  "commits": {
+    "parent": "88fe29f77914a38e96a23adb28bd0275b827ce87",
+    "current": "c3815d05672c7f86016b37178e5c5974d9c7a646"
+  },
+  "cpu": "AMD EPYC7763",
+  "actualISA": {
+    "AVX512": false,
+    "AVX2": true,
+    "Enabled": true
+  },
+  "exact_subcase": "TestDenoiserAverageStream/65x49/threads2",
+  "observed_hashes": {
+    "parent": "731832e65341b129394786ac2aa2e361f9c17461f8787cecb0e498955937d5d0",
+    "current": "731832e65341b129394786ac2aa2e361f9c17461f8787cecb0e498955937d5d0"
+  },
+  "original_expected_ARM_pin": "737cefc7e128dd3a1bf750b7cdcf385684517a95f845b70bcfa53b01c973fd8b",
+  "baseline_candidate_equal": true,
+  "previous_full_test_candidate_hash": "dd098e406b7182a0e46137d3240d0954c94f19f5ec5d6436c47202de287c5d17",
+  "interpretation": "Exactisolatedsubcasebaseline/candidateequalonthishost. Pinfailsbaselineandcandidate; observedhashdependsontestcontext/orderorsomeotherunestablishedstate. Doesnotjustifyrepinwithoutrootdiagnosis.",
+  "benchmark_calls": 0,
+  "whole_codec_builds": 0,
+  "source_binary_bindings": "raw/binding.json",
+  "summary": {
+    "oracle_only": true,
+    "oracle_results": {
+      "parent": {
+        "custom": {
+          "passed": false,
+          "exit_code": 1,
+          "output": "custom-oracle-parent-custom.txt"
+        }
+      },
+      "current": {
+        "custom": {
+          "passed": false,
+          "exit_code": 1,
+          "output": "custom-oracle-current-custom.txt"
+        }
+      }
+    },
+    "all_passed": false,
+    "benchmark_calls": 0,
+    "whole_codec_builds": 0,
+    "oracle_regex": "^TestDenoiserAverageStream$/^65x49$/^threads2$"
+  },
+  "merge": "HOLDpendingrootdecision;no112merge/newruns/pinchanges"
+}
