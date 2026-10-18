@@ -143,11 +143,31 @@ func FillCoeffTreeTokenCostTable(
 	}
 	for band := range vp9dec.CoefBands {
 		for ctx := range vp9dec.CoefContexts {
-			for token := range EntropyTokens {
-				(*out)[band][ctx][0][token] = uint16(CoeffTreeTokenCost(
-					(*model)[band][ctx][:], false, token))
-				(*out)[band][ctx][1][token] = uint16(CoeffTreeTokenCost(
-					(*model)[band][ctx][:], true, token))
+			p, dst := &model[band][ctx], &out[band][ctx]
+			if p[2] == 0 {
+				*dst = [2][EntropyTokens]uint16{}
+				continue
+			}
+			// Preserve the scalar panic and partial output order for invalid zero
+			// probabilities; production coefficient models have nonzero prefixes.
+			if p[0] == 0 || p[1] == 0 {
+				for token := range EntropyTokens {
+					dst[0][token] = uint16(CoeffTreeTokenCost(p[:], false, token))
+					dst[1][token] = uint16(CoeffTreeTokenCost(p[:], true, token))
+				}
+				continue
+			}
+			// Both forms share every decision after the EOB prefix.
+			eob, prefix := uint16(VP9CostZero(p[0])), uint16(VP9CostOne(p[0]))
+			zero, one := uint16(VP9CostZero(p[1])), uint16(VP9CostOne(p[1]))
+			pivotZero, pivotOne := uint16(VP9CostZero(p[2])), uint16(VP9CostOne(p[2]))
+			dst[0][EobToken], dst[1][EobToken] = eob, eob
+			dst[1][ZeroToken], dst[0][ZeroToken] = zero, prefix+zero
+			dst[1][OneToken], dst[0][OneToken] = one+pivotZero, prefix+one+pivotZero
+			tail := &coefConTreeTokenCostTable[p[2]]
+			for token := TwoToken; token < EobToken; token++ {
+				cost := one + pivotOne + tail[token]
+				dst[1][token], dst[0][token] = cost, prefix+cost
 			}
 		}
 	}
