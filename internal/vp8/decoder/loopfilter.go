@@ -192,7 +192,18 @@ func applyNormalLoopFilterPartialLumaMB(img *common.Image, row int, col int, yOf
 	blim := lfi.BLimit[level]
 	lim := lfi.Limit[level]
 
-	fusedV := macroInternalLoopFilter && col > 0 && !skipLF && pixel.LoopFilterMacroInternal16(img.Y[yOff-4:], 1, img.YStride, int(mblim), int(blim), int(lim), int(hev))
+	fusedV := false
+	if pixel.NativeLFByAxis {
+		if macroInternalLoopFilter && col > 0 && !skipLF {
+			p := img.Y[yOff-4:]
+			fusedV = pixel.CanLoopFilterMacroVertical16(p, img.YStride, mblim, blim)
+			if fusedV {
+				pixel.LoopFilterMacroVertical16Unchecked(p, img.YStride, mblim, blim, lim, hev)
+			}
+		}
+	} else {
+		fusedV = macroInternalLoopFilter && col > 0 && !skipLF && pixel.LoopFilterMacroInternal16(img.Y[yOff-4:], 1, img.YStride, int(mblim), int(blim), int(lim), int(hev))
+	}
 	if col > 0 && !fusedV {
 		dsp.MBLoopFilterVerticalEdge(img.Y[yOff-4:], img.YStride, mblim, lim, hev, 2)
 	}
@@ -200,7 +211,18 @@ func applyNormalLoopFilterPartialLumaMB(img *common.Image, row int, col int, yOf
 		dsp.LoopFilterVerticalEdgesY(img.Y[yOff:], img.YStride, blim, lim, hev)
 	}
 
-	fusedH := macroInternalLoopFilter && (row > 0 || topContext) && !skipLF && pixel.LoopFilterMacroInternal16(loopFilterYAt(img, yOff-4*img.YStride), img.YStride, 1, int(mblim), int(blim), int(lim), int(hev))
+	fusedH := false
+	if pixel.NativeLFByAxis {
+		if macroInternalLoopFilter && (row > 0 || topContext) && !skipLF {
+			p := loopFilterYAt(img, yOff-4*img.YStride)
+			fusedH = pixel.CanLoopFilterMacroHorizontal16(p, img.YStride, mblim, blim)
+			if fusedH {
+				pixel.LoopFilterMacroHorizontal16Unchecked(p, img.YStride, mblim, blim, lim, hev)
+			}
+		}
+	} else {
+		fusedH = macroInternalLoopFilter && (row > 0 || topContext) && !skipLF && pixel.LoopFilterMacroInternal16(loopFilterYAt(img, yOff-4*img.YStride), img.YStride, 1, int(mblim), int(blim), int(lim), int(hev))
+	}
 	if (row > 0 || topContext) && !fusedH {
 		dsp.MBLoopFilterHorizontalEdge(loopFilterYAt(img, yOff-4*img.YStride), img.YStride, mblim, lim, hev, 2)
 	}

@@ -18,7 +18,11 @@ func intra4x4DCPredict(dst []byte, dstStride int, above []byte, left []byte) {
 
 func intra4x4TMPredict(dst []byte, dstStride int, above []byte, left []byte, topLeft byte) {
 	if pixel.Enabled {
-		pixel.TMPredict(dst, dstStride, above, left, topLeft, 4)
+		if pixel.TMNative {
+			pixel.TMPredict4Native(dst, dstStride, above, left, topLeft, false)
+		} else {
+			pixel.TMPredict(dst, dstStride, above, left, topLeft, 4)
+		}
 	} else {
 		intra4x4TMPredictScalar(dst, dstStride, above, left, topLeft)
 	}

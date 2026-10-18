@@ -1,5 +1,7 @@
 package dsp
 
+import "github.com/thesyncim/govpx/internal/pixel"
+
 // Ported from libvpx v1.16.0 vp8/common/idctllm.c.
 
 const (
@@ -39,6 +41,10 @@ func DCOnlyIDCT4x4AddInt32(inputDC int32, pred []byte, predStride int, dst []byt
 // It is used by chroma residual paths that mirror libvpx's paired U/V block
 // dispatch.
 func DCOnlyIDCT4x4AddPairInt32(inputDC0 int32, inputDC1 int32, pred []byte, predStride int, dst []byte, dstStride int) {
+	if pixel.DCPairNative && pixel.Enabled {
+		pixel.DCPairInt32Native(inputDC0, inputDC1, pred, predStride, dst, dstStride)
+		return
+	}
 	a0 := dcOnlyIDCT4x4AddInt32Delta(inputDC0)
 	a1 := dcOnlyIDCT4x4AddInt32Delta(inputDC1)
 	dcOnlyIDCT4x4AddPairSIMD(int16(a0), int16(a1), pred, predStride, dst, dstStride)

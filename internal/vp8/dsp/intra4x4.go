@@ -1,6 +1,9 @@
 package dsp
 
-import "github.com/thesyncim/govpx/internal/vp8/common"
+import (
+	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/thesyncim/govpx/internal/vp8/common"
+)
 
 // Ported from libvpx v1.16.0 vpx_dsp/intrapred.c and
 // vp8/common/reconintra4x4.c.
@@ -41,6 +44,10 @@ func Intra4x4DCPredict(dst []byte, dstStride int, above []byte, left []byte) {
 }
 
 func Intra4x4TMPredict(dst []byte, dstStride int, above []byte, left []byte, topLeft byte) {
+	if pixel.TMNative && pixel.Enabled {
+		pixel.TMPredict4Native(dst, dstStride, above, left, topLeft, true)
+		return
+	}
 	_ = above[3]
 	_ = left[3]
 	_ = dst[3*dstStride+3]
