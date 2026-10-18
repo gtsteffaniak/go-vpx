@@ -151,6 +151,7 @@ jobs:
     timeout-minutes: 30
     env:
       CODEX_AGENT_ID: amd64-libvpx-bench
+      GOVPX_LIBVPX_ROUNDS: '2'
     steps:
       - uses: actions/checkout@v6
         with:

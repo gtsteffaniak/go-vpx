@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Drive the existing same-input helper; keep encode, wall and quality separate."""
 import json
+import os
 import pathlib
 import statistics
 import subprocess
@@ -14,6 +15,9 @@ cases = [
     ("vp8-720p-adaptive", "vp8", 1280, 720, 60, 2500, 8),
     ("vp8-720p-fixed", "vp8", 1280, 720, 60, 2500, -8),
 ]
+rounds = int(os.environ.get("GOVPX_LIBVPX_ROUNDS", "6"))
+if rounds < 2 or rounds > 6 or rounds % 2:
+    raise ValueError("use 2, 4 or 6 balanced timing rounds")
 manifest = []
 
 
@@ -50,7 +54,7 @@ def run(case, label, first=False, quality=False):
 for case in cases:
     run(case, "warmup")
 samples = {case[0]: [] for case in cases}
-for round_index in range(6):
+for round_index in range(rounds):
     order = cases[round_index % len(cases):] + cases[:round_index % len(cases)]
     for case in order:
         samples[case[0]].append(run(case, "round-" + str(round_index + 1), first=bool(round_index % 2)))
@@ -60,8 +64,9 @@ summary = {"timing_contract": {
     "govpx": "sum of EncodeInto call durations; input construction, warmup and allocation sampling excluded",
     "libvpx": "vpxenc cumulative vpx_codec_encode timer; subprocess/file wall timing reported separately",
     "libvpx_latency": "legacy helper latency fields repeat the mean, not measured latency quantiles; not used here",
-    "order": "three govpx-first and three reference-first runs per case",
+    "order": str(rounds // 2) + " govpx-first and " + str(rounds // 2) + " reference-first runs per case",
     "quality": "separate post-timing decode/PSNR/SSIM pass, same inputs and flags",
+    "rounds": rounds,
     "scope": "synthetic same-input/controls comparison; differing output/quality/drop work is reported, not assumed equivalent",
 }, "cases": {}}
 for case in cases:
@@ -72,7 +77,12 @@ for case in cases:
         return statistics.median(r[field] for r in rows)
     q = quality[name]
     fields = ["output_bytes", "output_bitrate_kbps", "bitrate_error_pct", "encoded_frames", "dropped_frames", "keyframe_bytes", "avg_interframe_bytes"]
+    quality_fields = fields + ["psnr", "ssim", "quality_frames"]
+    exact_quality = all(q[f] == q["reference"][f] for f in quality_fields)
     summary["cases"][name] = {
+        "exact_quality_and_output_equal": exact_quality,
+        "quality_scope": "exact measured output/quality match" if exact_quality else "quality/output differ; not an exact matched-quality result",
+        "quality_deltas_go_minus_C": {f: q[f] - q["reference"][f] for f in quality_fields},
         "govpx_median_ns_per_input": median(reports, "ns_per_frame"),
         "libvpx_median_ns_per_input": median(references, "ns_per_frame"),
         "govpx_time_delta_percent": 100 * (median(reports, "ns_per_frame") / median(references, "ns_per_frame") - 1),
