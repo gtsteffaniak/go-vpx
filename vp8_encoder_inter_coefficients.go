@@ -416,6 +416,9 @@ func coefficientBlockTokenRate(coefProbs *vp8tables.CoefficientProbs, coefTokenC
 	if coefTokenCosts != nil {
 		return vp8enc.CoefficientBlockTokenRateWithTableTrusted(coefTokenCosts, blockType, ctx, skipDC, qcoeff, eob)
 	}
+	if coefProbs == &vp8tables.DefaultCoefProbs {
+		return vp8enc.CoefficientBlockTokenRateWithTable(&vp8KeyFrameCoefCosts, blockType, ctx, skipDC, qcoeff, eob)
+	}
 	return vp8enc.CoefficientBlockTokenRate(coefProbs, blockType, ctx, skipDC, qcoeff, eob)
 }
 
