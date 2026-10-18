@@ -1,6 +1,7 @@
 package encoder
 
 import (
+	"encoding/binary"
 	"github.com/thesyncim/govpx/internal/vp9/common"
 	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
 	"github.com/thesyncim/govpx/internal/vp9/dsp"
@@ -377,6 +378,21 @@ func avg8x8Clamped(src []uint8, stride, x0, y0, pixelsWide, pixelsHigh int) int 
 func fillVariance4x4Avg(src []uint8, srcStride int, dst []uint8, dstStride int,
 	x8Idx, y8Idx int, vst *V8x8, pixelsWide, pixelsHigh int, isKeyFrame bool,
 ) {
+	if x8Idx >= 0 && y8Idx >= 0 && x8Idx+8 <= pixelsWide && y8Idx+8 <= pixelsHigh {
+		s0, s1 := avg4x4PairR3(src[y8Idx*srcStride+x8Idx:], srcStride)
+		s2, s3 := avg4x4PairR3(src[(y8Idx+4)*srcStride+x8Idx:], srcStride)
+		d0, d1, d2, d3 := int32(128), int32(128), int32(128), int32(128)
+		if !isKeyFrame {
+			d0, d1 = avg4x4PairR3(dst[y8Idx*dstStride+x8Idx:], dstStride)
+			d2, d3 = avg4x4PairR3(dst[(y8Idx+4)*dstStride+x8Idx:], dstStride)
+		}
+		diffs := [4]int32{s0 - d0, s1 - d1, s2 - d2, s3 - d3}
+		for k, d := range diffs {
+			fillVariance(uint32(d*d), d, 0, &vst.Split[k].PartVariances.None)
+		}
+		return
+	}
+
 	for k := range 4 {
 		x4Idx := x8Idx + ((k & 1) << 2)
 		y4Idx := y8Idx + ((k >> 1) << 2)
@@ -609,4 +625,16 @@ func partitionVarianceFor(bsize common.BlockSize, args setVTPartitioningArgs) *p
 	default:
 		return &args.V4.PartVariances
 	}
+}
+
+// Four-byte sums occupy independent 32-bit halves. Each half is at most
+// 4*4*255=4080, so the row additions cannot carry into the other block.
+func avg4x4PairR3(src []byte, stride int) (int32, int32) {
+	var sum uint64
+	for y := 0; y < 4; y++ {
+		v := binary.LittleEndian.Uint64(src[y*stride:])
+		v = (v & 0x00ff00ff00ff00ff) + ((v >> 8) & 0x00ff00ff00ff00ff)
+		sum += (v + (v >> 16)) & 0x0000ffff0000ffff
+	}
+	return int32((uint32(sum) + 8) >> 4), int32(((sum >> 32) + 8) >> 4)
 }
