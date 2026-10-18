@@ -697,18 +697,14 @@ func smoothSkinMap(rows int, cols int, skinMap []uint8) {
 	for row := 1; row < rows-1; row++ {
 		for col := 1; col < cols-1; col++ {
 			index := row*cols + col
-			neighbors := 0
-			for dy := -1; dy <= 1; dy++ {
-				for dx := -1; dx <= 1; dx++ {
-					if skinMap[(row+dy)*cols+col+dx] != 0 {
-						neighbors++
-					}
+			// The center is included in the original count. Existing skin survives
+			// one nonzero neighbor; an empty center needs all eight neighbors.
+			if skinMap[index] != 0 {
+				if skinMap[index-cols-1] != 0 || skinMap[index-cols] != 0 || skinMap[index-cols+1] != 0 || skinMap[index-1] != 0 || skinMap[index+1] != 0 || skinMap[index+cols-1] != 0 || skinMap[index+cols] != 0 || skinMap[index+cols+1] != 0 {
+					continue
 				}
-			}
-			if skinMap[index] != 0 && neighbors < 2 {
 				skinMap[index] = 0
-			}
-			if skinMap[index] == 0 && neighbors == 8 {
+			} else if skinMap[index-cols-1] != 0 && skinMap[index-cols] != 0 && skinMap[index-cols+1] != 0 && skinMap[index-1] != 0 && skinMap[index+1] != 0 && skinMap[index+cols-1] != 0 && skinMap[index+cols] != 0 && skinMap[index+cols+1] != 0 {
 				skinMap[index] = 1
 			}
 		}
