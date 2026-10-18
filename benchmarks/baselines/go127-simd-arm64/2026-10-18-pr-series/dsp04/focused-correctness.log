@@ -1,0 +1,9 @@
+=== RUN   TestDSPPRBilinear
+--- PASS: TestDSPPRBilinear (0.00s)
+=== RUN   TestDSPPRResidual
+--- PASS: TestDSPPRResidual (0.00s)
+=== RUN   TestDSPPRZeroDC
+--- PASS: TestDSPPRZeroDC (0.00s)
+=== RUN   TestDSPPRDequant
+--- PASS: TestDSPPRDequant (0.00s)
+PASS
