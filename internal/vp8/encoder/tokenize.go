@@ -188,6 +188,25 @@ func WriteCoefficientTokenGridPartitioned(writers *[8]BoolWriter, partitions int
 }
 
 func BlockCoeffEOB(qcoeff *[16]int16, skipDC int) int {
+	if uint(skipDC) <= 1 {
+		raw := unsafe.Slice((*byte)(unsafe.Pointer(qcoeff)), 32)
+		start := 15
+		if binary.LittleEndian.Uint64(raw[16:24])|binary.LittleEndian.Uint64(raw[24:32]) == 0 {
+			if binary.LittleEndian.Uint64(raw[:8])|binary.LittleEndian.Uint64(raw[8:16]) == 0 {
+				return skipDC
+			}
+			// A zero raster high half does not imply a zero scan high half. The scan suffix is filtered below.
+			start = 15
+		}
+		for ; start >= skipDC; start-- {
+			rc := int(tables.DefaultZigZag1D[start])
+			if qcoeff[rc] != 0 {
+				return start + 1
+			}
+		}
+		return skipDC
+	}
+
 	for pos := 15; pos >= skipDC; pos-- {
 		rc := int(tables.DefaultZigZag1D[pos])
 		if qcoeff[rc] != 0 {
