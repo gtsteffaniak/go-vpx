@@ -527,23 +527,27 @@ func coefficientBranchCountsFromTokenCounts(tokens *[tables.MaxEntropyTokens]int
 	if tokens == nil {
 		return counts
 	}
-	for token, total := range tokens {
-		if total == 0 {
-			continue
-		}
-		switch token {
-		case tables.DCTEOBToken:
-			counts[0][0] += total
-			continue
-		case tables.ZeroToken:
-			counts[0][1] += total
-			counts[1][0] += total
-			continue
-		}
-		path := coefficientTokenBranchPaths[token]
-		for i := uint8(0); i < path.len; i++ {
-			counts[path.nodes[i]][path.bits[i]] += total
-		}
-	}
+	counts[0][0] = tokens[11]
+	counts[0][1] = tokens[0] + tokens[1] + tokens[2] + tokens[3] + tokens[4] + tokens[5] + tokens[6] + tokens[7] + tokens[8] + tokens[9] + tokens[10]
+	counts[1][0] = tokens[0]
+	counts[1][1] = tokens[1] + tokens[2] + tokens[3] + tokens[4] + tokens[5] + tokens[6] + tokens[7] + tokens[8] + tokens[9] + tokens[10]
+	counts[2][0] = tokens[1]
+	counts[2][1] = tokens[2] + tokens[3] + tokens[4] + tokens[5] + tokens[6] + tokens[7] + tokens[8] + tokens[9] + tokens[10]
+	counts[3][0] = tokens[2] + tokens[3] + tokens[4]
+	counts[3][1] = tokens[5] + tokens[6] + tokens[7] + tokens[8] + tokens[9] + tokens[10]
+	counts[4][0] = tokens[2]
+	counts[4][1] = tokens[3] + tokens[4]
+	counts[5][0] = tokens[3]
+	counts[5][1] = tokens[4]
+	counts[6][0] = tokens[5] + tokens[6]
+	counts[6][1] = tokens[7] + tokens[8] + tokens[9] + tokens[10]
+	counts[7][0] = tokens[5]
+	counts[7][1] = tokens[6]
+	counts[8][0] = tokens[7] + tokens[8]
+	counts[8][1] = tokens[9] + tokens[10]
+	counts[9][0] = tokens[7]
+	counts[9][1] = tokens[8]
+	counts[10][0] = tokens[9]
+	counts[10][1] = tokens[10]
 	return counts
 }
