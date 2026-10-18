@@ -172,14 +172,38 @@ func loopFilterMacroInternalFusedVertical(p []byte, pitch, mblimit, blimit, limi
 	outer := pitch
 	var p3, p2, p1, p0, q0, q1, q2, q3 archsimd.Uint8x16
 	ptr := unsafe.Pointer(unsafe.SliceData(p))
-	r0 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 0*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 8*outer))).ReshapeToUint64s()).ReshapeToUint32s()
-	r1 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 1*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 9*outer))).ReshapeToUint64s()).ReshapeToUint32s()
-	r2 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 2*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 10*outer))).ReshapeToUint64s()).ReshapeToUint32s()
-	r3 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 3*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 11*outer))).ReshapeToUint64s()).ReshapeToUint32s()
-	r4 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 4*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 12*outer))).ReshapeToUint64s()).ReshapeToUint32s()
-	r5 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 5*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 13*outer))).ReshapeToUint64s()).ReshapeToUint32s()
-	r6 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 6*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 14*outer))).ReshapeToUint64s()).ReshapeToUint32s()
-	r7 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 7*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 15*outer))).ReshapeToUint64s()).ReshapeToUint32s()
+	w0 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 0*outer))).ReshapeToUint64s()
+	w8 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 8*outer))).ReshapeToUint64s()
+	r0 := w0.InterleaveLo(w8).ReshapeToUint32s()
+	h0 := w0.InterleaveHi(w8).ReshapeToUint32s()
+	w1 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 1*outer))).ReshapeToUint64s()
+	w9 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 9*outer))).ReshapeToUint64s()
+	r1 := w1.InterleaveLo(w9).ReshapeToUint32s()
+	h1 := w1.InterleaveHi(w9).ReshapeToUint32s()
+	w2 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 2*outer))).ReshapeToUint64s()
+	w10 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 10*outer))).ReshapeToUint64s()
+	r2 := w2.InterleaveLo(w10).ReshapeToUint32s()
+	h2 := w2.InterleaveHi(w10).ReshapeToUint32s()
+	w3 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 3*outer))).ReshapeToUint64s()
+	w11 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 11*outer))).ReshapeToUint64s()
+	r3 := w3.InterleaveLo(w11).ReshapeToUint32s()
+	h3 := w3.InterleaveHi(w11).ReshapeToUint32s()
+	w4 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 4*outer))).ReshapeToUint64s()
+	w12 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 12*outer))).ReshapeToUint64s()
+	r4 := w4.InterleaveLo(w12).ReshapeToUint32s()
+	h4 := w4.InterleaveHi(w12).ReshapeToUint32s()
+	w5 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 5*outer))).ReshapeToUint64s()
+	w13 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 13*outer))).ReshapeToUint64s()
+	r5 := w5.InterleaveLo(w13).ReshapeToUint32s()
+	h5 := w5.InterleaveHi(w13).ReshapeToUint32s()
+	w6 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 6*outer))).ReshapeToUint64s()
+	w14 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 14*outer))).ReshapeToUint64s()
+	r6 := w6.InterleaveLo(w14).ReshapeToUint32s()
+	h6 := w6.InterleaveHi(w14).ReshapeToUint32s()
+	w7 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 7*outer))).ReshapeToUint64s()
+	w15 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 15*outer))).ReshapeToUint64s()
+	r7 := w7.InterleaveLo(w15).ReshapeToUint32s()
+	h7 := w7.InterleaveHi(w15).ReshapeToUint32s()
 	a0 := r0.InterleaveEven(r4).ReshapeToUint16s()
 	a1 := r0.InterleaveOdd(r4).ReshapeToUint16s()
 	a2 := r1.InterleaveEven(r5).ReshapeToUint16s()
@@ -188,22 +212,46 @@ func loopFilterMacroInternalFusedVertical(p []byte, pitch, mblimit, blimit, limi
 	a5 := r2.InterleaveOdd(r6).ReshapeToUint16s()
 	a6 := r3.InterleaveEven(r7).ReshapeToUint16s()
 	a7 := r3.InterleaveOdd(r7).ReshapeToUint16s()
-	b0 := a0.InterleaveEven(a4).ReshapeToUint8s()
-	b1 := a0.InterleaveOdd(a4).ReshapeToUint8s()
-	b2 := a2.InterleaveEven(a6).ReshapeToUint8s()
-	b3 := a2.InterleaveOdd(a6).ReshapeToUint8s()
-	b4 := a1.InterleaveEven(a5).ReshapeToUint8s()
-	b5 := a1.InterleaveOdd(a5).ReshapeToUint8s()
-	b6 := a3.InterleaveEven(a7).ReshapeToUint8s()
-	b7 := a3.InterleaveOdd(a7).ReshapeToUint8s()
-	p3 = b0.InterleaveEven(b2)
-	p2 = b0.InterleaveOdd(b2)
-	p1 = b1.InterleaveEven(b3)
-	p0 = b1.InterleaveOdd(b3)
-	q0 = b4.InterleaveEven(b6)
-	q1 = b4.InterleaveOdd(b6)
-	q2 = b5.InterleaveEven(b7)
-	q3 = b5.InterleaveOdd(b7)
+	ab0 := a0.InterleaveEven(a4).ReshapeToUint8s()
+	ab1 := a0.InterleaveOdd(a4).ReshapeToUint8s()
+	ab2 := a2.InterleaveEven(a6).ReshapeToUint8s()
+	ab3 := a2.InterleaveOdd(a6).ReshapeToUint8s()
+	ab4 := a1.InterleaveEven(a5).ReshapeToUint8s()
+	ab5 := a1.InterleaveOdd(a5).ReshapeToUint8s()
+	ab6 := a3.InterleaveEven(a7).ReshapeToUint8s()
+	ab7 := a3.InterleaveOdd(a7).ReshapeToUint8s()
+	p3 = ab0.InterleaveEven(ab2)
+	p2 = ab0.InterleaveOdd(ab2)
+	p1 = ab1.InterleaveEven(ab3)
+	p0 = ab1.InterleaveOdd(ab3)
+	q0 = ab4.InterleaveEven(ab6)
+	q1 = ab4.InterleaveOdd(ab6)
+	q2 = ab5.InterleaveEven(ab7)
+	q3 = ab5.InterleaveOdd(ab7)
+	c0 := h0.InterleaveEven(h4).ReshapeToUint16s()
+	c1 := h0.InterleaveOdd(h4).ReshapeToUint16s()
+	c2 := h1.InterleaveEven(h5).ReshapeToUint16s()
+	c3 := h1.InterleaveOdd(h5).ReshapeToUint16s()
+	c4 := h2.InterleaveEven(h6).ReshapeToUint16s()
+	c5 := h2.InterleaveOdd(h6).ReshapeToUint16s()
+	c6 := h3.InterleaveEven(h7).ReshapeToUint16s()
+	c7 := h3.InterleaveOdd(h7).ReshapeToUint16s()
+	cb0 := c0.InterleaveEven(c4).ReshapeToUint8s()
+	cb1 := c0.InterleaveOdd(c4).ReshapeToUint8s()
+	cb2 := c2.InterleaveEven(c6).ReshapeToUint8s()
+	cb3 := c2.InterleaveOdd(c6).ReshapeToUint8s()
+	cb4 := c1.InterleaveEven(c5).ReshapeToUint8s()
+	cb5 := c1.InterleaveOdd(c5).ReshapeToUint8s()
+	cb6 := c3.InterleaveEven(c7).ReshapeToUint8s()
+	cb7 := c3.InterleaveOdd(c7).ReshapeToUint8s()
+	later0 := cb0.InterleaveEven(cb2)
+	later1 := cb0.InterleaveOdd(cb2)
+	later2 := cb1.InterleaveEven(cb3)
+	later3 := cb1.InterleaveOdd(cb3)
+	later4 := cb4.InterleaveEven(cb6)
+	later5 := cb4.InterleaveOdd(cb6)
+	later6 := cb5.InterleaveEven(cb7)
+	later7 := cb5.InterleaveOdd(cb7)
 	var lfO0, lfO1, lfO2, lfO3, lfO4, lfO5, lfO6, lfO7, lfO8, lfO9, lfO10, lfO11, lfO12, lfO13, lfO14, lfO15 archsimd.Uint8x16
 	lfO0, lfO1, lfO2 = p2, p1, p0
 	changed := false
@@ -253,44 +301,7 @@ func loopFilterMacroInternalFusedVertical(p []byte, pitch, mblimit, blimit, limi
 	{
 
 		p3, p2, p1, p0 = q0, q1, q2, q3
-		// The wrapper proves all twenty columns, including the wide loads at column four.
-		ptr := unsafe.Add(unsafe.Pointer(unsafe.SliceData(p)), 4)
-		var r0, r1, r2, r3 archsimd.Uint16x8
-		{
-			w0 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 0*outer))).ReshapeToUint32s()
-			w1 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 4*outer))).ReshapeToUint32s()
-			w2 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 8*outer))).ReshapeToUint32s()
-			w3 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 12*outer))).ReshapeToUint32s()
-			w01, w23 := w0.InterleaveOdd(w1).ReshapeToUint64s(), w2.InterleaveOdd(w3).ReshapeToUint64s()
-			r0 = w01.InterleaveLo(w23).ReshapeToUint16s()
-		}
-		{
-			w0 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 1*outer))).ReshapeToUint32s()
-			w1 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 5*outer))).ReshapeToUint32s()
-			w2 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 9*outer))).ReshapeToUint32s()
-			w3 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 13*outer))).ReshapeToUint32s()
-			w01, w23 := w0.InterleaveOdd(w1).ReshapeToUint64s(), w2.InterleaveOdd(w3).ReshapeToUint64s()
-			r1 = w01.InterleaveLo(w23).ReshapeToUint16s()
-		}
-		{
-			w0 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 2*outer))).ReshapeToUint32s()
-			w1 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 6*outer))).ReshapeToUint32s()
-			w2 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 10*outer))).ReshapeToUint32s()
-			w3 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 14*outer))).ReshapeToUint32s()
-			w01, w23 := w0.InterleaveOdd(w1).ReshapeToUint64s(), w2.InterleaveOdd(w3).ReshapeToUint64s()
-			r2 = w01.InterleaveLo(w23).ReshapeToUint16s()
-		}
-		{
-			w0 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 3*outer))).ReshapeToUint32s()
-			w1 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 7*outer))).ReshapeToUint32s()
-			w2 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 11*outer))).ReshapeToUint32s()
-			w3 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 15*outer))).ReshapeToUint32s()
-			w01, w23 := w0.InterleaveOdd(w1).ReshapeToUint64s(), w2.InterleaveOdd(w3).ReshapeToUint64s()
-			r3 = w01.InterleaveLo(w23).ReshapeToUint16s()
-		}
-		a0, a1 := r0.InterleaveEven(r2).ReshapeToUint8s(), r0.InterleaveOdd(r2).ReshapeToUint8s()
-		a2, a3 := r1.InterleaveEven(r3).ReshapeToUint8s(), r1.InterleaveOdd(r3).ReshapeToUint8s()
-		q0, q1, q2, q3 = a0.InterleaveEven(a2), a0.InterleaveOdd(a2), a1.InterleaveEven(a3), a1.InterleaveOdd(a3)
+		q0, q1, q2, q3 = later0, later1, later2, later3
 
 	}
 
@@ -353,44 +364,7 @@ func loopFilterMacroInternalFusedVertical(p []byte, pitch, mblimit, blimit, limi
 			}
 		}
 		p3, p2, p1, p0 = q0, q1, q2, q3
-		// The wrapper proves all twenty columns, including the wide loads at column four.
-		ptr := unsafe.Add(unsafe.Pointer(unsafe.SliceData(p)), 4)
-		var r0, r1, r2, r3 archsimd.Uint16x8
-		{
-			w0 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 0*outer))).ReshapeToUint32s()
-			w1 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 4*outer))).ReshapeToUint32s()
-			w2 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 8*outer))).ReshapeToUint32s()
-			w3 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 12*outer))).ReshapeToUint32s()
-			w01, w23 := w0.InterleaveEven(w1).ReshapeToUint64s(), w2.InterleaveEven(w3).ReshapeToUint64s()
-			r0 = w01.InterleaveHi(w23).ReshapeToUint16s()
-		}
-		{
-			w0 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 1*outer))).ReshapeToUint32s()
-			w1 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 5*outer))).ReshapeToUint32s()
-			w2 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 9*outer))).ReshapeToUint32s()
-			w3 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 13*outer))).ReshapeToUint32s()
-			w01, w23 := w0.InterleaveEven(w1).ReshapeToUint64s(), w2.InterleaveEven(w3).ReshapeToUint64s()
-			r1 = w01.InterleaveHi(w23).ReshapeToUint16s()
-		}
-		{
-			w0 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 2*outer))).ReshapeToUint32s()
-			w1 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 6*outer))).ReshapeToUint32s()
-			w2 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 10*outer))).ReshapeToUint32s()
-			w3 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 14*outer))).ReshapeToUint32s()
-			w01, w23 := w0.InterleaveEven(w1).ReshapeToUint64s(), w2.InterleaveEven(w3).ReshapeToUint64s()
-			r2 = w01.InterleaveHi(w23).ReshapeToUint16s()
-		}
-		{
-			w0 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 3*outer))).ReshapeToUint32s()
-			w1 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 7*outer))).ReshapeToUint32s()
-			w2 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 11*outer))).ReshapeToUint32s()
-			w3 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 15*outer))).ReshapeToUint32s()
-			w01, w23 := w0.InterleaveEven(w1).ReshapeToUint64s(), w2.InterleaveEven(w3).ReshapeToUint64s()
-			r3 = w01.InterleaveHi(w23).ReshapeToUint16s()
-		}
-		a0, a1 := r0.InterleaveEven(r2).ReshapeToUint8s(), r0.InterleaveOdd(r2).ReshapeToUint8s()
-		a2, a3 := r1.InterleaveEven(r3).ReshapeToUint8s(), r1.InterleaveOdd(r3).ReshapeToUint8s()
-		q0, q1, q2, q3 = a0.InterleaveEven(a2), a0.InterleaveOdd(a2), a1.InterleaveEven(a3), a1.InterleaveOdd(a3)
+		q0, q1, q2, q3 = later4, later5, later6, later7
 
 	}
 	{
