@@ -213,6 +213,17 @@ func selectInterFrameFullPixelMotionVectorWithSearchStartAndProbsCostTables(src 
 	if bestWalkCost == 0 {
 		return best, searcher.costNoStats(best)
 	}
+	// libvpx mcomp.c's mvsad_err_cost is nonnegative and its minimum
+	// is the zero-delta entry. Once SAD+MV cost reaches that floor,
+	// strict CHECK_BETTER comparisons cannot move any search candidate.
+	// Keep HEX's SAD return and NSTEP/DIAMOND's variance return distinct.
+	if search.fullPixelSearch >= interAnalysisFullPixelSearchNstep && search.fullPixelSearch <= interAnalysisFullPixelSearchHex &&
+		bestWalkCost == vp8enc.FullPelMVSADCost16FromDeltas(0, 0, 0, 0, qIndex) {
+		if search.fullPixelSearch == interAnalysisFullPixelSearchHex {
+			return best, bestWalkCost
+		}
+		return best, searcher.costNoStats(best)
+	}
 	if search.fullPixelSearch == interAnalysisFullPixelSearchNstep {
 		return searcher.nstepNoStats(best, bestWalkCost, search)
 	}
