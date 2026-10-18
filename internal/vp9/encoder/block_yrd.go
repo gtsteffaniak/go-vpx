@@ -1066,9 +1066,10 @@ func BlockYrd(src []byte, srcStride int, srcX, srcY int,
 	if (srcY+bh)*srcStride > len(src) || (dstY+bh)*dstStride > len(dst) {
 		return res
 	}
-	if _, ok := vp9dsp.SubtractBlockNonZero(src, srcY*srcStride+srcX, srcStride,
-		dst, dstY*dstStride+dstX, dstStride,
-		srcDiff, 0, bw, bw, bh); !ok {
+	nonzero, subtractOK := vp9dsp.SubtractBlockNonZero(src, srcY*srcStride+srcX, srcStride,
+		dst, dstY*dstStride+dstX, dstStride, srcDiff, 0, bw, bw, bh)
+	if !subtractOK {
+		nonzero = true // No extra reduction on the scalar fallback.
 		for y := range bh {
 			srcRow := src[(srcY+y)*srcStride+srcX : (srcY+y)*srcStride+srcX+bw]
 			dstRow := dst[(dstY+y)*dstStride+dstX : (dstY+y)*dstStride+dstX+bw]
@@ -1118,6 +1119,15 @@ func BlockYrd(src []byte, srcStride int, srcX, srcY int,
 	// for TX_4X4 it would be 256 × 16 × 3 + 4096 = 16384 — all fits.
 	if len(residueScratch) < srcDiffLen+3*nCoeffs*maxTxUnits {
 		return res
+	}
+	// BlockYrd consumes only zero/nonzero, sum(abs(q)), and squared error.
+	// The private scoring path avoids materializing q/dq and exact scan EOBs.
+	// Retain the original scratch-size contract before selecting it.
+	if maxTxUnits <= blockYrdMaxTxUnits && bw%txDim == 0 && bh%txDim == 0 {
+		if score, ok := blockYrdScore(srcDiff, bw, bh, txSize, roundFP, quantFP,
+			dequant, sseIn, residueScratch[srcDiffLen:srcDiffLen+nCoeffs], nonzero); ok {
+			return score
+		}
 	}
 	perTxBase := srcDiffLen
 	coeffsAll := residueScratch[perTxBase : perTxBase+nCoeffs*maxTxUnits]
