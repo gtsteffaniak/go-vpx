@@ -289,7 +289,12 @@ func (e *VP8Encoder) applyDenoiserToInterMacroblock(source vp8enc.SourceImage, f
 	mcU := e.denoiser.mcU[:]
 	mcV := e.denoiser.mcV[:]
 	mcYStride, mcUStride, mcVStride := 16, 8, 8
-	if !vp8dec.ReconstructWholeMVInterMacroblockWithState(
+	// libvpx denoising.c filters UV only for zero motion after Y accepts.
+	// Y-only mode and moving blocks never consume their chroma predictors.
+	lumaOnly := e.denoiser.mode == vp8enc.DenoiserOnYOnly || motionMag != 0
+	predicted := lumaOnly && vp8dec.PredictWholeMVInterLumaWithState(
+		&e.denoiser.refStates[avgIndex], &decMode, mcY, mcYStride, row, col)
+	if !predicted && !vp8dec.ReconstructWholeMVInterMacroblockWithState(
 		&e.denoiser.refStates[avgIndex], &decMode, &zeroTokens, &e.dequants[0],
 		mcY, mcYStride, mcU, mcUStride, mcV, mcVStride,
 		&e.reconstructScratch.Residual, row, col,
