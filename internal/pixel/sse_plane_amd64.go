@@ -14,6 +14,9 @@ func SSEPlane16(src []byte, ss int, ref []byte, rs, w, h int) (uint64, bool) {
 	if h > 1 && (ss > (len(src)-w)/(h-1) || rs > (len(ref)-w)/(h-1)) {
 		return 0, false
 	}
+	if w >= 128 && w&31 == 0 && archsimd.X86.AVX512() {
+		return ssePlane32AVX512(src, ss, ref, rs, w, h), true
+	}
 	defer archsimd.ClearAVXUpperBits()
 	src, ref = src[:len(src):len(src)], ref[:len(ref):len(ref)]
 	var total uint64
@@ -33,4 +36,28 @@ func SSEPlane16(src []byte, ss int, ref []byte, rs, w, h int) (uint64, bool) {
 		total += uint64(uint32(sum32(acc.GetLo().Add(acc.GetHi()))))
 	}
 	return total, true
+}
+
+// ssePlane32AVX512 requires the complete-window checks in SSEPlane16.
+// At most 65536 pixels enter each chunk, so its complete sum fits uint32.
+func ssePlane32AVX512(src []byte, ss int, ref []byte, rs, w, h int) uint64 {
+	defer archsimd.ClearAVXUpperBits()
+	var total uint64
+	for y := 0; y < h; {
+		var acc archsimd.Int32x16
+		end := min(y+4, h)
+		for ; y < end; y++ {
+			so, ro := y*ss, y*rs
+			a, b := src[so:so+w:so+w], ref[ro:ro+w:ro+w]
+			for x := 0; x <= w-32; x += 32 {
+				av := archsimd.LoadUint8x32(a[x : x+32 : x+32]).ExtendToUint16().BitsToInt16()
+				bv := archsimd.LoadUint8x32(b[x : x+32 : x+32]).ExtendToUint16().BitsToInt16()
+				d := av.Sub(bv)
+				acc = acc.Add(d.DotProductPairs(d))
+			}
+		}
+		v := acc.GetLo().Add(acc.GetHi())
+		total += uint64(uint32(sum32(v.GetLo().Add(v.GetHi()))))
+	}
+	return total
 }

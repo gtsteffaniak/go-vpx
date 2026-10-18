@@ -86,6 +86,8 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 	sha256sum "$root/internal/pixel/subtract_rows_amd64.go"
 	sha256sum "$root/internal/vp9/dsp/subtract_rows_native_test.go"
 	sha256sum "$root/internal/pixel/sse_simd.go"
+	sha256sum "$root/internal/pixel/sse_plane_amd64.go"
+	sha256sum "$root/internal/pixel/sse_plane_avx512_amd64_test.go"
 	sha256sum "$root/internal/vp8/dsp/sse8_rows_native_test.go"
 	sha256sum "$root/internal/vp9/dsp/subpel_pointer_native_test.go"
 	scripts/go.sh version
@@ -108,6 +110,7 @@ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBac
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/dsp -run '^TestVariance' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/encoder -run '^TestDenoiser' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestSSEPlane16' -count=1 -v
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestSSEPlane16' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestSubtractRows' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestSubtractRows' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^Test(SSE8ExactRows|SquaredError)' -count=1 -v
