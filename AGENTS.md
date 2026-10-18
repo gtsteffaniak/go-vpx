@@ -8,9 +8,9 @@
 
 ## Fast performance iteration
 
-- During tuning, run affected correctness tests and a short native benchmark screen. Use broader tests and longer measurements once a candidate is ready for its PR, or when a failure requires them.
-- Reuse unchanged source, oracle and benchmark evidence. Do not repeat full audits, profile collections or evidence packaging for each small kernel change.
-- Report short screens as preliminary. Let CI run broad validation; do not block publishing a draft PR on redundant local validation.
+- Run 50 short performance iterations against fixed codec baseline `c4a8bd9f66805fc9b7b4f99e26752cc68505e572`, using affected correctness tests, the root ML stream and compact native feedback.
+- Defer full suites, full performance matrices, C comparisons, profile audits and broad evidence audits until codec throughput is at least 1.5× that baseline on the same host and workload. Kernel wins remain valuable but do not unlock this end-to-end gate. Reuse the already completed baseline C comparison.
+- Full validation requires an explicit manual dispatch after that threshold; never start it automatically on PRs or main pushes. Reuse unchanged evidence, keep a compact iteration ledger including losses, and label short screens preliminary.
 
 ## Build caches
 

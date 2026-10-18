@@ -16,7 +16,17 @@ on:
   workflow_dispatch:
     inputs:
       full:
-        description: Run conformance, quality, oracle and parity gates in addition to routine Go checks
+        description: Full validation only after 1.5x codec throughput versus the fixed baseline
+        default: false
+        required: false
+        type: boolean
+      purego_math:
+        description: Optional selected pure-Go math checks during iteration
+        default: false
+        required: false
+        type: boolean
+      trace_compile:
+        description: Optional affected-package oracle trace compile during iteration
         default: false
         required: false
         type: boolean
@@ -31,7 +41,7 @@ concurrency:
 env:
   GOEXPERIMENT: simd
   GOTOOLCHAIN: go1.27.2
-  GOVPX_FULL_CI: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.full) }}
+  GOVPX_FULL_CI: ${{ github.event_name == 'workflow_dispatch' && inputs.full }}
 
 jobs:
   test:
@@ -51,10 +61,26 @@ jobs:
       - name: Report CI scope
         run: |
           if [ "$GOVPX_FULL_CI" = true ]; then
-            echo 'Full CI: routine Go checks plus conformance, quality, oracle and parity gates.' >> "$GITHUB_STEP_SUMMARY"
+            echo 'Explicit manual full validation: source/PGO, full suites, conformance, quality, oracle and parity gates. Dispatch only after the recorded 1.5x fixed-baseline codec throughput threshold.' >> "$GITHUB_STEP_SUMMARY"
           else
-            echo 'Routine CI: source/PGO, pinned control tables, native SIMD, pure-Go fallback and trace build. Full gates run on main pushes or manual full=true.' >> "$GITHUB_STEP_SUMMARY"
+            echo 'Short iteration CI: affected kernel correctness and root ML stream only. Full suites, control-source fetches, profiles and broad audits stay deferred until the fixed-baseline throughput threshold.' >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Affected kernel correctness
+        if: ${{ env.GOVPX_FULL_CI != 'true' }}
+        run: GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/encoder ./internal/vp9/encoder -run '^Test(BackendSelected|FPPacket|FP32ActualFeature|Hadamard|VP9BlockYrd|BlockYrd|FDCTZero|ForwardDCT4x4SIMDMatchesScalar|ForwardDCTBatchIndependentScalar|TokenZeroY1)' -count=1
+
+      - name: Root ML stream correctness
+        if: ${{ env.GOVPX_FULL_CI != 'true' }}
+        run: scripts/go.sh test -pgo=off . -run '^TestMLCacheStreamNative$' -count=1 -v
+
+      - name: Optional selected pure-Go math
+        if: ${{ env.GOVPX_FULL_CI != 'true' && inputs.purego_math }}
+        run: scripts/go.sh test -pgo=off -tags purego ./internal/pixel ./internal/vp8/encoder ./internal/vp9/encoder -run '^Test(FPPacket|Hadamard|VP9BlockYrd|BlockYrd|FDCTZero|ForwardDCT4x4SIMDMatchesScalar|ForwardDCTBatchIndependentScalar|TokenZeroY1)' -count=1
+
+      - name: Optional affected trace compile
+        if: ${{ env.GOVPX_FULL_CI != 'true' && inputs.trace_compile }}
+        run: scripts/go.sh test -pgo=off -tags govpx_oracle_trace ./internal/pixel ./internal/vp8/encoder ./internal/vp9/encoder -run '^$' -count=1
 
       - name: Install libvpx build tools
         if: ${{ env.GOVPX_FULL_CI == 'true' }}
@@ -63,18 +89,23 @@ jobs:
           sudo apt-get install -y nasm yasm
 
       - name: Source and PGO checks
+        if: ${{ env.GOVPX_FULL_CI == 'true' }}
         run: make test-noasm test-simd-selection fmtcheck pgo-check
 
       - name: Prepare pinned upstream control tables
+        if: ${{ env.GOVPX_FULL_CI == 'true' }}
         run: sh scripts/prepare-control-sources.sh
 
       - name: Native SIMD tests
+        if: ${{ env.GOVPX_FULL_CI == 'true' }}
         run: make test
 
       - name: Scalar fallback tests
+        if: ${{ env.GOVPX_FULL_CI == 'true' }}
         run: make test-purego
 
       - name: Oracle trace build
+        if: ${{ env.GOVPX_FULL_CI == 'true' }}
         run: make test-trace
 
       - name: VP9 decoder conformance

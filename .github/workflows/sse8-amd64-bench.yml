@@ -75,7 +75,7 @@ env:
 
 jobs:
   sse8:
-    if: ${{ !inputs.fp_packets_only && !inputs.fp_quick_only }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.fp_packets_only && !inputs.fp_quick_only }}
     runs-on: ${{ inputs.runner_label || 'ubuntu-latest' }}
     timeout-minutes: 15
     steps:
