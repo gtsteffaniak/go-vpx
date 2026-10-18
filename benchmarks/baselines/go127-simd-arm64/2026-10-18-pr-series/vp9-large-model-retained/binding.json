@@ -1,0 +1,35 @@
+{
+  "baseline": "7e0e37b7bbbcda65523f5581e7879c7d2d93827c",
+  "hardware": "Apple M4 Max / Darwin arm64",
+  "Go": "go1.27.2 simd",
+  "PGO": "off for whole; default no profile for test",
+  "GOMAXPROCS": 1,
+  "CGO_ENABLED": 1,
+  "source_sha256": {
+    "vp9_pick_inter_mode_nonrd.go": "93668fbec5b015b418e5b4fbc5dab36a155b2731a2e7ce26620cd8c2ea9597c8",
+    "vp9_pick_inter_mode_nonrd_predctx.go": "0174e66f98308e04c8a62fadbe051ea4241985d7e90444a1259bf481feaf518b"
+  },
+  "fixture_sha256": "c788841383ea984d814728c93430c590f13e687fbdad0450c825181f1ceb99fc",
+  "binaries_sha256": {
+    "baseline.test": "7e34ca9fa2aef091f453da878880f4fdd4adfc225067f72a90b569217d74df73",
+    "candidate-v2.test": "f09e49806c790e634f4d00068e75552ce0d3284fb351e0d67f029a1cbb42403f",
+    "baseline-whole": "62ee80e8380a0d41b48c3745ca6711099e1b232e4a0804240177442f527823f0",
+    "candidate-v2-whole": "ed35432220cfb3299fb6edb102c6facf8e3ff279812df36cb47e7c20d70d9295"
+  },
+  "patch_sha256": "3f9e63c7f8b86a7b27a70d0cb0d14abf38844daca06b994f658d988733396383",
+  "stream_hashes": [
+    "94d2d44afce27325c5e0e6298f53d87e65e826e9846d6ac609d274b114f9e162",
+    "94d2d44afce27325c5e0e6298f53d87e65e826e9846d6ac609d274b114f9e162",
+    "021db19fc47e375025f91a7767d68fbf1b5d06e08d4edc23c2b8803400fc42b0",
+    "a7e6780411fc2c1eb332cf2e4749f6e5213860fe84ffec30676ea3c2126cda02",
+    "205c81a59a3d27c6d50b0f7704366cd19a26a206ca0ce058551e4c35807cb8df",
+    "7768d90618c27fe28acd32327861d9f5980f28b9ea118f970b9713ae4177c32b",
+    "b67b66761191864c79c2e4ada44b1d4c6aea85f4c4718640a7a17657389c0f56",
+    "be025db173f17874b6e6e9eb7b41a641b0f011aa1b41a1425b87e8918cc0b1b2",
+    "7c40a8131876694e917d4b5a8a1bdb357a0a319abe47fbce02febda0ce8833ac"
+  ],
+  "tests": "TestVP9NonrdLargeModelOnceFrozen|TestVP9NonrdPredCtxMatchesLegacyPredictor|TestVP8Algorithm2Stream|TestMLCacheStreamNative",
+  "native_logs": "native-v2/",
+  "rejected_logs": "native/",
+  "summary": "summary.json"
+}

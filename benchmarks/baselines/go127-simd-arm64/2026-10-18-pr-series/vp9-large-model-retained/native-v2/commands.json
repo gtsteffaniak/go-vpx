@@ -1,0 +1,206 @@
+[
+  {
+    "cmd": [
+      "/private/tmp/govpx-astra-vp9-model-once/baseline-whole",
+      "-codec=vp9",
+      "-width=320",
+      "-height=180",
+      "-frames=120",
+      "-bitrate=500",
+      "-cpu-used=8",
+      "-threads=1",
+      "-row-mt=false",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "exit": 0,
+    "seconds": 0.5473911762237549,
+    "stdout": "r1-320-baseline.json"
+  },
+  {
+    "cmd": [
+      "/private/tmp/govpx-astra-vp9-model-once/candidate-v2-whole",
+      "-codec=vp9",
+      "-width=320",
+      "-height=180",
+      "-frames=120",
+      "-bitrate=500",
+      "-cpu-used=8",
+      "-threads=1",
+      "-row-mt=false",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "exit": 0,
+    "seconds": 0.9267740249633789,
+    "stdout": "r1-320-candidate.json"
+  },
+  {
+    "cmd": [
+      "/private/tmp/govpx-astra-vp9-model-once/baseline-whole",
+      "-codec=vp9",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-bitrate=2500",
+      "-cpu-used=8",
+      "-threads=1",
+      "-row-mt=false",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "exit": 0,
+    "seconds": 1.9107170104980469,
+    "stdout": "r1-1280-baseline.json"
+  },
+  {
+    "cmd": [
+      "/private/tmp/govpx-astra-vp9-model-once/candidate-v2-whole",
+      "-codec=vp9",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-bitrate=2500",
+      "-cpu-used=8",
+      "-threads=1",
+      "-row-mt=false",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "exit": 0,
+    "seconds": 1.9335343837738037,
+    "stdout": "r1-1280-candidate.json"
+  },
+  {
+    "cmd": [
+      "/private/tmp/govpx-astra-vp9-model-once/candidate-v2-whole",
+      "-codec=vp9",
+      "-width=320",
+      "-height=180",
+      "-frames=120",
+      "-bitrate=500",
+      "-cpu-used=8",
+      "-threads=1",
+      "-row-mt=false",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "exit": 0,
+    "seconds": 0.5521581172943115,
+    "stdout": "r2-320-candidate.json"
+  },
+  {
+    "cmd": [
+      "/private/tmp/govpx-astra-vp9-model-once/baseline-whole",
+      "-codec=vp9",
+      "-width=320",
+      "-height=180",
+      "-frames=120",
+      "-bitrate=500",
+      "-cpu-used=8",
+      "-threads=1",
+      "-row-mt=false",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "exit": 0,
+    "seconds": 0.5505399703979492,
+    "stdout": "r2-320-baseline.json"
+  },
+  {
+    "cmd": [
+      "/private/tmp/govpx-astra-vp9-model-once/candidate-v2-whole",
+      "-codec=vp9",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-bitrate=2500",
+      "-cpu-used=8",
+      "-threads=1",
+      "-row-mt=false",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "exit": 0,
+    "seconds": 1.980212926864624,
+    "stdout": "r2-1280-candidate.json"
+  },
+  {
+    "cmd": [
+      "/private/tmp/govpx-astra-vp9-model-once/baseline-whole",
+      "-codec=vp9",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-bitrate=2500",
+      "-cpu-used=8",
+      "-threads=1",
+      "-row-mt=false",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "exit": 0,
+    "seconds": 1.9828877449035645,
+    "stdout": "r2-1280-baseline.json"
+  },
+  {
+    "cmd": [
+      "/private/tmp/govpx-astra-vp9-model-once/candidate-v2.test",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkVP9NonrdLargeModelOnce$/././frozen$",
+      "-test.benchtime=40ms",
+      "-test.count=1",
+      "-test.cpu=1"
+    ],
+    "exit": 0,
+    "seconds": 2.4406259059906006,
+    "stdout": "kernel-r1-frozen.txt"
+  },
+  {
+    "cmd": [
+      "/private/tmp/govpx-astra-vp9-model-once/candidate-v2.test",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkVP9NonrdLargeModelOnce$/././once$",
+      "-test.benchtime=40ms",
+      "-test.count=1",
+      "-test.cpu=1"
+    ],
+    "exit": 0,
+    "seconds": 2.4238510131835938,
+    "stdout": "kernel-r1-once.txt"
+  },
+  {
+    "cmd": [
+      "/private/tmp/govpx-astra-vp9-model-once/candidate-v2.test",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkVP9NonrdLargeModelOnce$/././once$",
+      "-test.benchtime=40ms",
+      "-test.count=1",
+      "-test.cpu=1"
+    ],
+    "exit": 0,
+    "seconds": 2.4552319049835205,
+    "stdout": "kernel-r2-once.txt"
+  },
+  {
+    "cmd": [
+      "/private/tmp/govpx-astra-vp9-model-once/candidate-v2.test",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkVP9NonrdLargeModelOnce$/././frozen$",
+      "-test.benchtime=40ms",
+      "-test.count=1",
+      "-test.cpu=1"
+    ],
+    "exit": 0,
+    "seconds": 2.4496958255767822,
+    "stdout": "kernel-r2-frozen.txt"
+  }
+]

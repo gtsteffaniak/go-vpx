@@ -1,0 +1,201 @@
+package govpx
+
+import (
+	"bytes"
+	"fmt"
+	"testing"
+
+	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	"github.com/thesyncim/govpx/internal/vp9/common"
+	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
+	"github.com/thesyncim/govpx/internal/vp9/encoder"
+)
+
+type vp9ModelOnceFixture struct {
+	e                            *VP9Encoder
+	c                            vp9NonrdPredBlockCtx
+	inter                        vp9InterEncodeState
+	miRows, miCols, miRow, miCol int
+	bs                           common.BlockSize
+	dst                          []byte
+	stride                       int
+	args                         encoder.ModelRdForSbYLargeArgs
+}
+
+func newVP9ModelOnceFixture(tb testing.TB, w, h int, bs common.BlockSize, edge bool) *vp9ModelOnceFixture {
+	tb.Helper()
+	e, err := NewVP9Encoder(VP9EncoderOptions{Width: w, Height: h, CpuUsed: 8})
+	if err != nil {
+		tb.Fatal(err)
+	}
+	if _, err = e.Encode(vp9test.NewMotionYCbCr(w, h)); err != nil {
+		tb.Fatal(err)
+	}
+	f := &vp9ModelOnceFixture{e: e, bs: bs, miRows: (h + 7) / 8, miCols: (w + 7) / 8}
+	f.inter = vp9InterEncodeState{img: shiftedVP9ReferenceYCbCrForTest(e.refFrames[0].img, 3, -2), ref: &e.refFrames[0], allowHP: true}
+	bw, bh := int(common.Num4x4BlocksWideLookup[bs])*4, int(common.Num4x4BlocksHighLookup[bs])*4
+	if edge {
+		f.miRow = max(0, f.miRows-(bh+7)/8)
+		f.miCol = max(0, f.miCols-(bw+7)/8)
+	} else {
+		f.miRow = 1
+		f.miCol = 1
+	}
+	e.prepareVP9EncoderOutputFrame(w, h)
+	if !e.vp9NonrdPredBlockCtxInit(&f.c, &f.inter, f.miRow, f.miCol, bs) || !e.vp9NonrdPredBlockCtxAddRef(&f.c, vp9dec.LastFrame, &e.refFrames[0]) {
+		tb.Fatal("prepared context")
+	}
+	f.stride = bw + 7
+	f.dst = bytes.Repeat([]byte{0xa9}, f.stride*bh)
+	src, stride, _, _ := vp9EncoderSourcePlane(f.inter.img, 0)
+	f.args = encoder.ModelRdForSbYLargeArgs{BSize: bs, Dequant: [2]int16{95, 125}, Src: src, SrcStride: stride, SrcX: f.miCol * 8, SrcY: f.miRow * 8, TxMode: common.TxModeSelect, SourceVariance: 159, Speed: 8, Width: w, Height: h}
+	return f
+}
+
+// Frozen 7e0e37b7 order: predict + full variance, small model, large model.
+func (f *vp9ModelOnceFixture) frozen(c *vp9NonrdPredBlockCtx, mv vp9dec.MV, filter vp9dec.InterpFilter) encoder.ModelRdForSbYLargeResult {
+	variance, sse, ok := f.e.vp9NonrdPredictVarianceSSETo(c, &f.inter, f.miRows, f.miCols, f.miRow, f.miCol, f.bs, common.NewMv, vp9dec.LastFrame, mv, filter, f.dst, f.stride)
+	if !ok {
+		return encoder.ModelRdForSbYLargeResult{}
+	}
+	r := f.small(variance, sse)
+	args := f.args
+	args.Pred = f.dst
+	args.PredStride = f.stride
+	large := encoder.ModelRdForSbYLarge(args)
+	if large.Valid {
+		r = large
+	}
+	return r
+}
+func (f *vp9ModelOnceFixture) small(variance, sse uint64) encoder.ModelRdForSbYLargeResult {
+	a := f.args
+	rate, dist, skip, tx := encoder.ModelRdForSbY(encoder.ModelRdForSbYArgs{BSize: f.bs, QIndex: 80, Dequant: a.Dequant, VarY: variance, SSEY: sse, TxMode: a.TxMode, SourceVariance: a.SourceVariance, SegmentID: a.SegmentID, CyclicRefreshAQ: a.CyclicRefreshAQ, ScreenContent: a.ScreenContent})
+	return encoder.ModelRdForSbYLargeResult{Rate: rate, Dist: dist, VarY: variance, SSEY: sse, SkipTxfm: skip, TxSize: tx, Valid: true}
+}
+type vp9ModelOncePreparedPredictor interface {
+ vp9NonrdPredictLargeModelLumaTo(*vp9NonrdPredBlockCtx, *vp9InterEncodeState,
+  int,int,int,int,common.BlockSize,common.PredictionMode,int8,vp9dec.MV,
+  vp9dec.InterpFilter,[]byte,int) (uint64,uint64,bool,bool)
+}
+func (f *vp9ModelOnceFixture) once(c *vp9NonrdPredBlockCtx, mv vp9dec.MV, filter vp9dec.InterpFilter) encoder.ModelRdForSbYLargeResult {
+ predictor,present:=any(f.e).(vp9ModelOncePreparedPredictor)
+ if !present {return f.frozen(c,mv,filter)}
+
+	variance, sse, ready, ok := predictor.vp9NonrdPredictLargeModelLumaTo(c, &f.inter, f.miRows, f.miCols, f.miRow, f.miCol, f.bs, common.NewMv, vp9dec.LastFrame, mv, filter, f.dst, f.stride)
+	var large encoder.ModelRdForSbYLargeResult
+	if ok {
+		args := f.args
+		args.Pred = f.dst
+		args.PredStride = f.stride
+		large = encoder.ModelRdForSbYLarge(args)
+		if !large.Valid && !ready {
+			variance, sse, ok = encoder.BlockDiffVarianceSSEClampedSource(c.src, c.srcStride, c.srcW, c.srcH, f.dst, f.stride, c.x0, c.y0, 0, 0, c.blockW, c.blockH)
+		}
+	}
+	if !ok {
+		return encoder.ModelRdForSbYLargeResult{}
+	}
+	if large.Valid {
+		return large
+	}
+	return f.small(variance, sse)
+}
+
+func TestVP9NonrdLargeModelOnceFrozen(t *testing.T) {
+	for _, dims := range [][2]int{{128, 128}, {94, 78}} {
+		for _, bs := range []common.BlockSize{common.Block8x8, common.Block32x32, common.Block64x32, common.Block64x64} {
+			for _, edge := range []bool{false, true} {
+				t.Run(fmt.Sprintf("%dx%d/b%d/edge%t", dims[0], dims[1], bs, edge), func(t *testing.T) {
+					f := newVP9ModelOnceFixture(t, dims[0], dims[1], bs, edge)
+					for _, kind := range []string{"prepared", "legacy", "invalid-large-window", "short-dst", "invalid-filter"} {
+						c := &f.c
+						savedArgs, savedDst := f.args, f.dst
+						switch kind {
+						case "legacy":
+							c = nil
+						case "invalid-large-window":
+							f.args.SrcStride = 0
+						case "short-dst":
+							f.dst = f.dst[:7]
+						}
+						for _, mv := range []vp9dec.MV{{}, {Row: -16, Col: 24}, {Row: 3, Col: -5}, {Row: -16384, Col: 16383}} {
+							for _, filter := range []vp9dec.InterpFilter{vp9dec.InterpEighttap, vp9dec.InterpEighttapSmooth, vp9dec.InterpEighttapSharp, vp9dec.InterpBilinear} {
+								if kind == "invalid-filter" {
+									filter = vp9dec.InterpSwitchable
+								}
+								for i := range f.dst {
+									f.dst[i] = 0xa9
+								}
+								want := f.frozen(c, mv, filter)
+								wantDst := append([]byte(nil), f.dst...)
+								for i := range f.dst {
+									f.dst[i] = 0xa9
+								}
+								got := f.once(c, mv, filter)
+								if got != want || !bytes.Equal(f.dst, wantDst) {
+									t.Fatalf("%s mv=%v filter=%d got=%+v want=%+v pixels=%t", kind, mv, filter, got, want, bytes.Equal(f.dst, wantDst))
+								}
+							}
+						}
+						f.args, f.dst = savedArgs, savedDst
+					}
+				})
+			}
+		}
+	}
+}
+
+var vp9ModelOnceSink encoder.ModelRdForSbYLargeResult
+
+func BenchmarkVP9NonrdLargeModelOnce(b *testing.B) {
+	for _, bs := range []common.BlockSize{common.Block32x32, common.Block64x64} {
+		for _, shape := range []string{"fullpel", "subpel", "clipped", "legacy"} {
+			w, h := 128, 128
+			edge := false
+			if shape == "clipped" {
+				w, h, edge = 94, 78, true
+			}
+			f := newVP9ModelOnceFixture(b, w, h, bs, edge)
+			c := &f.c
+			if shape == "legacy" {
+				c = nil
+			}
+			mv := vp9dec.MV{Row: -16, Col: 24}
+			if shape == "subpel" {
+				mv = vp9dec.MV{Row: 3, Col: -5}
+			}
+			for _, method := range []string{"frozen", "once"} {
+				b.Run(fmt.Sprintf("b%d/%s/%s", bs, shape, method), func(b *testing.B) {
+					fn := f.frozen
+					if method == "once" {
+						fn = f.once
+					}
+					b.ReportAllocs()
+					b.ResetTimer()
+					for i := 0; i < b.N; i++ {
+						vp9ModelOnceSink = fn(c, mv, vp9dec.InterpEighttap)
+					}
+				})
+			}
+		}
+	}
+}
+
+// BenchmarkVP9NonrdLargeModelNative runs identical fixture source against
+// the original route on the baseline and the production helper when present.
+func BenchmarkVP9NonrdLargeModelNative(b *testing.B) {
+ for _,bs:=range []common.BlockSize{common.Block32x32,common.Block64x64} {
+  for _,shape:=range []string{"fullpel","subpel","clipped","legacy"} {
+   w,h:=128,128;edge:=false
+   if shape=="clipped" {w,h,edge=94,78,true}
+   f:=newVP9ModelOnceFixture(b,w,h,bs,edge);c:=&f.c
+   if shape=="legacy" {c=nil}
+   mv:=vp9dec.MV{Row:-16,Col:24};if shape=="subpel" {mv=vp9dec.MV{Row:3,Col:-5}}
+   b.Run(fmt.Sprintf("b%d/%s",bs,shape),func(b *testing.B){
+    b.ReportAllocs();b.ResetTimer()
+    for i:=0;i<b.N;i++ {vp9ModelOnceSink=f.once(c,mv,vp9dec.InterpEighttap)}
+   })
+  }
+ }
+}

@@ -1,0 +1,394 @@
+--- a/vp9_pick_inter_mode_nonrd.go
++++ b/vp9_pick_inter_mode_nonrd.go
+@@ -1314,87 +1314,110 @@
+ 				filterUVOKU := false
+ 				filterUVOKV := false
+ 				var filterVarU, filterSSEU, filterVarV, filterSSEV uint64
+-				varY, sseY, ok := e.vp9NonrdPredictVarianceSSETo(&predCtx,
+-					inter, miRows,
+-					miCols, miRow, miCol, bsize, thisMode, refFrame, mv, filter,
+-					evalPred, evalPredStride)
++				var varY, sseY uint64
++				var large encoder.ModelRdForSbYLargeResult
++				var ok bool
++				if useModelYrdLarge {
++					var varianceReady bool
++					varY, sseY, varianceReady, ok = e.vp9NonrdPredictLargeModelLumaTo(&predCtx,
++						inter, miRows, miCols, miRow, miCol, bsize, thisMode,
++						refFrame, mv, filter, evalPred, evalPredStride)
++					if ok {
++						large = encoder.ModelRdForSbYLarge(encoder.ModelRdForSbYLargeArgs{
++							BSize:             bsize,
++							Dequant:           dequantY,
++							Src:               src,
++							SrcStride:         srcStride,
++							SrcX:              x0,
++							SrcY:              y0,
++							Pred:              evalPred,
++							PredStride:        evalPredStride,
++							PredX:             0,
++							PredY:             0,
++							TxMode:            frameTxMode,
++							SourceVariance:    uint64(sourceVariance),
++							SegmentID:         segID,
++							CyclicRefreshAQ:   e.opts.AQMode == VP9AQCyclicRefresh,
++							ScreenContent:     e.opts.ScreenContentMode == int8(VP9ScreenContentScreen),
++							ZeroTempSADSource: zeroTempSADSource,
++							Speed:             speedFeatureCPUUsed,
++							Width:             e.opts.Width,
++							Height:            e.opts.Height,
++						})
++						if !large.Valid && !varianceReady {
++							// The prepared predictor succeeded, but the large model
++							// rejected its window. Recover the small model's inputs
++							// without building the predictor again.
++							varY, sseY, ok = encoder.BlockDiffVarianceSSEClampedSource(
++								predCtx.src, predCtx.srcStride, predCtx.srcW, predCtx.srcH,
++								evalPred, evalPredStride, predCtx.x0, predCtx.y0, 0, 0,
++								predCtx.blockW, predCtx.blockH)
++						}
++					}
++				} else {
++					varY, sseY, ok = e.vp9NonrdPredictVarianceSSETo(&predCtx,
++						inter, miRows, miCols, miRow, miCol, bsize, thisMode,
++						refFrame, mv, filter, evalPred, evalPredStride)
++				}
+ 				if !ok {
+ 					continue
+ 				}
+-				rateY, distY, skipTxfm, mrdTxSize := encoder.ModelRdForSbY(encoder.ModelRdForSbYArgs{
+-					BSize:           bsize,
+-					QIndex:          segQIndex,
+-					Dequant:         dequantY,
+-					VarY:            varY,
+-					SSEY:            sseY,
+-					TxMode:          frameTxMode,
+-					SourceVariance:  uint64(sourceVariance),
+-					SegmentID:       segID,
+-					CyclicRefreshAQ: e.opts.AQMode == VP9AQCyclicRefresh,
+-					ScreenContent:   e.opts.ScreenContentMode == int8(VP9ScreenContentScreen),
+-				})
+-				if useModelYrdLarge {
+-					large := encoder.ModelRdForSbYLarge(encoder.ModelRdForSbYLargeArgs{
+-						BSize:             bsize,
+-						Dequant:           dequantY,
+-						Src:               src,
+-						SrcStride:         srcStride,
+-						SrcX:              x0,
+-						SrcY:              y0,
+-						Pred:              evalPred,
+-						PredStride:        evalPredStride,
+-						PredX:             0,
+-						PredY:             0,
+-						TxMode:            frameTxMode,
+-						SourceVariance:    uint64(sourceVariance),
+-						SegmentID:         segID,
+-						CyclicRefreshAQ:   e.opts.AQMode == VP9AQCyclicRefresh,
+-						ScreenContent:     e.opts.ScreenContentMode == int8(VP9ScreenContentScreen),
+-						ZeroTempSADSource: zeroTempSADSource,
+-						Speed:             speedFeatureCPUUsed,
+-						Width:             e.opts.Width,
+-						Height:            e.opts.Height,
+-					})
+-					if large.Valid {
+-						rateY = large.Rate
+-						distY = large.Dist
+-						varY = large.VarY
+-						sseY = large.SSEY
+-						skipTxfm = large.SkipTxfm
+-						mrdTxSize = large.TxSize
+-						if large.SkipTxfm == encoder.SkipTxfmAcDc {
+-							// libvpx vp9_pickmode.c:578-605 — the UV skip
+-							// test builds/evaluates U first and `break`s
+-							// before touching V when U is not skippable,
+-							// so the V predictor is built lazily.
+-							uvBsize := vp9dec.GetPlaneBlockSize(bsize, &e.planes[1])
+-							uvTxSize := vp9dec.GetUvTxSize(bsize, large.TxSize,
+-								&e.planes[1])
+-							filterVarU, filterSSEU, filterUVOKU =
++				var rateY int
++				var distY int64
++				var skipTxfm encoder.SkipTxfmFlag
++				var mrdTxSize common.TxSize
++				if large.Valid {
++					rateY = large.Rate
++					distY = large.Dist
++					varY = large.VarY
++					sseY = large.SSEY
++					skipTxfm = large.SkipTxfm
++					mrdTxSize = large.TxSize
++					if large.SkipTxfm == encoder.SkipTxfmAcDc {
++						// libvpx vp9_pickmode.c:578-605 — the UV skip
++						// test builds/evaluates U first and `break`s
++						// before touching V when U is not skippable,
++						// so the V predictor is built lazily.
++						uvBsize := vp9dec.GetPlaneBlockSize(bsize, &e.planes[1])
++						uvTxSize := vp9dec.GetUvTxSize(bsize, large.TxSize,
++							&e.planes[1])
++						filterVarU, filterSSEU, filterUVOKU =
++							e.vp9NonrdCtxUVVariancePlaneSSE(&predCtx,
++								inter, miRows,
++								miCols, miRow, miCol, bsize, thisMode,
++								refFrame, mv, filter, 1)
++						if filterUVOKU &&
++							encoder.ModelRdForSbYLargeEarlyTermPlane(
++								uvBsize, uvTxSize, dequantU,
++								filterVarU, filterSSEU) {
++							filterVarV, filterSSEV, filterUVOKV =
+ 								e.vp9NonrdCtxUVVariancePlaneSSE(&predCtx,
+ 									inter, miRows,
+ 									miCols, miRow, miCol, bsize, thisMode,
+-									refFrame, mv, filter, 1)
+-							if filterUVOKU &&
+-								encoder.ModelRdForSbYLargeEarlyTermPlane(
+-									uvBsize, uvTxSize, dequantU,
+-									filterVarU, filterSSEU) {
+-								filterVarV, filterSSEV, filterUVOKV =
+-									e.vp9NonrdCtxUVVariancePlaneSSE(&predCtx,
+-										inter, miRows,
+-										miCols, miRow, miCol, bsize, thisMode,
+-										refFrame, mv, filter, 2)
+-								if filterUVOKV {
+-									filterEarlyTerm = encoder.ModelRdForSbYLargeEarlyTermPlane(
+-										uvBsize, uvTxSize, dequantV,
+-										filterVarV, filterSSEV)
+-									if filterEarlyTerm {
+-										searchEarlyTermSticky = true
+-									}
++									refFrame, mv, filter, 2)
++							if filterUVOKV {
++								filterEarlyTerm = encoder.ModelRdForSbYLargeEarlyTermPlane(
++									uvBsize, uvTxSize, dequantV,
++									filterVarV, filterSSEV)
++								if filterEarlyTerm {
++									searchEarlyTermSticky = true
+ 								}
+ 							}
+ 						}
+ 					}
++				} else {
++					rateY, distY, skipTxfm, mrdTxSize = encoder.ModelRdForSbY(encoder.ModelRdForSbYArgs{
++						BSize:           bsize,
++						QIndex:          segQIndex,
++						Dequant:         dequantY,
++						VarY:            varY,
++						SSEY:            sseY,
++						TxMode:          frameTxMode,
++						SourceVariance:  uint64(sourceVariance),
++						SegmentID:       segID,
++						CyclicRefreshAQ: e.opts.AQMode == VP9AQCyclicRefresh,
++						ScreenContent:   e.opts.ScreenContentMode == int8(VP9ScreenContentScreen),
++					})
+ 				}
+ 				filterEarlyTerm = searchEarlyTermSticky
+ 				interpFilterCost := 0
+@@ -1538,94 +1561,107 @@
+ 				// vp9_pickmode.c:2346 model_rd_for_sb_y.
+ 				if usePredBufferPool {
+ 					buf := &predBuffers[thisModePredIdx]
+-					varY, sseY, ok = e.vp9NonrdPredictVarianceSSETo(&predCtx,
+-						inter, miRows,
+-						miCols, miRow, miCol, bsize, thisMode, refFrame, mv, filter,
+-						buf.data, buf.stride)
+ 					currentPred = buf.data
+ 					currentPredStride = buf.stride
+ 				} else {
++					currentPred = e.blockScratch[:compactPredLen]
++				}
++				var large encoder.ModelRdForSbYLargeResult
++				if useModelYrdLarge {
++					var varianceReady bool
++					varY, sseY, varianceReady, ok = e.vp9NonrdPredictLargeModelLumaTo(&predCtx,
++						inter, miRows, miCols, miRow, miCol, bsize, thisMode,
++						refFrame, mv, filter, currentPred, currentPredStride)
++					if ok {
++						large = encoder.ModelRdForSbYLarge(encoder.ModelRdForSbYLargeArgs{
++							BSize:             bsize,
++							Dequant:           dequantY,
++							Src:               src,
++							SrcStride:         srcStride,
++							SrcX:              x0,
++							SrcY:              y0,
++							Pred:              currentPred,
++							PredStride:        currentPredStride,
++							PredX:             0,
++							PredY:             0,
++							TxMode:            frameTxMode,
++							SourceVariance:    uint64(sourceVariance),
++							SegmentID:         segID,
++							CyclicRefreshAQ:   e.opts.AQMode == VP9AQCyclicRefresh,
++							ScreenContent:     e.opts.ScreenContentMode == int8(VP9ScreenContentScreen),
++							ZeroTempSADSource: zeroTempSADSource,
++							Speed:             speedFeatureCPUUsed,
++							Width:             e.opts.Width,
++							Height:            e.opts.Height,
++						})
++						if !large.Valid && !varianceReady {
++							// The prepared predictor succeeded, but the large model
++							// rejected its window. Recover the small model's inputs
++							// without building the predictor again.
++							varY, sseY, ok = encoder.BlockDiffVarianceSSEClampedSource(
++								predCtx.src, predCtx.srcStride, predCtx.srcW, predCtx.srcH,
++								currentPred, currentPredStride, predCtx.x0, predCtx.y0, 0, 0,
++								predCtx.blockW, predCtx.blockH)
++						}
++					}
++				} else {
+ 					varY, sseY, ok = e.vp9NonrdPredictVarianceSSETo(&predCtx,
+-						inter, miRows,
+-						miCols, miRow, miCol, bsize, thisMode, refFrame, mv, filter,
+-						e.blockScratch[:compactPredLen], compactPredW)
+-					currentPred = e.blockScratch[:compactPredLen]
++						inter, miRows, miCols, miRow, miCol, bsize, thisMode,
++						refFrame, mv, filter, currentPred, currentPredStride)
+ 				}
+ 				if !ok {
+ 					continue
+ 				}
+-				rateY, distY, modelSkipTxfm, mrdTxSize = encoder.ModelRdForSbY(encoder.ModelRdForSbYArgs{
+-					BSize:           bsize,
+-					QIndex:          segQIndex,
+-					Dequant:         dequantY,
+-					VarY:            varY,
+-					SSEY:            sseY,
+-					TxMode:          frameTxMode,
+-					SourceVariance:  uint64(sourceVariance),
+-					SegmentID:       segID,
+-					CyclicRefreshAQ: e.opts.AQMode == VP9AQCyclicRefresh,
+-					ScreenContent:   e.opts.ScreenContentMode == int8(VP9ScreenContentScreen),
+-				})
+-				if useModelYrdLarge {
+-					large := encoder.ModelRdForSbYLarge(encoder.ModelRdForSbYLargeArgs{
+-						BSize:             bsize,
+-						Dequant:           dequantY,
+-						Src:               src,
+-						SrcStride:         srcStride,
+-						SrcX:              x0,
+-						SrcY:              y0,
+-						Pred:              currentPred,
+-						PredStride:        currentPredStride,
+-						PredX:             0,
+-						PredY:             0,
+-						TxMode:            frameTxMode,
+-						SourceVariance:    uint64(sourceVariance),
+-						SegmentID:         segID,
+-						CyclicRefreshAQ:   e.opts.AQMode == VP9AQCyclicRefresh,
+-						ScreenContent:     e.opts.ScreenContentMode == int8(VP9ScreenContentScreen),
+-						ZeroTempSADSource: zeroTempSADSource,
+-						Speed:             speedFeatureCPUUsed,
+-						Width:             e.opts.Width,
+-						Height:            e.opts.Height,
+-					})
+-					if large.Valid {
+-						rateY = large.Rate
+-						distY = large.Dist
+-						varY = large.VarY
+-						sseY = large.SSEY
+-						modelSkipTxfm = large.SkipTxfm
+-						mrdTxSize = large.TxSize
+-						if large.SkipTxfm == encoder.SkipTxfmAcDc {
+-							// libvpx vp9_pickmode.c:578-605 — the UV skip
+-							// test builds/evaluates U first and `break`s
+-							// before touching V when U is not skippable,
+-							// so the V predictor is built lazily.
+-							uvBsize := vp9dec.GetPlaneBlockSize(bsize,
+-								&e.planes[1])
+-							uvTxSize := vp9dec.GetUvTxSize(bsize,
+-								large.TxSize, &e.planes[1])
+-							uvVarU, uvSSEU, uvOKU =
++				if large.Valid {
++					rateY = large.Rate
++					distY = large.Dist
++					varY = large.VarY
++					sseY = large.SSEY
++					modelSkipTxfm = large.SkipTxfm
++					mrdTxSize = large.TxSize
++					if large.SkipTxfm == encoder.SkipTxfmAcDc {
++						// libvpx vp9_pickmode.c:578-605 — the UV skip
++						// test builds/evaluates U first and `break`s
++						// before touching V when U is not skippable,
++						// so the V predictor is built lazily.
++						uvBsize := vp9dec.GetPlaneBlockSize(bsize,
++							&e.planes[1])
++						uvTxSize := vp9dec.GetUvTxSize(bsize,
++							large.TxSize, &e.planes[1])
++						uvVarU, uvSSEU, uvOKU =
++							e.vp9NonrdCtxUVVariancePlaneSSE(&predCtx,
++								inter, miRows,
++								miCols, miRow, miCol, bsize, thisMode,
++								refFrame, mv, filter, 1)
++						if uvOKU &&
++							encoder.ModelRdForSbYLargeEarlyTermPlane(
++								uvBsize, uvTxSize, dequantU,
++								uvVarU, uvSSEU) {
++							uvVarV, uvSSEV, uvOKV =
+ 								e.vp9NonrdCtxUVVariancePlaneSSE(&predCtx,
+ 									inter, miRows,
+ 									miCols, miRow, miCol, bsize, thisMode,
+-									refFrame, mv, filter, 1)
+-							if uvOKU &&
+-								encoder.ModelRdForSbYLargeEarlyTermPlane(
+-									uvBsize, uvTxSize, dequantU,
+-									uvVarU, uvSSEU) {
+-								uvVarV, uvSSEV, uvOKV =
+-									e.vp9NonrdCtxUVVariancePlaneSSE(&predCtx,
+-										inter, miRows,
+-										miCols, miRow, miCol, bsize, thisMode,
+-										refFrame, mv, filter, 2)
+-								if uvOKV {
+-									thisEarlyTerm = encoder.ModelRdForSbYLargeEarlyTermPlane(
+-										uvBsize, uvTxSize, dequantV,
+-										uvVarV, uvSSEV)
+-								}
++									refFrame, mv, filter, 2)
++							if uvOKV {
++								thisEarlyTerm = encoder.ModelRdForSbYLargeEarlyTermPlane(
++									uvBsize, uvTxSize, dequantV,
++									uvVarV, uvSSEV)
+ 							}
+ 						}
+ 					}
++				} else {
++					rateY, distY, modelSkipTxfm, mrdTxSize = encoder.ModelRdForSbY(encoder.ModelRdForSbYArgs{
++						BSize:           bsize,
++						QIndex:          segQIndex,
++						Dequant:         dequantY,
++						VarY:            varY,
++						SSEY:            sseY,
++						TxMode:          frameTxMode,
++						SourceVariance:  uint64(sourceVariance),
++						SegmentID:       segID,
++						CyclicRefreshAQ: e.opts.AQMode == VP9AQCyclicRefresh,
++						ScreenContent:   e.opts.ScreenContentMode == int8(VP9ScreenContentScreen),
++					})
+ 				}
+ 			}
+ 			if !ok {
+--- a/vp9_pick_inter_mode_nonrd_predctx.go
++++ b/vp9_pick_inter_mode_nonrd_predctx.go
+@@ -595,3 +595,25 @@
+ 	return encoder.BlockDiffVarianceSSEClampedSource(c.src, c.srcStride,
+ 		c.srcW, c.srcH, dst, dstStride, c.x0, c.y0, 0, 0, c.blockW, c.blockH)
+ }
++
++// vp9NonrdPredictLargeModelLumaTo omits the whole-block variance scan when
++// the prepared source block is fully visible: model_rd_for_sb_y_large
++// produces the same whole-block inputs while gathering its 8x8 statistics.
++// The third return value says whether the ordinary variance/SSE are ready.
++// Keep legacy prediction and clamped-source validation for unsupported or
++// clipped blocks; callers also retain the small-model fallback.
++func (e *VP9Encoder) vp9NonrdPredictLargeModelLumaTo(c *vp9NonrdPredBlockCtx,
++	inter *vp9InterEncodeState, miRows, miCols, miRow, miCol int,
++	bsize common.BlockSize, mode common.PredictionMode, refFrame int8,
++	mv vp9dec.MV, filter vp9dec.InterpFilter, dst []byte, dstStride int,
++) (variance, sse uint64, varianceReady, ok bool) {
++	if c != nil && refFrame >= 0 && int(refFrame) < len(c.ref) &&
++		c.ref[refFrame].valid && c.x0 >= 0 && c.y0 >= 0 &&
++		c.x0+c.blockW <= c.srcW && c.y0+c.blockH <= c.srcH {
++		ok = e.vp9NonrdCtxPredictLuma(c, &c.ref[refFrame], mv, filter, dst, dstStride)
++		return 0, 0, false, ok
++	}
++	variance, sse, ok = e.vp9NonrdPredictVarianceSSETo(c, inter, miRows,
++		miCols, miRow, miCol, bsize, mode, refFrame, mv, filter, dst, dstStride)
++	return variance, sse, true, ok
++}

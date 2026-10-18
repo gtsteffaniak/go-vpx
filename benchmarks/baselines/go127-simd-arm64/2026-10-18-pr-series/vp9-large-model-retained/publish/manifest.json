@@ -1,0 +1,21 @@
+{
+  "base_sha": "7e0e37b7bbbcda65523f5581e7879c7d2d93827c",
+  "scope": "Independent VP9 non-RD large-model scan removal; two balanced 40ms native component samples and separately requested 320p/720p canonical codec screen. No C/profile/full suite.",
+  "fixtures": {
+    "vp9_nonrd_model_once_native_test.go": "scripts/vp9-model-once/fixtures/vp9_nonrd_model_once_native_test.go.txt"
+  },
+  "variants": [
+    {
+      "id": 201,
+      "hypothesis": "Select large OR small VP9 RD model and let prepared full visible large blocks provide variance/SSE once. Preserve clipped/unprepared fallback.",
+      "package": ".",
+      "test": "^(TestVP9NonrdLargeModelOnceFrozen|TestVP9NonrdPredCtxMatchesLegacyPredictor|TestVP8Algorithm2Stream|TestMLCacheStreamNative)$",
+      "bench": "^BenchmarkVP9NonrdLargeModelNative$",
+      "files": {
+        "vp9_pick_inter_mode_nonrd.go": "scripts/vp9-model-once/variants/201/vp9_pick_inter_mode_nonrd.go.txt",
+        "vp9_pick_inter_mode_nonrd_predctx.go": "scripts/vp9-model-once/variants/201/vp9_pick_inter_mode_nonrd_predctx.go.txt"
+      }
+    }
+  ],
+  "bundle_archive": "benchmarks/baselines/go127-simd-arm64/2026-10-18-vp9-model-once/overlays.tar.gz"
+}

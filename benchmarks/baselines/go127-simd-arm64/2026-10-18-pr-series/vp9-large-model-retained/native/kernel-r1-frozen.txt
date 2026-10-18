@@ -1,0 +1,13 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/thesyncim/govpx
+cpu: Apple M4 Max
+BenchmarkVP9NonrdLargeModelOnce/b9/fullpel/frozen         	   48765	      1076 ns/op	       0 B/op	       0 allocs/op
+BenchmarkVP9NonrdLargeModelOnce/b9/subpel/frozen          	   36961	      1301 ns/op	       0 B/op	       0 allocs/op
+BenchmarkVP9NonrdLargeModelOnce/b9/clipped/frozen         	  140157	       406.8 ns/op	       0 B/op	       0 allocs/op
+BenchmarkVP9NonrdLargeModelOnce/b9/legacy/frozen          	   55761	       948.0 ns/op	       0 B/op	       0 allocs/op
+BenchmarkVP9NonrdLargeModelOnce/b12/fullpel/frozen        	   16374	      2898 ns/op	       0 B/op	       0 allocs/op
+BenchmarkVP9NonrdLargeModelOnce/b12/subpel/frozen         	    8170	      5917 ns/op	       0 B/op	       0 allocs/op
+BenchmarkVP9NonrdLargeModelOnce/b12/clipped/frozen        	   49172	      1021 ns/op	       0 B/op	       0 allocs/op
+BenchmarkVP9NonrdLargeModelOnce/b12/legacy/frozen         	   12308	      3629 ns/op	       0 B/op	       0 allocs/op
+PASS
