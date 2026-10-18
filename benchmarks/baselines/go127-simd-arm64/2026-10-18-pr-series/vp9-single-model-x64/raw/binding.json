@@ -1,0 +1,95 @@
+{
+  "commits": {
+    "parent": "e9d4d08b3208c63254f251aa363e8b2b1c66abbf",
+    "current": "52ea88797ea75ef16710be5a05bd480b45967c11"
+  },
+  "PGO": "off",
+  "CGO_ENABLED": 1,
+  "GOMAXPROCS": 1,
+  "driver_sha256": "36729cdc79dc6d9ff0bf642eb7dd9f0d9bc98344b8351dfbf94512238f685f23",
+  "shared_fixture_sha256": {
+    "internal/pixel/fp32_optional_native_test.go": "9cfc327f50e989209bd69d5dd75d51e9905379b96b09dffa4686387bea2d9bac",
+    "internal/vp9/encoder/quant_fp16_native_test.go": "6db86483a9c1a7d6cfd8c59453375a39d86a6d9d9109c75114982cd71e14f67e",
+    "internal/pixel/quantize_fp_packets_test.go": "2f596d080e68ef3f969bfda94829c827c0afa8eb386bc4f44edd5633b315e419"
+  },
+  "scope": "Preliminary two-round feedback; no race/profiles/trace/codegen or full source audit.",
+  "variants": {
+    "parent": {
+      "actual_SDK_features": {
+        "AVX512": false,
+        "AVX2": true,
+        "Enabled": true
+      },
+      "original_fixture_sha256": {
+        "internal/pixel/fp32_optional_native_test.go": "9cfc327f50e989209bd69d5dd75d51e9905379b96b09dffa4686387bea2d9bac",
+        "internal/vp9/encoder/quant_fp16_native_test.go": "6db86483a9c1a7d6cfd8c59453375a39d86a6d9d9109c75114982cd71e14f67e",
+        "internal/pixel/quantize_fp_packets_test.go": "2f596d080e68ef3f969bfda94829c827c0afa8eb386bc4f44edd5633b315e419"
+      },
+      "production_source_sha256": {
+        "internal/pixel/quantize_fp_amd64.go": "aa838dec9cd8733b7c74b20220b7f39f0059209573fc43c09bd61bbb093b572a",
+        "internal/pixel/quantize_fp32_avx512_amd64.go": "d487f136dbc121772b77abf7da0c49630b54acbc40ca355577f1cbb5e1b6e96b",
+        "internal/pixel/quantize_fp_simd.go": "47b401b2e9f34afc5bdaf3f2c49d41f2f6559ee4bf85a6442878960a7f830572"
+      },
+      "binaries": {
+        "pixel": {
+          "sha256": "77976d85cb021c0bf99f7aedcf82976ac8f04a3e29bb16f6dd5681009c729d01",
+          "bytes": 5933163
+        },
+        "custom": {
+          "sha256": "000eed587a33541776a04d5558edbcafeb291c184fd12d2c42902de85dda6521",
+          "bytes": 25096772
+        },
+        "whole": {
+          "sha256": "0c5ff60e2be95caf83e67d9be38f61fbe59002244893808680c45bec9244ab57",
+          "bytes": 12884382
+        }
+      }
+    },
+    "current": {
+      "actual_SDK_features": {
+        "AVX512": false,
+        "AVX2": true,
+        "Enabled": true
+      },
+      "original_fixture_sha256": {
+        "internal/pixel/fp32_optional_native_test.go": "9cfc327f50e989209bd69d5dd75d51e9905379b96b09dffa4686387bea2d9bac",
+        "internal/vp9/encoder/quant_fp16_native_test.go": "6db86483a9c1a7d6cfd8c59453375a39d86a6d9d9109c75114982cd71e14f67e",
+        "internal/pixel/quantize_fp_packets_test.go": "2f596d080e68ef3f969bfda94829c827c0afa8eb386bc4f44edd5633b315e419"
+      },
+      "production_source_sha256": {
+        "internal/pixel/quantize_fp_amd64.go": "aa838dec9cd8733b7c74b20220b7f39f0059209573fc43c09bd61bbb093b572a",
+        "internal/pixel/quantize_fp32_avx512_amd64.go": "d487f136dbc121772b77abf7da0c49630b54acbc40ca355577f1cbb5e1b6e96b",
+        "internal/pixel/quantize_fp_simd.go": "47b401b2e9f34afc5bdaf3f2c49d41f2f6559ee4bf85a6442878960a7f830572"
+      },
+      "binaries": {
+        "pixel": {
+          "sha256": "e6a50142317efeda37f24d57ebf5577859562f353c5328053284117bd8e809b9",
+          "bytes": 5933427
+        },
+        "custom": {
+          "sha256": "5abc61e0385ca973fce8a3d1c33fdd4e982701232c9668e7b5bf137674a36c27",
+          "bytes": 25100900
+        },
+        "whole": {
+          "sha256": "dfd2a5b2033ed938889ee03684a263c864e12f92d5307bec8b1bdc63f82ab4af",
+          "bytes": 12888550
+        }
+      }
+    }
+  },
+  "benchmark_plan": [
+    [
+      "custom",
+      ".",
+      "^BenchmarkVP9NonrdCoeffCostPrepare$"
+    ]
+  ],
+  "whole_codec_plan": {
+    "mode": "two720p-rounds",
+    "codec": "vp9",
+    "cpu_used": [
+      8
+    ]
+  },
+  "oracle_override": "^Test(VP9NonrdPredCtxMatchesLegacyPredictor|VP9NonrdPredCtxAddRefRejectsScaledRef|VP9NonrdCoeffCostFrameTransitions|VP8Algorithm2Stream|MLCacheStreamNative)$"
+}

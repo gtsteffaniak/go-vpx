@@ -11,8 +11,8 @@ Fixed full-validation baseline remains c4a8bd9f66805fc9b7b4f99e26752cc68505e572.
 | Subpel MV-rate floor, iterative only | fixed0.9813x, adaptive0.9908x; first pair had compile overlap | rejected |
 | VP9 large model v1 | extra structs/helper overhead; mixed/slower | rejected; raw retained |
 | VP9 large model v2 | ARM fullpel32/64 component1.19–1.20x/1.164–1.168x; codec0.987–0.996x | winning component code preserved in archive for scoped native follow-up |
-| VP9 unused coefficient-cost setup | ARM720p1.0373/1.0162x;320p outlier excluded | PR111, native x64 evidence pending |
-| VP8 average-backed denoiser | ARM fixed1.0404/1.0478x, adaptive1.0955/1.0156x | PR112, native x64 evidence pending |
-| VP9 small-model-only fallback v3 | ARM720p1.0373/1.0074x;320p outlier excluded | independent PR113 candidate |
+| VP9 unused coefficient-cost setup | ARM720p1.0373/1.0162x;320p outlier excluded | merged PR111/e9d4d08b; x64 non-RD setup6.91x, codec0.9993/1.0185x |
+| VP8 average-backed denoiser | ARM fixed1.0404/1.0478x, adaptive1.0955/1.0156x | PR112 held: x64 partial Thread2 noisy hash mismatch; baseline-only diagnosis pending |
+| VP9 small-model-only fallback v3 | ARM720p1.0373/1.0074x;320p outlier excluded | merged PR113/9cdd3b7f; x64 codec1.0058/1.0079x |
 
 Codec and kernel results are separate; unchanged VP9 codec allocation count is1.25/frame on this720p workload. Setup components and VP8 codec allocate zero. Raw results retain all losses. The V2 and V3 picker variants overlap and are alternatives; the cost-table gate is independent.

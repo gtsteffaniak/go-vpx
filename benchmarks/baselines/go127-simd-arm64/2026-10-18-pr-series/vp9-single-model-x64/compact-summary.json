@@ -1,0 +1,125 @@
+{
+  "run": 39161954456,
+  "url": "https://github.com/thesyncim/govpx/actions/runs/39161954456",
+  "commits": {
+    "parent": "e9d4d08b3208c63254f251aa363e8b2b1c66abbf",
+    "current": "52ea88797ea75ef16710be5a05bd480b45967c11"
+  },
+  "cpu": "AMD EPYC7763",
+  "actualISA": {
+    "AVX2": true,
+    "AVX512": false,
+    "Enabled": true
+  },
+  "codec_scope": "VP9720p60inputsCPU8/2500kbps/threads1/GOMAX1/PGOoff,twoAB/BApairs",
+  "whole_pairs": [
+    {
+      "round": 1,
+      "parent_ms": 24.666288,
+      "current_ms": 24.524666,
+      "throughput_delta_percent": 0.5774675993548639,
+      "time_delta_percent": -0.5741520572532077,
+      "speedup": 1.0057746759935486,
+      "semantic_fields_equal": 22,
+      "allocs_per_frame_parent": 1.25,
+      "allocs_per_frame_current": 1.25
+    },
+    {
+      "round": 2,
+      "parent_ms": 24.614503,
+      "current_ms": 24.422758,
+      "throughput_delta_percent": 0.7851078899442809,
+      "time_delta_percent": -0.778991962584008,
+      "speedup": 1.0078510788994428,
+      "semantic_fields_equal": 22,
+      "allocs_per_frame_parent": 1.25,
+      "allocs_per_frame_current": 1.25
+    }
+  ],
+  "unchanged_controls": {
+    "BenchmarkVP9NonrdCoeffCostPrepare/compound-inter": {
+      "raw_ns": {
+        "parent": [
+          991.8,
+          995.9
+        ],
+        "current": [
+          994.1,
+          989.6
+        ]
+      },
+      "speedup": 1.0020164339365831,
+      "paired_speedups": [
+        0.9976863494618247,
+        1.0063662085691187
+      ]
+    },
+    "BenchmarkVP9NonrdCoeffCostPrepare/fullrd-inter": {
+      "raw_ns": {
+        "parent": [
+          994.8,
+          996.6
+        ],
+        "current": [
+          990.3,
+          989.5
+        ]
+      },
+      "speedup": 1.0058591776947168,
+      "paired_speedups": [
+        1.004544077552257,
+        1.0071753410813542
+      ]
+    },
+    "BenchmarkVP9NonrdCoeffCostPrepare/key": {
+      "raw_ns": {
+        "parent": [
+          8958.0,
+          8973.0
+        ],
+        "current": [
+          9019.0,
+          8962.0
+        ]
+      },
+      "speedup": 0.9972192870251932,
+      "paired_speedups": [
+        0.9932365007207007,
+        1.001227404597188
+      ]
+    },
+    "BenchmarkVP9NonrdCoeffCostPrepare/nonrd-inter": {
+      "raw_ns": {
+        "parent": [
+          166.1,
+          166.0
+        ],
+        "current": [
+          165.9,
+          166.4
+        ]
+      },
+      "speedup": 0.9993981342160698,
+      "paired_speedups": [
+        1.001205545509343,
+        0.9975961538461539
+      ]
+    }
+  },
+  "component_zeroalloc_samples": 16,
+  "codec_allocs_note": "Unchanged75/60=1.25/frame,notzero.",
+  "oracle_scope": "Preparedpredictor+costtransition+96VP8+72ML;22PASSpervariant.",
+  "no_control_gain_claim": true,
+  "no_full_C_profile": true,
+  "merge": {
+    "baseRefOid": "e9d4d08b3208c63254f251aa363e8b2b1c66abbf",
+    "headRefOid": "52ea88797ea75ef16710be5a05bd480b45967c11",
+    "mergeCommit": {
+      "oid": "9cdd3b7f0c15ed5ea49bd81b8b24ac5026231f8a"
+    },
+    "mergedAt": "2026-10-18T20:12:45Z",
+    "number": 113,
+    "state": "MERGED",
+    "url": "https://github.com/thesyncim/govpx/pull/113"
+  }
+}
