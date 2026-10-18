@@ -1,0 +1,113 @@
+{
+  "base_sha": "870699ce83f3eb6de44f507ef29f6d6a429e916d",
+  "scope": "Independent algorithms, balanced two40ms native x64 pairs, source-bound frozen/scalar oracles. Preliminary. No full/C/profile/whole matrix.",
+  "fixtures": {
+    "internal/vp9/encoder/x64_round3_native_test.go": "scripts/x64-round3/fixtures/internal/vp9/encoder/x64_round3_native_test.go.txt",
+    "internal/pixel/x64_round3_native_test.go": "scripts/x64-round3/fixtures/internal/pixel/x64_round3_native_test.go.txt"
+  },
+  "variants": [
+    {
+      "id": 126,
+      "hypothesis": "Build both coefficient token-cost tables from one shared prefix calculation per context.",
+      "package": "./internal/vp9/encoder",
+      "test": "^Test(Round3CostTable|CoeffTreeTokenCost)",
+      "bench": "^BenchmarkRound3CostTable$",
+      "files": {
+        "internal/vp9/encoder/coeff_cost.go": "scripts/x64-round3/variants/126/internal/vp9/encoder/coeff_cost.go.txt"
+      }
+    },
+    {
+      "id": 127,
+      "hypothesis": "Update motion-offset bit cost by binary-counter carries instead of rescanning all bits for every table entry.",
+      "package": "./internal/vp9/encoder",
+      "test": "^Test(Round3Nmv|NmvCostTable)",
+      "bench": "^BenchmarkRound3Nmv$",
+      "files": {
+        "internal/vp9/encoder/motion_cost.go": "scripts/x64-round3/variants/127/internal/vp9/encoder/motion_cost.go.txt"
+      }
+    },
+    {
+      "id": 128,
+      "hypothesis": "Reuse coefficient probability decisions from the dry pass instead of running every savings search twice.",
+      "package": "./internal/vp9/encoder",
+      "test": "^Test(Round3CoefUpdates|WriteCoefProbsFromCounts)",
+      "bench": "^BenchmarkRound3CoefUpdates$",
+      "files": {
+        "internal/vp9/encoder/coef_probs_counts.go": "scripts/x64-round3/variants/128/internal/vp9/encoder/coef_probs_counts.go.txt"
+      }
+    },
+    {
+      "id": 129,
+      "hypothesis": "Use the validated flat probability-row offset directly when counting EOB tokens, removing five dimension decodes.",
+      "package": "./internal/vp9/encoder",
+      "test": "^Test(Round3EOBCount|CountCoefEOB)",
+      "bench": "^BenchmarkRound3EOBCount$",
+      "files": {
+        "internal/vp9/encoder/token_pack.go": "scripts/x64-round3/variants/129/internal/vp9/encoder/token_pack.go.txt"
+      }
+    },
+    {
+      "id": 130,
+      "hypothesis": "Use exact rounded byte average directly, eliminating widening, bias, shift, and narrowing while preserving eight-byte store order.",
+      "package": "./internal/pixel",
+      "test": "^TestRound3Average$",
+      "bench": "^BenchmarkRound3Average$",
+      "files": {
+        "internal/pixel/kernels_simd.go": "scripts/x64-round3/variants/130/internal/pixel/kernels_simd.go.txt"
+      }
+    },
+    {
+      "id": 131,
+      "hypothesis": "Interpolate RD table deltas from one endpoint, eliminating two general multiplications.",
+      "package": "./internal/vp9/encoder",
+      "test": "^Test(Round3ModelNorm|ModelRDIterations58)",
+      "bench": "^BenchmarkRound3ModelNorm$",
+      "files": {
+        "internal/vp9/encoder/block_yrd.go": "scripts/x64-round3/variants/131/internal/vp9/encoder/block_yrd.go.txt"
+      }
+    },
+    {
+      "id": 132,
+      "hypothesis": "Recognize saturated RD model ratios before the integer division using an exact product comparison.",
+      "package": "./internal/vp9/encoder",
+      "test": "^TestModelRDIterations58$",
+      "bench": "^BenchmarkModelRDIteration58$",
+      "files": {
+        "internal/vp9/encoder/block_yrd.go": "scripts/x64-round3/variants/132/internal/vp9/encoder/block_yrd.go.txt"
+      }
+    },
+    {
+      "id": 133,
+      "hypothesis": "Reuse one above row and exact saturated byte arithmetic for x64 true-motion prediction, preserving left alias order.",
+      "package": "./internal/pixel",
+      "test": "^Test(Round3TM|TMPredictDisabledScalarContract|TMPredict4Tile)",
+      "bench": "^BenchmarkRound3TM$",
+      "files": {
+        "internal/pixel/kernels_simd.go": "scripts/x64-round3/variants/133/internal/pixel/kernels_simd.go.txt",
+        "internal/pixel/tmpredict_bytes_x64_amd64.go": "scripts/x64-round3/variants/133/internal/pixel/tmpredict_bytes_x64_amd64.go.txt",
+        "internal/pixel/tmpredict_bytes_x64_other.go": "scripts/x64-round3/variants/133/internal/pixel/tmpredict_bytes_x64_other.go.txt"
+      }
+    },
+    {
+      "id": 134,
+      "hypothesis": "Read and reduce each eight-pixel row once for paired4x4 averages, eliminating four separate clamped block walks.",
+      "package": "./internal/vp9/encoder",
+      "test": "^Test(Round3Variance4|VP9FillVariance4x4Avg|VP9Avg)",
+      "bench": "^BenchmarkRound3Variance4$",
+      "files": {
+        "internal/vp9/encoder/variance_partition_tree.go": "scripts/x64-round3/variants/134/internal/vp9/encoder/variance_partition_tree.go.txt"
+      }
+    },
+    {
+      "id": 135,
+      "hypothesis": "Walk coefficient bands as segments and hoist their two cost rows, removing per-coefficient band accounting.",
+      "package": "./internal/vp9/encoder",
+      "test": "^Test(Round3KnownCost|CoeffBlockRateCost)",
+      "bench": "^BenchmarkRound3KnownCost$",
+      "files": {
+        "internal/vp9/encoder/coeff_cost.go": "scripts/x64-round3/variants/135/internal/vp9/encoder/coeff_cost.go.txt"
+      }
+    }
+  ],
+  "bundle_archive": "benchmarks/baselines/go127-simd-arm64/2026-10-18-algorithmic-round3/x64-source-overlays.tar.gz"
+}
