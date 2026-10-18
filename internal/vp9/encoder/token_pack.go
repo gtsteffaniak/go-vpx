@@ -46,25 +46,15 @@ func CountCoefEOBTokens(tokens []TokenExtra, stats *FrameCoefBranchStats) bool {
 	if stats == nil {
 		return false
 	}
+	// FrameCoefBranchStats is a nested array of identical, pointer-free rows.
+	// The checked probability offset indexes precisely the same flattened row.
+	rows := (*[coefProbsFlatLen / UnconstrainedNodes][EntropyNodes][2]uint32)(unsafe.Pointer(stats))
 	for _, tok := range tokens {
-		probOff := int(tok.ProbOff)
-		if tok.Token != EobToken || probOff%UnconstrainedNodes != 0 ||
-			probOff < 0 || probOff >= coefProbsFlatLen {
+		off := int(tok.ProbOff)
+		if tok.Token != EobToken || off%UnconstrainedNodes != 0 || off >= coefProbsFlatLen {
 			return false
 		}
-		row := probOff / UnconstrainedNodes
-		ctx := row % vp9dec.CoefContexts
-		row /= vp9dec.CoefContexts
-		band := row % vp9dec.CoefBands
-		row /= vp9dec.CoefBands
-		ref := row % vp9dec.CoefRefTypes
-		row /= vp9dec.CoefRefTypes
-		plane := row % vp9dec.CoefPlaneTypes
-		row /= vp9dec.CoefPlaneTypes
-		if row < 0 || row >= int(common.TxSizes) {
-			return false
-		}
-		recordCoefBranch00(&stats[row][plane][ref][band][ctx])
+		rows[off/UnconstrainedNodes][0][0]++
 	}
 	return true
 }
