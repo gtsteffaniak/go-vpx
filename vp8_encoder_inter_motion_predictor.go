@@ -252,6 +252,11 @@ func biasImprovedInterFrameMVSlots(slots *[8]improvedInterFrameMVSlot, count int
 	}
 	targetBias := signBias[refFrame]
 	limit := min(count, len(slots))
+	top := -(mbRow * 16) << 3
+	bottom := (mbRows - 1 - mbRow) * 16 << 3
+	left := -(mbCol * 16) << 3
+	right := (mbCols - 1 - mbCol) * 16 << 3
+	clamp := mbRows > 0 && mbCols > 0
 	for i := range limit {
 		slot := &slots[i]
 		if slot.refFrame == vp8common.IntraFrame {
@@ -261,7 +266,10 @@ func biasImprovedInterFrameMVSlots(slots *[8]improvedInterFrameMVSlot, count int
 			slot.mv.Row = -slot.mv.Row
 			slot.mv.Col = -slot.mv.Col
 		}
-		slot.mv = clampInterFrameModeMotionVector(slot.mv, mbRow, mbCol, mbRows, mbCols)
+		if clamp {
+			slot.mv.Row = int16(clampInterFrameModeMotionVectorComponent(int(slot.mv.Row), top, bottom))
+			slot.mv.Col = int16(clampInterFrameModeMotionVectorComponent(int(slot.mv.Col), left, right))
+		}
 	}
 }
 
