@@ -1,0 +1,94 @@
+{
+  "base_sha": "870699ce83f3eb6de44f507ef29f6d6a429e916d",
+  "scope": "Five independent algorithms, balanced two40ms native x64 pairs, source-bound frozen/scalar oracles. Preliminary.",
+  "fixtures": {
+    "internal/vp9/encoder/x64_round3_second_native_test.go": "scripts/x64-round3-second/fixtures/internal/vp9/encoder/x64_round3_second_native_test.go.txt",
+    "internal/vp9/encoder/x64_round3_native_test.go": "scripts/x64-round3-second/fixtures/internal/vp9/encoder/x64_round3_native_test.go.txt",
+    "internal/pixel/x64_round3_native_test.go": "scripts/x64-round3-second/fixtures/internal/pixel/x64_round3_native_test.go.txt"
+  },
+  "variants": [
+    {
+      "id": 136,
+      "hypothesis": "Skip probability-search setup when the seed already equals the old probability and the candidate walk is empty.",
+      "package": "./internal/vp9/encoder",
+      "test": "^Test(Round3SearchSeed|ProbDiffUpdateSavingsSearch)",
+      "bench": "^BenchmarkRound3SearchSeed$",
+      "files": {
+        "internal/vp9/encoder/cost.go": "scripts/x64-round3-second/variants/136/internal/vp9/encoder/cost.go.txt"
+      }
+    },
+    {
+      "id": 137,
+      "hypothesis": "Compose the fixed probability-remap and update-length tables once, removing one dependent lookup per search candidate.",
+      "package": "./internal/vp9/encoder",
+      "test": "^Test(Round3ProbCost|ProbDiffUpdate|CondProbDiff)",
+      "bench": "^BenchmarkRound3ProbCost$",
+      "files": {
+        "internal/vp9/encoder/prob_update.go": "scripts/x64-round3-second/variants/137/internal/vp9/encoder/prob_update.go.txt"
+      }
+    },
+    {
+      "id": 138,
+      "hypothesis": "Reuse existing signed-coefficient token costs for larger int16 magnitudes instead of recosting14 extra bits.",
+      "package": "./internal/vp9/encoder",
+      "test": "^Test(Round3ExtraCost|CoeffTokenExtra|CoeffQCoeff)",
+      "bench": "^BenchmarkRound3ExtraCost$",
+      "files": {
+        "internal/vp9/encoder/coeff_cost.go": "scripts/x64-round3-second/variants/138/internal/vp9/encoder/coeff_cost.go.txt"
+      }
+    },
+    {
+      "id": 139,
+      "hypothesis": "Aggregate ordered probability-tree branches from leaves upward, removing recursive traversal and call setup.",
+      "package": "./internal/vp9/encoder",
+      "test": "^Test(Round3Tree|TreeProbs|ProbDiffUpdateForTree)",
+      "bench": "^BenchmarkRound3Tree$",
+      "files": {
+        "internal/vp9/encoder/tree_probs.go": "scripts/x64-round3-second/variants/139/internal/vp9/encoder/tree_probs.go.txt"
+      }
+    },
+    {
+      "id": 140,
+      "hypothesis": "Stop first-pass exhaustive motion search after the earliest exact zero-error match, preserving strict-tie order.",
+      "package": "./internal/vp9/encoder",
+      "test": "^Test(Round3FirstPass|FirstPassMotion|AnalyzeFirstPass)",
+      "bench": "^BenchmarkRound3FirstPass$",
+      "files": {
+        "internal/vp9/encoder/firstpass_analysis.go": "scripts/x64-round3-second/variants/140/internal/vp9/encoder/firstpass_analysis.go.txt"
+      }
+    },
+    {
+      "id": 130,
+      "hypothesis": "Use exact rounded byte average directly, eliminating widening, bias, shift, and narrowing while preserving eight-byte store order. Refine short/zero entry to preserve measured controls.",
+      "package": "./internal/pixel",
+      "test": "^TestRound3Average$",
+      "bench": "^BenchmarkRound3Average$",
+      "files": {
+        "internal/pixel/kernels_simd.go": "scripts/x64-round3-second/variants/130/internal/pixel/kernels_simd.go.txt"
+      }
+    },
+    {
+      "id": 133,
+      "hypothesis": "Reuse one above row and exact saturated byte arithmetic for x64 true-motion prediction, preserving left alias order. Refine short/zero entry to preserve measured controls.",
+      "package": "./internal/pixel",
+      "test": "^Test(Round3TM|TMPredictDisabledScalarContract|TMPredict4Tile)",
+      "bench": "^BenchmarkRound3TM$",
+      "files": {
+        "internal/pixel/kernels_simd.go": "scripts/x64-round3-second/variants/133/internal/pixel/kernels_simd.go.txt",
+        "internal/pixel/tmpredict_bytes_x64_amd64.go": "scripts/x64-round3-second/variants/133/internal/pixel/tmpredict_bytes_x64_amd64.go.txt",
+        "internal/pixel/tmpredict_bytes_x64_other.go": "scripts/x64-round3-second/variants/133/internal/pixel/tmpredict_bytes_x64_other.go.txt"
+      }
+    },
+    {
+      "id": 135,
+      "hypothesis": "Walk coefficient bands as segments and hoist their two cost rows, removing per-coefficient band accounting. Refine short/zero entry to preserve measured controls.",
+      "package": "./internal/vp9/encoder",
+      "test": "^Test(Round3KnownCost|CoeffBlockRateCost)",
+      "bench": "^BenchmarkRound3KnownCost$",
+      "files": {
+        "internal/vp9/encoder/coeff_cost.go": "scripts/x64-round3-second/variants/135/internal/vp9/encoder/coeff_cost.go.txt"
+      }
+    }
+  ],
+  "bundle_archive": "benchmarks/baselines/go127-simd-arm64/2026-10-18-algorithmic-round3/x64-second-overlays.tar.gz"
+}
