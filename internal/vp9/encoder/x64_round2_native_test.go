@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/thesyncim/govpx/internal/vp9/common"
 	"testing"
+	"unsafe"
 )
 
 func round2ReferenceYrd(src, dst []byte, stride, off, bw, bh, n int, dq [2]int16, sse uint64) BlockYrdResult {
@@ -138,17 +139,17 @@ func BenchmarkX64Round2Yrd(b *testing.B) {
 	}
 }
 func TestX64Round2Metrics(t *testing.T) {
-	for _, xy := range [][2]int{{maxInt(), 2}, {2, maxInt()}} {
-		panicked := func() (panicked bool) {
-			defer func() { panicked = recover() != nil }()
-			BlockDiffStatsClampedSource([]byte{1, 2, 3, 4}, 2, 2, 2, []byte{4, 3, 2, 1}, 2, xy[0], xy[1], 0, 0, 2, 2)
-			return false
-		}()
-		if !panicked {
-			t.Fatalf("overflow coordinate %v no longer panics", xy)
+	for _, xy := range [][2]int{{maxInt(), 2}, {2, maxInt()}, {maxInt() - 1, 2}, {2, maxInt() - 1}} {
+		got, gok, gpanic := round2ClampedOutcome(func() (BlockDiffStats, bool) {
+			return BlockDiffStatsClampedSource([]byte{1, 2, 3, 4}, 2, 2, 2, []byte{4, 3, 2, 1}, 2, xy[0], xy[1], 0, 0, 2, 2)
+		})
+		want, wok, wpanic := round2ClampedOutcome(func() (BlockDiffStats, bool) {
+			return round2FrozenClampedStats([]byte{1, 2, 3, 4}, 2, 2, 2, []byte{4, 3, 2, 1}, 2, xy[0], xy[1], 0, 0, 2, 2)
+		})
+		if gpanic != wpanic || (!gpanic && (gok != wok || got != want)) {
+			t.Fatalf("overflow coordinate %v: got%+v/%v/panic%v want%+v/%v/panic%v", xy, got, gok, gpanic, want, wok, wpanic)
 		}
 	}
-
 	a, b := round2Pixels("dense")
 	for _, size := range []int{4, 8, 16, 32, 64} {
 		want := blockDiffStatsScalar(a[:], 64, b[:], 64, 0, 0, 0, 0, size, size)
@@ -204,6 +205,73 @@ func BenchmarkX64Round2EdgeStats(b *testing.B) {
 					round2StatsSink, _ = BlockDiffStatsClampedSource(a[:], 64, 57, 53, p[:], 64, xy[0], xy[1], 0, 0, size, size)
 				}
 			})
+		}
+	}
+}
+
+// Frozen b57 clamped-edge behavior, including integer-wrap panic semantics.
+func round2FrozenClampedStats(src []byte, srcStride, srcW, srcH int,
+	ref []byte, refStride int, srcX, srcY, refX, refY, w, h int,
+) (BlockDiffStats, bool) {
+	if len(src) == 0 || len(ref) == 0 || srcStride <= 0 || refStride <= 0 ||
+		srcW <= 0 || srcH <= 0 || w <= 0 || h <= 0 ||
+		srcX < 0 || srcY < 0 || refX < 0 || refY < 0 ||
+		srcW > srcStride || refX+w > refStride {
+		return BlockDiffStats{}, false
+	}
+	if (srcH-1)*srcStride+srcW > len(src) ||
+		(refY+h-1)*refStride+refX+w > len(ref) {
+		return BlockDiffStats{}, false
+	}
+	if srcX+w <= srcW && srcY+h <= srcH {
+		return blockDiffStats(src, srcStride, ref, refStride,
+			srcX, srcY, refX, refY, w, h), true
+	}
+
+	var stats BlockDiffStats
+	stats.Count = uint64(w * h)
+	for y := range h {
+		sy := srcY + y
+		if sy >= srcH {
+			sy = srcH - 1
+		}
+		srcRow := src[sy*srcStride:]
+		refRow := ref[(refY+y)*refStride+refX:]
+		for x := range w {
+			sx := srcX + x
+			if sx >= srcW {
+				sx = srcW - 1
+			}
+			diff := int64(int(srcRow[sx]) - int(refRow[x]))
+			stats.Sum += diff
+			stats.SSE += uint64(diff * diff)
+		}
+	}
+	return stats, true
+}
+func round2ClampedOutcome(fn func() (BlockDiffStats, bool)) (stats BlockDiffStats, ok, panicked bool) {
+	defer func() { panicked = recover() != nil }()
+	stats, ok = fn()
+	return
+}
+
+// Scratch aliases retain the original subtraction writes and read ordering.
+func TestX64Round2UniformScratchAlias(t *testing.T) {
+	for _, aliasSource := range []bool{true, false} {
+		var backing [1024]int16
+		window := unsafe.Slice((*byte)(unsafe.Pointer(&backing[0])), 256)
+		var separate [256]byte
+		src, dst := window, separate[:]
+		if !aliasSource {
+			src, dst = separate[:], window
+		}
+		for i := range src {
+			src[i] = 129
+			dst[i] = 127
+		}
+		got := BlockYrd(src, 16, 0, 0, dst, 16, 0, 0, 16, 16, common.Tx8x8, [2]int16{97, 123}, BlockYrdUnknownSSE, backing[:])
+		if !got.Valid || window[0] != 2 || window[1] != 0 {
+			t.Fatalf("aliasSource%v changed subtraction contract: result%+v firstbytes%v", aliasSource, got, window[:2])
 		}
 	}
 }

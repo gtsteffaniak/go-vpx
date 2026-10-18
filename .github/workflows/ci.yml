@@ -68,7 +68,7 @@ jobs:
 
       - name: Affected kernel correctness
         if: ${{ env.GOVPX_FULL_CI != 'true' }}
-        run: GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/encoder ./internal/vp9/encoder ./internal/vp9/dsp -run '^Test(BackendSelected|FPPacket|FP32ActualFeature|Hadamard|VP9BlockYrd|BlockYrd|FDCTZero|ForwardDCT4x4SIMDMatchesScalar|ForwardDCTBatchIndependentScalar|TokenZeroY1|VP8WorkElision|IntraBridge57|ModelRDIterations58|X64Round2)' -count=1
+        run: GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/encoder ./internal/vp9/encoder ./internal/vp9/dsp -run '^Test(BackendSelected|FPPacket|FP32ActualFeature|Hadamard|VP9BlockYrd|BlockYrd|FDCTZero|ForwardDCT4x4SIMDMatchesScalar|ForwardDCTBatchIndependentScalar|TokenZeroY1|VP8WorkElision|IntraBridge57|ModelRDIterations58|X64Round2|InitSegmentMacroblockQuants|FP16DisjointScalar|FP16AliasedStoreOrder|FP32DispatchBoundaries|Subpel)' -count=1
 
       - name: Root ML stream correctness
         if: ${{ env.GOVPX_FULL_CI != 'true' }}
@@ -76,7 +76,7 @@ jobs:
 
       - name: Optional selected pure-Go math
         if: ${{ env.GOVPX_FULL_CI != 'true' && inputs.purego_math }}
-        run: scripts/go.sh test -pgo=off -tags purego ./internal/pixel ./internal/vp8/encoder ./internal/vp9/encoder ./internal/vp9/dsp -run '^Test(FPPacket|Hadamard|VP9BlockYrd|BlockYrd|FDCTZero|ForwardDCT4x4SIMDMatchesScalar|ForwardDCTBatchIndependentScalar|TokenZeroY1|VP8WorkElision|IntraBridge57|ModelRDIterations58|X64Round2)' -count=1
+        run: scripts/go.sh test -pgo=off -tags purego ./internal/pixel ./internal/vp8/encoder ./internal/vp9/encoder ./internal/vp9/dsp -run '^Test(FPPacket|Hadamard|VP9BlockYrd|BlockYrd|FDCTZero|ForwardDCT4x4SIMDMatchesScalar|ForwardDCTBatchIndependentScalar|TokenZeroY1|VP8WorkElision|IntraBridge57|ModelRDIterations58|X64Round2|InitSegmentMacroblockQuants|FP16DisjointScalar|FP16AliasedStoreOrder|FP32DispatchBoundaries|Subpel)' -count=1
 
       - name: Optional affected trace compile
         if: ${{ env.GOVPX_FULL_CI != 'true' && inputs.trace_compile }}

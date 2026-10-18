@@ -40,7 +40,7 @@ on:
         required: false
         type: string
       bench_package:
-        description: Package for a custom quick benchmark (defaults to ./internal/pixel)
+        description: Comma-separated packages for custom quick benchmarks (defaults to ./internal/pixel)
         required: false
         type: string
       quick_manifest:

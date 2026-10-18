@@ -1073,6 +1073,11 @@ func BlockYrd(src []byte, srcStride int, srcX, srcY int,
 	if (srcY+bh)*srcStride > len(src) || (dstY+bh)*dstStride > len(dst) {
 		return res
 	}
+	if txSize == common.Tx8x8 || txSize == common.Tx16x16 {
+		if score, ok := blockYrdUniformPixelsR2(src, srcStride, srcY*srcStride+srcX, dst, dstStride, dstY*dstStride+dstX, bw, bh, txSize, dequant, sseIn, residueScratch); ok {
+			return score
+		}
+	}
 	nonzero, subtractOK := vp9dsp.SubtractBlockNonZero(src, srcY*srcStride+srcX, srcStride,
 		dst, dstY*dstStride+dstX, dstStride, srcDiff, 0, bw, bw, bh)
 	if !subtractOK {

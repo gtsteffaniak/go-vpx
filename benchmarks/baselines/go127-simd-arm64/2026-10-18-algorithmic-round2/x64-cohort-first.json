@@ -69,5 +69,6 @@
         "internal/vp9/encoder/block_metric.go": "scripts/x64-round2/variants/100/internal/vp9/encoder/block_metric.go.txt"
       }
     }
-  ]
+  ],
+  "bundle_archive": "benchmarks/baselines/go127-simd-arm64/2026-10-18-algorithmic-round2/x64-source-overlays.tar.gz"
 }

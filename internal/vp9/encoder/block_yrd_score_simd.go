@@ -85,6 +85,11 @@ func blockYrdScore(src []int16, bw, bh int, tx common.TxSize,
 // each four-lane accumulator is below 2^31, and the 256-coefficient total
 // is below 2^32. Larger or unusual tables retain the general path.
 func blockYrdQuantScore(coeff []int16, n int, r, q, d [2]int16) (int, uint32) {
+	if n == 256 {
+		if rate, err, ok := blockYrdQuantWideR2(coeff, n, r, q, d); ok {
+			return rate, err
+		}
+	}
 	// For d>=16, each qabs<=2047. At most 32 packets contribute to
 	// a lane, so 32*2047=65504 fits uint16 without per-packet widening.
 	if d[0] >= 16 && d[1] >= 16 {

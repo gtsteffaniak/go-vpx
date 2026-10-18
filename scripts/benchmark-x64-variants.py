@@ -55,6 +55,7 @@ def main():
                GOAMD64='v1', GOMAXPROCS='1', CGO_ENABLED='1', GOFLAGS='-p=2', GODEBUG='',
                GOVPX_REQUIRE_SIMD='1', GOVPX_REQUIRE_FP32_NATIVE='0', GOVPX_REQUIRE_FP32_OFF='0')
     commands = []
+    archived_blobs = {}
     status = {'complete': False, 'phase': 'setup', 'variant_status': {}}
 
     def save_status():
@@ -62,6 +63,8 @@ def main():
 
     def blob(path):
         relative(path)
+        if path in archived_blobs:
+            return archived_blobs[path]
         return subprocess.check_output(['git', 'show', args.head_sha + ':' + path], cwd=root)
 
     def run(argv, name):
@@ -78,6 +81,17 @@ def main():
     try:
         manifest_bytes = blob(args.manifest)
         manifest = json.loads(manifest_bytes)
+        archive_digest = None
+        if manifest.get('bundle_archive'):
+            archive_bytes = blob(manifest['bundle_archive'])
+            archive_digest = sha(archive_bytes)
+            with tarfile.open(fileobj=io.BytesIO(archive_bytes)) as tar:
+                members = tar.getmembers()
+                assert sum(m.size for m in members) <= 32 * 1024 * 1024
+                for member in members:
+                    path = str(relative(member.name))
+                    assert member.isfile() and path not in archived_blobs
+                    archived_blobs[path] = tar.extractfile(member).read()
         assert manifest['base_sha'] == args.base_sha
         variants = manifest['variants']
         ids = [str(v['id']) for v in variants]
@@ -92,6 +106,7 @@ def main():
         (out / 'manifest.json').write_bytes(manifest_bytes)
         binding = {'base_sha': args.base_sha, 'bundle_commit': args.head_sha,
                    'manifest_sha256': sha(manifest_bytes), 'driver_sha256': sha(Path(__file__).read_bytes()),
+                   'bundle_archive_sha256': archive_digest,
                    'PGO': 'off', 'CGO_ENABLED': 1, 'GOMAXPROCS': 1, 'GOAMD64': 'v1',
                    'shared_fixture_sha256': {f: sha(b) for f, b in fixtures.items()},
                    'scope': 'Two balanced short native component samples; no whole/C/profile/race/full suite.',

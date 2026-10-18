@@ -238,5 +238,6 @@
         "internal/pixel/vector_variance_r2_amd64.go": "scripts/x64-round2/variants2/99/internal/pixel/vector_variance_r2_amd64.go.txt"
       }
     }
-  ]
+  ],
+  "bundle_archive": "benchmarks/baselines/go127-simd-arm64/2026-10-18-algorithmic-round2/x64-source-overlays.tar.gz"
 }
