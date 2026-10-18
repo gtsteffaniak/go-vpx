@@ -1,0 +1,10 @@
+{
+  "BenchmarkVP8Algorithm2/bpred/p0": [
+    1.166289592760181,
+    1.162514827995255
+  ],
+  "BenchmarkVP8Algorithm2/bpred/p1": [
+    1.1367735470941884,
+    1.0848366650414432
+  ]
+}

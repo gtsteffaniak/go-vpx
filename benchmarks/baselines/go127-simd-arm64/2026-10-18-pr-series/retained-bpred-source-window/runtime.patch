@@ -1,0 +1,60 @@
+--- a/vp8_encoder_inter_modes_fast_helpers.go
++++ b/vp8_encoder_inter_modes_fast_helpers.go
+@@ -1,6 +1,7 @@
+ package govpx
+ 
+ import (
++	"github.com/thesyncim/govpx/internal/pixel"
+ 	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
+ 	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
+ 	"github.com/thesyncim/govpx/internal/vp8/dsp"
+@@ -242,7 +243,22 @@
+ 	predictorSum := 0
+ 	rate := e.interIntraReferenceRate() + e.interIntraYModeRate(vp8common.BPred)
+ 	distortion := 0
++	// Validate the complete source MB once for all 64 candidate-statistics
++	// calls and 16 selected residuals. Partial blocks keep clamped reads.
++	baseY, baseX := mbRow*16, mbCol*16
++	preparedSource := src.Width >= 16 && src.Height >= 16 &&
++		uint(baseX) <= uint(src.Width-16) && uint(baseY) <= uint(src.Height-16) &&
++		src.YStride >= src.Width && len(src.Y) >= baseX+16 &&
++		baseY+15 <= (len(src.Y)-baseX-16)/src.YStride
++	var sourceMB []byte
++	if preparedSource {
++		sourceMB = src.Y[baseY*src.YStride+baseX:]
++	}
+ 	for block := range 16 {
++		var blockSource []byte
++		if preparedSource {
++			blockSource = sourceMB[((block&12)>>2)*4*src.YStride+(block&3)*4:]
++		}
+ 		blockAbove, blockLeft, blockTopLeft := analysisBPredEdges(y, yStride, refsYAbove, refsYLeft, refsYTopLeft, block)
+ 		bestMode := vp8common.BModeCount
+ 		bestRate := 0
+@@ -256,7 +272,12 @@
+ 				return vp8enc.InterFrameMacroblockMode{}, 0, 0, 0, 0, false
+ 			}
+ 			modeRate := modeCosts[j]
+-			modeSum, modeDist := vp8enc.BPredBlockStats(src, mbRow, mbCol, block, blockPred[:], 4)
++			var modeSum, modeDist int
++			if preparedSource {
++				modeSum, modeDist = dsp.PixelStats4x4(blockSource, src.YStride, blockPred[:], 4)
++			} else {
++				modeSum, modeDist = vp8enc.BPredBlockStats(src, mbRow, mbCol, block, blockPred[:], 4)
++			}
+ 			modeCost := vp8enc.RDCost(rdMult, rdDiv, modeRate, modeDist)
+ 			if modeCost < bestCost {
+ 				bestMode = bMode
+@@ -279,7 +300,11 @@
+ 		var dct [16]int16
+ 		var qcoeff [16]int16
+ 		var dqcoeff [16]int16
+-		vp8enc.FillBPredResidual4x4(src, mbRow, mbCol, block, bestPred[:], &input)
++		if preparedSource {
++			pixel.Subtract(blockSource, src.YStride, bestPred[:], 4, input[:], 4, 4, 4)
++		} else {
++			vp8enc.FillBPredResidual4x4(src, mbRow, mbCol, block, bestPred[:], &input)
++		}
+ 		vp8enc.ForwardDCT4x4(input[:], 4, &dct)
+ 		eob := vp8enc.QuantizeDecisionBlockWithActivity(fastQuant, &dct, quantY1, zbinOverQuant, actZbinAdj, &qcoeff, &dqcoeff)
+ 		recon := y[((block&12)>>2)*4*yStride+(block&3)*4:]

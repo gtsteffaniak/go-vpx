@@ -1,0 +1,16 @@
+{
+  "parent": "9cdd3b7f0c15ed5ea49bd81b8b24ac5026231f8a",
+  "hardware": "Apple M4 Max / Darwin arm64",
+  "Go": "go1.27.2 SIMD",
+  "PGO": "off",
+  "CGO_ENABLED": 1,
+  "GOMAXPROCS": 1,
+  "source_sha256": "c1e1edb7484397d83a782259e81c879cdda67bd62caa41b909e048e04e25acea",
+  "binaries_sha256": {
+    "base-whole": "7dc6b1fa644908f9890d027e72a8de954633b2c82e71c28c10fcbf0817488d90",
+    "candidate-whole": "d4e5354079b3ab54bf832ed9d0c08dc4978df97b8f61625e1f405d23f1fe3876",
+    "base.test": "469d2a2486e5c13d2e2732ecea82693e0274e3bf17c9cb309ccd83fe24cf5e48",
+    "candidate.test": "f4a0e38418aa159b57e6efc0473fcd6f435e2b3ac0e475994b6ffac4cbb52dda"
+  },
+  "correctness": "Project-wrapper test -pgo=off . -run ^Test(VP8Algorithm2|VP8Algorithm2ClampedEdges|VP8Algorithm2Stream|MLCacheStreamNative)$ -count=1 PASS; 96 VP8 +72 ML. No new math/unsafe."
+}
