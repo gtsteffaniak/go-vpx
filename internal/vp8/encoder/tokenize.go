@@ -3,6 +3,7 @@ package encoder
 import (
 	"github.com/thesyncim/govpx/internal/vp8/common"
 	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"unsafe"
 )
 
 // Ported from libvpx v1.16.0 vp8/encoder/tokenize.c coefficient token
@@ -315,6 +316,48 @@ func ResetTokenContextPlanes(above *TokenContextPlanes, left *TokenContextPlanes
 // WriteCoefficientMacroblockTokens. Used by mode-decision to keep RD scoring
 // in step with libvpx's above_context / left_context plumbing across MBs.
 func UpdateTokenContextPlanesFromCoefficients(above *TokenContextPlanes, left *TokenContextPlanes, is4x4 bool, coeffs *MacroblockCoefficients) {
+	// Independent planes permit dropping transient context writes. The original walk handles every alias.
+	if above != nil && left != nil && coeffs != nil && above != left {
+		cp := uintptr(unsafe.Pointer(coeffs))
+		ap := uintptr(unsafe.Pointer(above))
+		lp := uintptr(unsafe.Pointer(left))
+		cn := unsafe.Sizeof(*coeffs)
+		an := unsafe.Sizeof(*above)
+		disjoint := func(a, b, na, nb uintptr) bool {
+			if a <= b {
+				return b-a >= na
+			}
+			return a-b >= nb
+		}
+		if disjoint(cp, ap, cn, an) && disjoint(cp, lp, cn, an) && disjoint(ap, lp, an, an) {
+			skip := uint8(0)
+			if !is4x4 {
+				skip = 1
+				v := uint8(0)
+				if coeffs.EOB[24] > 0 {
+					v = 1
+				}
+				above.Y2 = v
+				left.Y2 = v
+			}
+			flag := func(i int, s uint8) uint8 {
+				if coeffs.EOB[i] > s {
+					return 1
+				}
+				return 0
+			}
+			for i := range 4 {
+				above.Y1[i] = flag(12+i, skip)
+				left.Y1[i] = flag(i*4+3, skip)
+			}
+			above.U = [2]uint8{flag(18, 0), flag(19, 0)}
+			left.U = [2]uint8{flag(17, 0), flag(19, 0)}
+			above.V = [2]uint8{flag(22, 0), flag(23, 0)}
+			left.V = [2]uint8{flag(21, 0), flag(23, 0)}
+			return
+		}
+	}
+
 	if above == nil || left == nil || coeffs == nil {
 		return
 	}
