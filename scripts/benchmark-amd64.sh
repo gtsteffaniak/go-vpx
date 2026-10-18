@@ -102,6 +102,16 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 	done
 	printf '%s\n' 'GOMAXPROCS=1 PGO=off rounds=6 kernel-benchtime=150ms'
 	sha256sum "$root/scripts/capture-stats-codegen.py"
+	sha256sum "$root/internal/vp8/encoder/token_zero_y1_arm64.go"
+	sha256sum "$root/internal/vp8/encoder/token_zero_y1_other.go"
+	sha256sum "$root/internal/vp8/encoder/token_zero_y1_alias_acceptance_arm64_test.go"
+	sha256sum "$root/internal/vp8/encoder/token_zero_y1_private_test.go"
+	sha256sum "$root/internal/pixel/loopfilter_rowtail_native_test.go"
+	sha256sum "$root/internal/pixel/loopfilter_columns_wide20_arm64.go"
+	sha256sum "$root/internal/pixel/loopfilter_columns_reuse_arm64_test.go"
+	sha256sum "$root/internal/vp8/dsp/loopfilter_macro_axis_native_test.go"
+	sha256sum "$root/internal/pixel/quantize_fp_packets_test.go"
+	sha256sum "$root/internal/pixel/fp32_optional_arm_native_test.go"
 	sha256sum "$root/internal/pixel/stats_odd_row_frozen_test.go"
 	sha256sum "$root/internal/pixel/stats_odd_row_state_test.go"
 	sha256sum "$root/internal/vp8/encoder/probability_tokens.go"
@@ -259,6 +269,11 @@ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBac
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/dsp -run '^TestVariance' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/encoder -run '^TestDenoiser' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/encoder -run '^TestDenseToken' -count=1 -v
+	# Current-only zero-Y1 full-state oracle; AMD declines to the original scalar walk.
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/encoder -run '^TestTokenZeroY1' -count=1 -v
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/vp8/encoder -run '^TestTokenZeroY1' -count=1 -v
+	GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off ./internal/vp8/encoder -run '^TestTokenZeroY1' -count=1 -v
+	GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/vp8/encoder -run '^TestTokenZeroY1' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/vp8/encoder -run '^TestDenseToken' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./ ./internal/vp8/dsp -run '^TestCopy(8|16)RowsPublicState$' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./ ./internal/vp8/dsp -run '^TestCopy(8|16)RowsPublicState$' -count=1 -v
@@ -347,12 +362,12 @@ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBac
 # FP32 tests require actual features; unsupported selected tests explicitly skip.
 # No fake capability or selected-AVX512 claim from fallback runs.
 {
- GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestFP32' -count=1 -v
- GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestFP32' -count=1 -v
- GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestFP32' -count=1 -v
- GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestFP32' -count=1 -v
- GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestFP32' -count=1 -v
- GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestFP32' -count=1 -v
+ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^Test(FP32|FPPacket)' -count=1 -v
+ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^Test(FP32|FPPacket)' -count=1 -v
+ GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^Test(FP32|FPPacket)' -count=1 -v
+ GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^Test(FP32|FPPacket)' -count=1 -v
+ GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^Test(FP32|FPPacket)' -count=1 -v
+ GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^Test(FP32|FPPacket)' -count=1 -v
 } >> "$output_dir/fp16-validation.txt" 2>&1
 
 if [ -n "$previous_dir" ]; then

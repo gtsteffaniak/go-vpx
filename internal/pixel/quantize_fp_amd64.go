@@ -31,19 +31,30 @@ func quantizeFPBlockSIMD(coeff, iscan, qcoeff, dqcoeff []int16, n int, r, q, d [
 			vr, vq, vd := archsimd.BroadcastInt16x16(r[1]).SetLo(archsimd.BroadcastInt16x8(r[1]).SetElem(0, r[0])), archsimd.BroadcastInt16x16(q[1]).SetLo(archsimd.BroadcastInt16x8(q[1]).SetElem(0, q[0])), archsimd.BroadcastInt16x16(d[1]).SetLo(archsimd.BroadcastInt16x8(d[1]).SetElem(0, d[0]))
 			c := archsimd.LoadInt16x16Array((*[16]int16)(unsafe.Add(cp, uintptr(i)*2)))
 			a := c.Abs().ToBits().Add(vr.ToBits()).Min(max16).BitsToInt16()
-			magnitude := a.MulHigh(vq).Masked(a.GreaterEqual(vd))
-			sign := c.ShiftAllRight(15)
-			t := magnitude.Xor(sign).Sub(sign)
-			if qcoeff != nil {
-				t.StoreArray((*[16]int16)(unsafe.Add(qp, uintptr(i)*2)))
-			}
-			t.Mul(vd).StoreArray((*[16]int16)(unsafe.Add(dp, uintptr(i)*2)))
-			last = last.Max(archsimd.LoadInt16x16Array((*[16]int16)(unsafe.Add(ip, uintptr(i)*2))).Masked(t.NotEqual(zero)))
-			if classes != nil {
-				lo := fpClassIndices(magnitude.GetLo().Min(eleven))
-				hi := fpClassIndices(magnitude.GetHi().Min(eleven))
-				*(*uint64)(unsafe.Add(clp, uintptr(i))) = permute16(lut, lo).ReshapeToUint64s().GetElem(0)
-				*(*uint64)(unsafe.Add(clp, uintptr(i+8))) = permute16(lut, hi).ReshapeToUint64s().GetElem(0)
+			below := vd.Greater(a)
+			if below.ToInt16x16().ToBits().ReshapeToUint8s().Equal(archsimd.Uint8x32{}).ToBits() == 0 {
+				if qcoeff != nil {
+					zero.StoreArray((*[16]int16)(unsafe.Add(qp, uintptr(i)*2)))
+				}
+				zero.StoreArray((*[16]int16)(unsafe.Add(dp, uintptr(i)*2)))
+				if classes != nil {
+					archsimd.Uint8x16{}.StoreArray((*[16]byte)(unsafe.Add(clp, uintptr(i))))
+				}
+			} else {
+				magnitude := a.MulHigh(vq).ToBits().AndNot(below.ToInt16x16().ToBits()).BitsToInt16()
+				sign := c.ShiftAllRight(15)
+				t := magnitude.Xor(sign).Sub(sign)
+				if qcoeff != nil {
+					t.StoreArray((*[16]int16)(unsafe.Add(qp, uintptr(i)*2)))
+				}
+				t.Mul(vd).StoreArray((*[16]int16)(unsafe.Add(dp, uintptr(i)*2)))
+				last = last.Max(archsimd.LoadInt16x16Array((*[16]int16)(unsafe.Add(ip, uintptr(i)*2))).Masked(t.NotEqual(zero)))
+				if classes != nil {
+					lo := fpClassIndices(magnitude.GetLo().Min(eleven))
+					hi := fpClassIndices(magnitude.GetHi().Min(eleven))
+					*(*uint64)(unsafe.Add(clp, uintptr(i))) = permute16(lut, lo).ReshapeToUint64s().GetElem(0)
+					*(*uint64)(unsafe.Add(clp, uintptr(i+8))) = permute16(lut, hi).ReshapeToUint64s().GetElem(0)
+				}
 			}
 		}
 		acR, acQ, acD := archsimd.BroadcastInt16x16(r[1]), archsimd.BroadcastInt16x16(q[1]), archsimd.BroadcastInt16x16(d[1])
@@ -53,7 +64,18 @@ func quantizeFPBlockSIMD(coeff, iscan, qcoeff, dqcoeff []int16, n int, r, q, d [
 				vr, vq, vd := acR, acQ, acD
 				c := archsimd.LoadInt16x16Array((*[16]int16)(unsafe.Add(cp, uintptr(i)*2)))
 				a := c.Abs().ToBits().Add(vr.ToBits()).Min(max16).BitsToInt16()
-				magnitude := a.MulHigh(vq).Masked(a.GreaterEqual(vd))
+				below := vd.Greater(a)
+				if below.ToInt16x16().ToBits().ReshapeToUint8s().Equal(archsimd.Uint8x32{}).ToBits() == 0 {
+					if qcoeff != nil {
+						zero.StoreArray((*[16]int16)(unsafe.Add(qp, uintptr(i)*2)))
+					}
+					zero.StoreArray((*[16]int16)(unsafe.Add(dp, uintptr(i)*2)))
+					if classes != nil {
+						archsimd.Uint8x16{}.StoreArray((*[16]byte)(unsafe.Add(clp, uintptr(i))))
+					}
+					continue
+				}
+				magnitude := a.MulHigh(vq).ToBits().AndNot(below.ToInt16x16().ToBits()).BitsToInt16()
 				sign := c.ShiftAllRight(15)
 				t := magnitude.Xor(sign).Sub(sign)
 				if qcoeff != nil {
@@ -89,7 +111,20 @@ func quantizeFPBlockSIMD(coeff, iscan, qcoeff, dqcoeff []int16, n int, r, q, d [
 		// Unsigned magnitude handles -32768; adding a nonnegative int16 round
 		// fits uint16 exactly, then clips to the scalar signed-int16 bound.
 		a := c.Abs().ToBits().Add(vr.ToBits()).Min(max16).BitsToInt16()
-		t := fpMulHigh16(a, vq).Masked(a.GreaterEqual(vd))
+		below := vd.Greater(a)
+		// libvpx quantize_fp skips arithmetic and scan work for zero packets.
+		// Use the exact public threshold, rather than its table-specific shortcut.
+		if below.ToInt16x8().ToBits().ReshapeToUint8s().Equal(archsimd.Uint8x16{}).ToBits() == 0 {
+			if qcoeff != nil {
+				zero.Store(qcoeff[i:])
+			}
+			zero.Store(dqcoeff[i:])
+			if classes != nil {
+				storeBytes8(classes[i:], archsimd.Uint8x16{})
+			}
+			continue
+		}
+		t := fpMulHigh16(a, vq).ToBits().AndNot(below.ToInt16x8().ToBits()).BitsToInt16()
 		magnitude := t
 		t = zero.Sub(t).IfElse(c.Less(zero), t)
 		if qcoeff != nil {

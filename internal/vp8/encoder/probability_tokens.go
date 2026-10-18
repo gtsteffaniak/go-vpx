@@ -366,27 +366,30 @@ func countCoefficientMacroblockTokensAndRecords(is4x4 bool, above *TokenContextP
 		blockType = 3
 	}
 
-	for block := range 16 {
-		eob := coeffs.BlockEOB(block, skipDC)
-		a := block & 3
-		l := (block & 0x0c) >> 2
-		ctx := int(above.Y1[a] + left.Y1[l])
-		if ctx >= tables.PrevCoefContexts {
-			return ErrInvalidPacketConfig
+	if !zeroY1TokenRecords(above, left, coeffs, counts, records, blockType, skipDC) {
+		for block := range 16 {
+			eob := coeffs.BlockEOB(block, skipDC)
+			a := block & 3
+			l := (block & 0x0c) >> 2
+			ctx := int(above.Y1[a] + left.Y1[l])
+			if ctx >= tables.PrevCoefContexts {
+				return ErrInvalidPacketConfig
+			}
+			if eob <= skipDC {
+				// Macroblock entry and context checks already prove these arguments.
+				(*counts)[blockType][skipDC][ctx][tables.DCTEOBToken]++
+				records.appendTokenUnchecked(blockType, skipDC, ctx, tables.DCTEOBToken, 0, 0, false)
+			} else if err := countBlockCoefficientTokensAndRecords(counts, records, blockType, ctx, skipDC, &coeffs.QCoeff[block], eob); err != nil {
+				return err
+			}
+			hasCoeffs := uint8(0)
+			if eob > skipDC {
+				hasCoeffs = 1
+			}
+			above.Y1[a] = hasCoeffs
+			left.Y1[l] = hasCoeffs
 		}
-		if eob <= skipDC {
-			// Macroblock entry and context checks already prove these arguments.
-			(*counts)[blockType][skipDC][ctx][tables.DCTEOBToken]++
-			records.appendTokenUnchecked(blockType, skipDC, ctx, tables.DCTEOBToken, 0, 0, false)
-		} else if err := countBlockCoefficientTokensAndRecords(counts, records, blockType, ctx, skipDC, &coeffs.QCoeff[block], eob); err != nil {
-			return err
-		}
-		hasCoeffs := uint8(0)
-		if eob > skipDC {
-			hasCoeffs = 1
-		}
-		above.Y1[a] = hasCoeffs
-		left.Y1[l] = hasCoeffs
+
 	}
 
 	for block := 16; block < 24; block++ {

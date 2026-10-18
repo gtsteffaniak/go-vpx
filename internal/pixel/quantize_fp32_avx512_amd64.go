@@ -30,22 +30,44 @@ func quantizeFPBlock32AVX512(coeff, iscan, qcoeff, dqcoeff []int16, n int, r, q,
 		vd := archsimd.BroadcastInt16x32(d[1]).SetLo(archsimd.BroadcastInt16x16(d[1]).SetLo(archsimd.BroadcastInt16x8(d[1]).SetElem(0, d[0])))
 		c := archsimd.LoadInt16x32Array((*[32]int16)(unsafe.Add(cp, uintptr(i)*2)))
 		a := c.Abs().ToBits().Add(vr.ToBits()).Min(max16).BitsToInt16()
-		magnitude := a.MulHigh(vq).Masked(a.GreaterEqual(vd))
-		t := zero.Sub(magnitude).IfElse(c.Less(zero), magnitude)
-		if qcoeff != nil {
-			t.StoreArray((*[32]int16)(unsafe.Add(qp, uintptr(i)*2)))
-		}
-		t.Mul(vd).StoreArray((*[32]int16)(unsafe.Add(dp, uintptr(i)*2)))
-		last = last.Max(archsimd.LoadInt16x32Array((*[32]int16)(unsafe.Add(ip, uintptr(i)*2))).Masked(t.NotEqual(zero)))
-		if classes != nil {
-			lut.Permute(magnitude.Min(eleven).ToBits()).TruncToUint8().StoreArray((*[32]byte)(unsafe.Add(clp, uintptr(i))))
+		active := a.GreaterEqual(vd)
+		if active.ToBits() == 0 {
+			if qcoeff != nil {
+				zero.StoreArray((*[32]int16)(unsafe.Add(qp, uintptr(i)*2)))
+			}
+			zero.StoreArray((*[32]int16)(unsafe.Add(dp, uintptr(i)*2)))
+			if classes != nil {
+				archsimd.Uint8x32{}.StoreArray((*[32]byte)(unsafe.Add(clp, uintptr(i))))
+			}
+		} else {
+			magnitude := a.MulHigh(vq).Masked(active)
+			t := zero.Sub(magnitude).IfElse(c.Less(zero), magnitude)
+			if qcoeff != nil {
+				t.StoreArray((*[32]int16)(unsafe.Add(qp, uintptr(i)*2)))
+			}
+			t.Mul(vd).StoreArray((*[32]int16)(unsafe.Add(dp, uintptr(i)*2)))
+			last = last.Max(archsimd.LoadInt16x32Array((*[32]int16)(unsafe.Add(ip, uintptr(i)*2))).Masked(t.NotEqual(zero)))
+			if classes != nil {
+				lut.Permute(magnitude.Min(eleven).ToBits()).TruncToUint8().StoreArray((*[32]byte)(unsafe.Add(clp, uintptr(i))))
+			}
 		}
 	}
 	acR, acQ, acD := archsimd.BroadcastInt16x32(r[1]), archsimd.BroadcastInt16x32(q[1]), archsimd.BroadcastInt16x32(d[1])
 	for i := 32; i < n; i += 32 {
 		c := archsimd.LoadInt16x32Array((*[32]int16)(unsafe.Add(cp, uintptr(i)*2)))
 		a := c.Abs().ToBits().Add(acR.ToBits()).Min(max16).BitsToInt16()
-		magnitude := a.MulHigh(acQ).Masked(a.GreaterEqual(acD))
+		active := a.GreaterEqual(acD)
+		if active.ToBits() == 0 {
+			if qcoeff != nil {
+				zero.StoreArray((*[32]int16)(unsafe.Add(qp, uintptr(i)*2)))
+			}
+			zero.StoreArray((*[32]int16)(unsafe.Add(dp, uintptr(i)*2)))
+			if classes != nil {
+				archsimd.Uint8x32{}.StoreArray((*[32]byte)(unsafe.Add(clp, uintptr(i))))
+			}
+			continue
+		}
+		magnitude := a.MulHigh(acQ).Masked(active)
 		t := zero.Sub(magnitude).IfElse(c.Less(zero), magnitude)
 		if qcoeff != nil {
 			t.StoreArray((*[32]int16)(unsafe.Add(qp, uintptr(i)*2)))

@@ -233,12 +233,12 @@ if [ -f "$scratch/head/$fp_fixture" ] && [ -f "$scratch/head/$stats_fixture" ] &
  # Selected ordinary/race and genuinely disabled fallback states execute on
  # this SAME runner. Only actual SDK AVX512 can enable selected32 assertions.
  {
-  GOVPX_REQUIRE_SIMD=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off ./internal/pixel -run '^Test(FP16|FP32|.*Stats)' -count=1 -v
-  GOVPX_REQUIRE_SIMD=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^Test(FP16|FP32|.*Stats)' -count=1 -v
-  GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off ./internal/pixel -run '^Test(FP16|FP32|.*Stats)' -count=1 -v
-  GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^Test(FP16|FP32|.*Stats)' -count=1 -v
-  GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP16_AVX_OFF=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off ./internal/pixel -run '^Test(FP16|FP32|.*Stats)' -count=1 -v
-  GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP16_AVX_OFF=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^Test(FP16|FP32|.*Stats)' -count=1 -v
+  GOVPX_REQUIRE_SIMD=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off ./internal/pixel -run '^Test(FP16|FP32|FPPacket|.*Stats)' -count=1 -v
+  GOVPX_REQUIRE_SIMD=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^Test(FP16|FP32|FPPacket|.*Stats)' -count=1 -v
+  GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off ./internal/pixel -run '^Test(FP16|FP32|FPPacket|.*Stats)' -count=1 -v
+  GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^Test(FP16|FP32|FPPacket|.*Stats)' -count=1 -v
+  GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP16_AVX_OFF=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off ./internal/pixel -run '^Test(FP16|FP32|FPPacket|.*Stats)' -count=1 -v
+  GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP16_AVX_OFF=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^Test(FP16|FP32|FPPacket|.*Stats)' -count=1 -v
  } > "$output_dir/pixel-optional-validation.txt" 2>&1
  for variant in head base; do
   scripts/go.sh -C "$scratch/$variant" test -mod=readonly -pgo=off -c -o "$scratch/$variant-pixel.test" ./internal/pixel > "$output_dir/pixel-$variant-build.txt" 2>&1
