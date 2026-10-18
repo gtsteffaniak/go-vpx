@@ -96,7 +96,11 @@ def main():
                 source = scratch / variant
                 source.mkdir()
                 # No repository evidence archives or unrelated files are needed by these pure-Go targets.
-                archive = subprocess.check_output(["git", "archive", commit, "--", "*.go", "go.mod", "go.sum"], cwd=root)
+                archive_paths = ["*.go", "go.mod"]
+                if subprocess.run(["git", "cat-file", "-e", commit + ":go.sum"], cwd=root,
+                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0:
+                    archive_paths.append("go.sum")
+                archive = subprocess.check_output(["git", "archive", commit, "--", *archive_paths], cwd=root)
                 with tarfile.open(fileobj=io.BytesIO(archive)) as tar:
                     assert all(not Path(m.name).is_absolute() and ".." not in Path(m.name).parts for m in tar.getmembers())
                     tar.extractall(source)
