@@ -22,9 +22,22 @@ func forwardDCT4BatchGo(input, output []int16, count int) int {
 		in, out := input[i*16:], output[i*16:]
 		r0, r1, r2, r3 := archsimd.LoadInt16x8(in), archsimd.LoadInt16x8(in[8:]), archsimd.LoadInt16x8(in[16:]), archsimd.LoadInt16x8(in[24:])
 		magnitude := r0.Abs().ToBits().Max(r1.Abs().ToBits()).Max(r2.Abs().ToBits()).Max(r3.Abs().ToBits())
-		if magnitude.ReduceMax() > 255 {
-			forwardDCT4x4Scalar(in, 4, (*[16]int16)(out))
-			forwardDCT4x4Scalar(in[16:], 4, (*[16]int16)(out[16:]))
+		peak := uint32(magnitude.ReduceMax())
+		// One unsigned range check admits only nonzero residual packets.
+		// Zero and out-of-range packets share the uncommon branch.
+		if peak-1 >= 255 {
+			if peak == 0 {
+				// libvpx v1.16.0 rounding leaves raster coefficient 1 equal to 1.
+				v := archsimd.Int16x8{}.SetElem(1, 1)
+				z := archsimd.Int16x8{}
+				v.Store(out)
+				z.Store(out[8:])
+				v.Store(out[16:])
+				z.Store(out[24:])
+			} else {
+				forwardDCT4x4Scalar(in, 4, (*[16]int16)(out))
+				forwardDCT4x4Scalar(in[16:], 4, (*[16]int16)(out[16:]))
+			}
 			continue
 		}
 		// Deinterleave the four input columns across eight rows (two blocks).

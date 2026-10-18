@@ -1162,9 +1162,9 @@ func BlockYrd(src []byte, srcStride int, srcX, srcY int,
 			// libvpx: vp9_pickmode.c:796-813 — Hadamard dispatch by tx_size.
 			switch txSize {
 			case common.Tx16x16:
-				hadamard16x16Into(srcDiff[srcOff:], bw, coeffSlot)
+				hadamardBlockYrd(srcDiff[srcOff:], bw, coeffSlot, 16)
 			case common.Tx8x8:
-				hadamard8x8Into(srcDiff[srcOff:], bw, coeffSlot)
+				hadamardBlockYrd(srcDiff[srcOff:], bw, coeffSlot, 8)
 			default:
 				// libvpx: vp9_pickmode.c:809 — x->fwd_txfm4x4 is the forward
 				// 4x4 DCT (vpx_fdct4x4). govpx's ForwardDCT4x4Into

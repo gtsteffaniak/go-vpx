@@ -55,7 +55,10 @@ def main():
     parser.add_argument("--bench", help="Custom benchmark regex; case inventory is inferred from parent")
     parser.add_argument("--test", help="Ordinary oracle regex (default: packet oracles in FP mode)")
     parser.add_argument("--package", default="./internal/pixel", help="Package for --bench/--test overrides")
+    parser.add_argument("--fixture", action="append", default=[f.strip() for f in os.environ.get("GOVPX_QUICK_FIXTURES", "").splitlines() if f.strip()], help="Shared relative _test.go path; repeatable")
     args = parser.parse_args()
+    for f in args.fixture:
+        assert f.endswith("_test.go") and not Path(f).is_absolute() and ".." not in Path(f).parts and ".git" not in Path(f).parts and "\\" not in f, "fixture must be a relative _test.go path without traversal"
     assert all(re.fullmatch(r"[0-9a-f]{40}", c) for c in (args.head_sha, args.base_sha)), "use exact commit SHAs"
     assert platform.system() == "Linux" and platform.machine() == "x86_64", "native Linux/x64 required"
     assert os.environ.get("GOVPX_NATIVE_FP_QUICK") == "1", "explicit native timing opt-in required"
@@ -105,7 +108,9 @@ def main():
                     assert all(not Path(m.name).is_absolute() and ".." not in Path(m.name).parts for m in tar.getmembers())
                     tar.extractall(source)
                 sources[variant] = source
-            fixtures = {f: (sources["current"] / f).read_bytes() for f in FIXTURES}
+            fixture_paths = dict.fromkeys((*FIXTURES, *args.fixture))
+            assert all((sources["current"] / f).is_file() and not (sources["current"] / f).is_symlink() for f in fixture_paths), "fixture must be a regular tracked Go test file"
+            fixtures = {f: (sources["current"] / f).read_bytes() for f in fixture_paths}
             binding = {"commits": commits, "PGO": "off", "CGO_ENABLED": 1, "GOMAXPROCS": 1,
                        "driver_sha256": sha(Path(__file__).read_bytes()), "shared_fixture_sha256": {f: sha(b) for f, b in fixtures.items()},
                        "scope": "Preliminary two-round feedback; no race/profiles/trace/codegen or full source audit.", "variants": {}}
@@ -117,9 +122,12 @@ def main():
             bins = {}
             phase = "build-and-ordinary-oracles"
             for variant, source in sources.items():
-                originals = {f: sha((source / f).read_bytes()) if (source / f).exists() else None for f in FIXTURES}
+                assert all(not (source / f).is_symlink() for f in fixtures), "reference fixture cannot be a symlink"
+                originals = {f: sha((source / f).read_bytes()) if (source / f).exists() else None for f in fixtures}
                 for f, data in fixtures.items():
+                    (source / f).parent.mkdir(parents=True, exist_ok=True)
                     (source / f).write_bytes(data)
+                    assert (source / f).read_bytes() == data
                 bins[variant] = {}
                 packages = {"pixel": "./internal/pixel", **{k: pkg for k, pkg, _ in plan}, "whole": "./cmd/govpx-bench"}
                 for kind, package in packages.items():

@@ -30,7 +30,19 @@ func forwardDCT4BatchGo(input, output []int16, count int) int {
 		in, out := input[i*16:], output[i*16:]
 		r0, r1, r2, r3 := archsimd.LoadInt16x8(in), archsimd.LoadInt16x8(in[8:]), archsimd.LoadInt16x8(in[16:]), archsimd.LoadInt16x8(in[24:])
 		magnitude := r0.Abs().ToBits().Max(r1.Abs().ToBits()).Max(r2.Abs().ToBits()).Max(r3.Abs().ToBits())
-		if (magnitude.ReshapeToUint64s().GetElem(0)|magnitude.ReshapeToUint64s().GetElem(1))&0xff00ff00ff00ff00 != 0 {
+		peak := (magnitude.ReshapeToUint64s().GetElem(0) | magnitude.ReshapeToUint64s().GetElem(1))
+		if peak == 0 {
+			// The pinned libvpx integer transform maps zero residual to
+			// coefficient 1 at raster index 1 because of its rounding biases.
+			v := archsimd.Int16x8{}.SetElem(1, 1)
+			z := archsimd.Int16x8{}
+			v.Store(out)
+			z.Store(out[8:])
+			v.Store(out[16:])
+			z.Store(out[24:])
+			continue
+		}
+		if peak&0xff00ff00ff00ff00 != 0 {
 			forwardDCT4x4Scalar(in, 4, (*[16]int16)(out))
 			forwardDCT4x4Scalar(in[16:], 4, (*[16]int16)(out[16:]))
 			continue
