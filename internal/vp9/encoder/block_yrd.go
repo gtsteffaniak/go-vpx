@@ -132,11 +132,18 @@ func ModelRDFromVarLapndz(varN uint32, nLog2 uint, qstep uint32) (rate int, dist
 	if varN == 0 {
 		return 0, 0
 	}
+	// At xsq=0 the libvpx table is exactly rQ10=65536, dQ10=0.
+	// Keep the general arithmetic for unusual shifts outside block sizes.
+	if qstep == 0 && nLog2 <= 12 {
+		return 32768 << nLog2, 0
+	}
 	xsqQ1064 := ((uint64(qstep) * uint64(qstep)) << (nLog2 + 10)) + uint64(varN>>1)
 	xsqQ1064 /= uint64(varN)
 	var xsqQ10 int
-	if xsqQ1064 > maxXsqQ10 {
-		xsqQ10 = maxXsqQ10
+	if xsqQ1064 >= maxXsqQ10 {
+		// libvpx v1.16.0 vp9_rd.c tables: model_rd_norm(245727)
+		// interpolates buckets102/103 to exactly rate0,dist1023.
+		return 0, (int64(varN)*1023 + 512) >> 10
 	} else {
 		xsqQ10 = int(xsqQ1064)
 	}
@@ -1066,9 +1073,10 @@ func BlockYrd(src []byte, srcStride int, srcX, srcY int,
 	if (srcY+bh)*srcStride > len(src) || (dstY+bh)*dstStride > len(dst) {
 		return res
 	}
-	if _, ok := vp9dsp.SubtractBlockNonZero(src, srcY*srcStride+srcX, srcStride,
-		dst, dstY*dstStride+dstX, dstStride,
-		srcDiff, 0, bw, bw, bh); !ok {
+	nonzero, subtractOK := vp9dsp.SubtractBlockNonZero(src, srcY*srcStride+srcX, srcStride,
+		dst, dstY*dstStride+dstX, dstStride, srcDiff, 0, bw, bw, bh)
+	if !subtractOK {
+		nonzero = true // No extra reduction on the scalar fallback.
 		for y := range bh {
 			srcRow := src[(srcY+y)*srcStride+srcX : (srcY+y)*srcStride+srcX+bw]
 			dstRow := dst[(dstY+y)*dstStride+dstX : (dstY+y)*dstStride+dstX+bw]
@@ -1118,6 +1126,15 @@ func BlockYrd(src []byte, srcStride int, srcX, srcY int,
 	// for TX_4X4 it would be 256 × 16 × 3 + 4096 = 16384 — all fits.
 	if len(residueScratch) < srcDiffLen+3*nCoeffs*maxTxUnits {
 		return res
+	}
+	// BlockYrd consumes only zero/nonzero, sum(abs(q)), and squared error.
+	// The private scoring path avoids materializing q/dq and exact scan EOBs.
+	// Retain the original scratch-size contract before selecting it.
+	if maxTxUnits <= blockYrdMaxTxUnits && bw%txDim == 0 && bh%txDim == 0 {
+		if score, ok := blockYrdScore(srcDiff, bw, bh, txSize, roundFP, quantFP,
+			dequant, sseIn, residueScratch[srcDiffLen:srcDiffLen+nCoeffs], nonzero); ok {
+			return score
+		}
 	}
 	perTxBase := srcDiffLen
 	coeffsAll := residueScratch[perTxBase : perTxBase+nCoeffs*maxTxUnits]

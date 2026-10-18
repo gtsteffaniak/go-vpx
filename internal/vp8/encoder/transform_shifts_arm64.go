@@ -32,3 +32,5 @@ func vp8Right16(v archsimd.Int32x4) archsimd.Int32x4 { return v.Shift(vp8ShiftRi
 var vp8ShiftSign = archsimd.BroadcastInt32x4(-31)
 
 func vp8Sign(v archsimd.Int32x4) archsimd.Int32x4 { return v.Shift(vp8ShiftSign) }
+
+func vp8Zero4(v archsimd.Int32x4) bool { return v.ToBits().ReduceMax() == 0 }
