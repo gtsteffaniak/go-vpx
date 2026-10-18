@@ -288,6 +288,11 @@ func (ctx *loopFilterPickContext) pickFastNoStats(seedLevel uint8, minLevel int)
 	level := vp8enc.ClampLoopFilterPickLevel(int(seedLevel), minLevel, maxLevel)
 	bestLevel := level
 	bestErr := ctx.cachedPartialLumaSSE(level, &ssErr, &ssSet)
+	// SSE is nonnegative in this bounded frame, and ties keep the seed.
+	// Statistics/traces retain the complete trial sequence in their paths.
+	if bestErr == 0 && !traceEnabled && ctx.cols > 0 && ctx.rows > 0 && ctx.rows <= maxInt()/65025/256/ctx.cols {
+		return uint8(bestLevel), nil
+	}
 	if traceEnabled {
 		e.emitOracleLFTrial("seed", level, bestErr)
 	}
@@ -403,6 +408,16 @@ func (ctx *loopFilterPickContext) pickFullNoStats(seedLevel uint8, minLevel int)
 	bestLumaLevel := -1
 
 	bestErr := ctx.cachedFullLumaSSE(filtMid, &ssErr, &ssSet, &residentLevel)
+	// No nonnegative SSE can improve a zero-error incumbent. The seed's
+	// filtered luma is already resident and can be reused by reconstruction.
+	if bestErr == 0 && !traceEnabled && ctx.cols > 0 && ctx.rows > 0 && ctx.rows <= maxInt()/65025/256/ctx.cols {
+		if filtMid > 0 {
+			e.loopFilterPickReady = true
+			e.loopFilterPickLevel = uint8(filtMid)
+			e.loopFilterPickBest = false
+		}
+		return uint8(filtMid), nil
+	}
 	if traceEnabled {
 		e.emitOracleLFTrial("full", filtMid, bestErr)
 	}
