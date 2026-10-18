@@ -115,6 +115,9 @@ func planeMatches(a []byte, aStride int, b []byte, bStride int, width int, heigh
 	if !planeHasVisibleRows(a, aStride, width, height) || !planeHasVisibleRows(b, bStride, width, height) {
 		return false
 	}
+	if width > 0 && height > 0 && aStride == width && bStride == width {
+		return bytes.Equal(a[:width*height], b[:width*height])
+	}
 	for row := range height {
 		aRow := a[row*aStride : row*aStride+width]
 		bRow := b[row*bStride : row*bStride+width]

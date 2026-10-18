@@ -51,14 +51,22 @@ func inverse4Go(input *[16]int16, pred []byte, ps int, dst []byte, ds int, walsh
 	}
 	out0, out1, out2, out3 = pixel.Transpose4(out0, out1, out2, out3)
 	if walsh {
-		var values [16]int16
-		pixel.Store4(values[:], out0)
-		pixel.Store4(values[4:], out1)
-		pixel.Store4(values[8:], out2)
-		pixel.Store4(values[12:], out3)
-		for i, v := range values {
-			mb[i*16] = v
-		}
+		mb[0] = int16(out0.GetElem(0))
+		mb[16] = int16(out0.GetElem(1))
+		mb[32] = int16(out0.GetElem(2))
+		mb[48] = int16(out0.GetElem(3))
+		mb[64] = int16(out1.GetElem(0))
+		mb[80] = int16(out1.GetElem(1))
+		mb[96] = int16(out1.GetElem(2))
+		mb[112] = int16(out1.GetElem(3))
+		mb[128] = int16(out2.GetElem(0))
+		mb[144] = int16(out2.GetElem(1))
+		mb[160] = int16(out2.GetElem(2))
+		mb[176] = int16(out2.GetElem(3))
+		mb[192] = int16(out3.GetElem(0))
+		mb[208] = int16(out3.GetElem(1))
+		mb[224] = int16(out3.GetElem(2))
+		mb[240] = int16(out3.GetElem(3))
 	} else {
 		pixel.StorePixels4(dst, out0.Add(pixel.LoadPixels4(pred)))
 		pixel.StorePixels4(dst[ds:], out1.Add(pixel.LoadPixels4(pred[ps:])))

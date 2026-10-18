@@ -105,9 +105,9 @@ func pickFastWholeBlockIntraYModeWithRDConstants(src vp8enc.SourceImage, qIndex 
 	bestMode := vp8common.DCPred
 	bestRate := 0
 	bestRD := 0
+	refs := vp8dec.BuildIntraPredictorRefs(pred, mbRow, mbCol, &scratch.Refs)
 	for i, yMode := range wholeBlockIntraYModeCandidates {
-		mode := vp8dec.MacroblockMode{RefFrame: vp8common.IntraFrame, Mode: yMode, UVMode: vp8common.DCPred}
-		if !predictAnalysisMacroblock(pred, mbRow, mbCol, &mode, scratch) {
+		if !vp8dec.PredictIntraY16x16(yMode, pred.Y[mbRow*16*pred.YStride+mbCol*16:], pred.YStride, refs.YAbove, refs.YLeft, refs.YTopLeft, refs.UpAvailable, refs.LeftAvailable) {
 			return 0, 0, 0, false
 		}
 		dist, _ := vp8enc.MacroblockLumaVarianceSSE(src, pred, mbRow, mbCol)
@@ -130,8 +130,9 @@ func pickFastWholeBlockIntraYModeWithRDConstants(src vp8enc.SourceImage, qIndex 
 func pickFastIntraChromaMode(src vp8enc.SourceImage, mbRow int, mbCol int, pred *vp8common.Image, scratch *vp8dec.IntraReconstructionScratch) (vp8common.MBPredictionMode, int, bool) {
 	bestMode := vp8common.DCPred
 	bestSSE := 0
+	refs := vp8dec.BuildIntraPredictorRefs(pred, mbRow, mbCol, &scratch.Refs)
 	for i, uvMode := range wholeBlockIntraUVModeCandidates {
-		if !predictAnalysisChroma(pred, mbRow, mbCol, uvMode, scratch) {
+		if !predictAnalysisChromaWithRefs(pred, mbRow, mbCol, uvMode, refs) {
 			return 0, 0, false
 		}
 		sse := vp8enc.MacroblockChromaSSE(src, pred, mbRow, mbCol)
@@ -698,6 +699,9 @@ func intraYModeRate(keyFrame bool, mode vp8common.MBPredictionMode) int {
 
 func intraYModeRateWithProbs(keyFrame bool, mode vp8common.MBPredictionMode, interProbs []uint8) int {
 	if keyFrame {
+		if int(mode) >= 0 && int(mode) < 5 {
+			return vp8StaticModeCosts.y[int(mode)]
+		}
 		return vp8enc.TreeTokenCost(vp8tables.KeyFrameYModeTree[:], vp8tables.KeyFrameYModeProbs[:], int(mode))
 	}
 	if len(interProbs) == vp8tables.YModeProbCount {
@@ -716,6 +720,9 @@ func intraUVModeRate(keyFrame bool, mode vp8common.MBPredictionMode) int {
 
 func intraUVModeRateWithProbs(keyFrame bool, mode vp8common.MBPredictionMode, interProbs []uint8) int {
 	if keyFrame {
+		if int(mode) >= 0 && int(mode) < 4 {
+			return vp8StaticModeCosts.uv[int(mode)]
+		}
 		return vp8enc.TreeTokenCost(vp8tables.UVModeTree[:], vp8tables.KeyFrameUVModeProbs[:], int(mode))
 	}
 	if len(interProbs) == vp8tables.UVModeProbCount {
@@ -730,6 +737,9 @@ func bPredModeRate(keyFrame bool, mode vp8common.BPredictionMode, above vp8commo
 
 func bPredModeRateWithProbs(keyFrame bool, mode vp8common.BPredictionMode, above vp8common.BPredictionMode, left vp8common.BPredictionMode, interProbs []uint8) int {
 	if keyFrame {
+		if int(mode) >= 0 && int(mode) < 10 && int(above) >= 0 && int(above) < 10 && int(left) >= 0 && int(left) < 10 {
+			return vp8StaticModeCosts.b[int(above)][int(left)][int(mode)]
+		}
 		return vp8enc.TreeTokenCost(vp8tables.BModeTree[:], vp8tables.KeyFrameBModeProbs[int(above)][int(left)][:], int(mode))
 	}
 	if len(interProbs) == vp8tables.BModeProbCount {

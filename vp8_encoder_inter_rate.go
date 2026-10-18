@@ -174,6 +174,18 @@ func macroblockLumaSSE(src vp8enc.SourceImage, ref *vp8common.Image, mbRow int, 
 		}
 	}
 
+	// A partial source MB needs one visible-edge extension, not a clamp
+	// and index calculation for every source/reference sample pair.
+	if src.Height > 0 && src.Width > 0 &&
+		(baseY < 0 || baseX < 0 || baseY+16 > src.Height || baseX+16 > src.Width) &&
+		refBaseY >= 0 && refBaseX >= 0 && refBaseY <= ref.CodedHeight-16 && refBaseX <= ref.CodedWidth-16 {
+		if refPtr, ok := refFullPelYPtr(ref, refBaseY, refBaseX, 16, 16); ok {
+			var scratch [256]byte
+			vp8enc.GatherClampedLumaBlock(src, baseY, baseX, 16, 16, scratch[:], 16)
+			return dsp.SSE16x16PtrFast(&scratch[0], 16, refPtr, ref.YStride)
+		}
+	}
+
 	sse := 0
 	for row := range 16 {
 		srcY := vp8enc.ClampEncodeCoord(baseY+row, src.Height)
@@ -215,6 +227,19 @@ func macroblockLumaMotionVarianceSSE(src vp8enc.SourceImage, ref *vp8common.Imag
 	if uint(baseY) <= uint(src.Height-16) && uint(baseX) <= uint(src.Width-16) {
 		if refPtr, ok := refFullPelYPtr(ref, refBaseY, refBaseX, 16, 16); ok {
 			sum, sse := dsp.VarianceBlock16x16PtrFast(&src.Y[baseY*src.YStride+baseX], src.YStride, refPtr, ref.YStride)
+			return sse - ((sum * sum) >> 8), sse
+		}
+	}
+
+	// A partial source MB needs one visible-edge extension, not a clamp
+	// and index calculation for every source/reference sample pair.
+	if src.Height > 0 && src.Width > 0 &&
+		(baseY < 0 || baseX < 0 || baseY+16 > src.Height || baseX+16 > src.Width) &&
+		refBaseY >= 0 && refBaseX >= 0 && refBaseY <= ref.CodedHeight-16 && refBaseX <= ref.CodedWidth-16 {
+		if refPtr, ok := refFullPelYPtr(ref, refBaseY, refBaseX, 16, 16); ok {
+			var scratch [256]byte
+			vp8enc.GatherClampedLumaBlock(src, baseY, baseX, 16, 16, scratch[:], 16)
+			sum, sse := dsp.VarianceBlock16x16PtrFast(&scratch[0], 16, refPtr, ref.YStride)
 			return sse - ((sum * sum) >> 8), sse
 		}
 	}

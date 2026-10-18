@@ -1,6 +1,7 @@
 package govpx
 
 import (
+	"github.com/thesyncim/govpx/internal/pixel"
 	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
 	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
 	"github.com/thesyncim/govpx/internal/vp8/dsp"
@@ -674,6 +675,11 @@ func gatherCodedClampedRefBlock(ref *vp8common.Image, baseY int, baseX int, widt
 func fillSplitMotionResidual4x4(src vp8enc.SourceImage, mbRow int, mbCol int, block int, pred *[16]byte, out *[16]int16) {
 	baseY := mbRow*16 + (block>>2)*4
 	baseX := mbCol*16 + (block&3)*4
+	if src.Width >= 4 && src.Height >= 4 && uint(baseX) <= uint(src.Width-4) && uint(baseY) <= uint(src.Height-4) {
+		pixel.Subtract(src.Y[baseY*src.YStride+baseX:], src.YStride, pred[:], 4, out[:], 4, 4, 4)
+		return
+	}
+
 	for row := range 4 {
 		srcY := vp8enc.ClampEncodeCoord(baseY+row, src.Height)
 		for col := range 4 {
