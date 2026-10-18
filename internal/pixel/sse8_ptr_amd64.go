@@ -16,22 +16,25 @@ func SSE8Ptr(src *byte, ss int, ref *byte, rs int) uint32 {
 	}
 	sp, rp := unsafe.Pointer(src), unsafe.Pointer(ref)
 	var acc archsimd.Int32x8
-	so, ro := 0, 0
-	for y := 0; y < 8; y += 4 {
+	for remaining := 8; ; {
 		{
-			a := (archsimd.Uint64x2{}).SetElem(0, *(*uint64)(unsafe.Add(sp, so+0*ss))).SetElem(1, *(*uint64)(unsafe.Add(sp, so+1*ss))).ReshapeToUint8s().ExtendToUint16().BitsToInt16()
-			b := (archsimd.Uint64x2{}).SetElem(0, *(*uint64)(unsafe.Add(rp, ro+0*rs))).SetElem(1, *(*uint64)(unsafe.Add(rp, ro+1*rs))).ReshapeToUint8s().ExtendToUint16().BitsToInt16()
+			a := (archsimd.Uint64x2{}).SetElem(0, *(*uint64)(unsafe.Add(sp, 0))).SetElem(1, *(*uint64)(unsafe.Add(sp, ss))).ReshapeToUint8s().ExtendToUint16().BitsToInt16()
+			b := (archsimd.Uint64x2{}).SetElem(0, *(*uint64)(unsafe.Add(rp, 0))).SetElem(1, *(*uint64)(unsafe.Add(rp, rs))).ReshapeToUint8s().ExtendToUint16().BitsToInt16()
 			d := a.Sub(b)
 			acc = acc.Add(d.DotProductPairs(d))
 		}
 		{
-			a := (archsimd.Uint64x2{}).SetElem(0, *(*uint64)(unsafe.Add(sp, so+2*ss))).SetElem(1, *(*uint64)(unsafe.Add(sp, so+3*ss))).ReshapeToUint8s().ExtendToUint16().BitsToInt16()
-			b := (archsimd.Uint64x2{}).SetElem(0, *(*uint64)(unsafe.Add(rp, ro+2*rs))).SetElem(1, *(*uint64)(unsafe.Add(rp, ro+3*rs))).ReshapeToUint8s().ExtendToUint16().BitsToInt16()
+			a := (archsimd.Uint64x2{}).SetElem(0, *(*uint64)(unsafe.Add(sp, 2*ss))).SetElem(1, *(*uint64)(unsafe.Add(sp, 3*ss))).ReshapeToUint8s().ExtendToUint16().BitsToInt16()
+			b := (archsimd.Uint64x2{}).SetElem(0, *(*uint64)(unsafe.Add(rp, 2*rs))).SetElem(1, *(*uint64)(unsafe.Add(rp, 3*rs))).ReshapeToUint8s().ExtendToUint16().BitsToInt16()
 			d := a.Sub(b)
 			acc = acc.Add(d.DotProductPairs(d))
 		}
-		so += 4 * ss
-		ro += 4 * rs
+		remaining -= 4
+		if remaining == 0 {
+			break
+		}
+		sp = unsafe.Add(sp, 4*ss)
+		rp = unsafe.Add(rp, 4*rs)
 	}
 	result := uint32(sum32(acc.GetLo().Add(acc.GetHi())))
 	archsimd.ClearAVXUpperBits()

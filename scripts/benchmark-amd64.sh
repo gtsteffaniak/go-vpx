@@ -86,6 +86,8 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 	sha256sum "$root/internal/vp9/encoder/quant_fp_classes_native_bench_test.go"
 	sha256sum "$root/internal/pixel/quantize_fp_simd.go"
 	sha256sum "$root/internal/pixel/quantize_fp_amd64.go"
+	sha256sum "$root/internal/pixel/fp16_guard_component_native_test.go"
+	sha256sum "$root/scripts/benchmark-fp16-guard-diagnostic.sh"
 	sha256sum "$root/internal/pixel/quantize_fp16_amd64_test.go"
 	sha256sum "$root/internal/vp9/encoder/quant_fp16_native_test.go"
 	sha256sum "$root/internal/vp8/encoder/quant_batch_native_test.go"
@@ -160,6 +162,13 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 	sha256sum "$root/internal/vp8/dsp/tmpredict_bytes_state_test.go"
 	sha256sum "$root/internal/vp8/dsp/tmpredict_bytes_native_test.go"
 	sha256sum "$root/internal/vp8/dsp/tmpredict_rows_common_state_test.go"
+	sha256sum "$root/internal/pixel/tmpredict_native_arm64.go"
+	sha256sum "$root/internal/pixel/tmpredict_native_other.go"
+	sha256sum "$root/internal/pixel/tmpredict_native_arm64_test.go"
+	sha256sum "$root/internal/pixel/tmpredict_disabled_scalar_test.go"
+	sha256sum "$root/internal/pixel/tmpredict_disabled_scalar_arm64_test.go"
+	sha256sum "$root/internal/pixel/tmpredict_disabled_scalar_amd64_test.go"
+	sha256sum "$root/internal/pixel/tmpredict_disabled_scalar_other_test.go"
 	scripts/go.sh version
 	scripts/go.sh env GOOS GOARCH GOAMD64 GOEXPERIMENT GOTOOLCHAIN GOCACHE
 	lscpu
@@ -231,6 +240,9 @@ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBac
 	# x64 validates the declining entry and exact current fallback state.
 	# The frozen state imports pixel and is deliberately never copied to old
 	# references with different malformed-window/alias contracts.
+	# This current-only prefix includes TestTMPredictDisabledScalarContract in
+	# selected/off ordinary+race runs below; its defer restores Enabled. No test
+	# is overlaid onto old references. ARM native-only tests are build-excluded here.
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/dsp -run '^TestTMPredict' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./internal/vp8/dsp -run '^TestTMPredict' -count=1 -v
 	GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/dsp -run '^TestTMPredict' -count=1 -v
@@ -333,6 +345,13 @@ for variant in $variants; do
 		scripts/go.sh tool pprof -top -cum -nodecount=40 "$output_dir/$variant-govpx-bench" "$profile" > "$output_dir/$variant-$codec-720p-profile-cumulative.txt"
 	done
 done
+
+# Diagnostic guard component only, after all unchanged codec timing/profile work.
+# One current-only binary; frozen helper candidates stay test-only. References,
+# common overlays remain unchanged. The diagnostic times the actual selected
+# trial guard and two frozen comparators; it does not select production dispatch.
+scripts/go.sh test -pgo=off -c -o "$output_dir/simd-fp16-guard.test" ./internal/pixel
+scripts/benchmark-fp16-guard-diagnostic.sh "$output_dir/simd-fp16-guard.test" "$output_dir/fp16-guard-component.txt"
 
 # Keep artifacts compact; raw text/JSON and environment details are sufficient
 # to reproduce and analyze these measurements.

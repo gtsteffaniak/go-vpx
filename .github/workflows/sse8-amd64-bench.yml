@@ -44,6 +44,11 @@ jobs:
         with:
           go-version: '1.27.2'
 
+      - name: Verify GNU native code capture tools
+        run: |
+          command -v objdump
+          objdump --version | grep '^GNU objdump'
+
       - name: Compare all 36 public SSE8 cases in six balanced rounds
         env:
           HEAD_REF: ${{ inputs.head_ref || github.event.pull_request.head.sha || github.sha }}

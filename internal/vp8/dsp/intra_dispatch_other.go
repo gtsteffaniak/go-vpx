@@ -70,7 +70,11 @@ func intraHorizontalPredict8x8(dst []byte, dstStride int, left []byte) {
 
 func intraTMPredict16x16(dst []byte, dstStride int, above []byte, left []byte, topLeft byte) {
 	if pixel.Enabled {
-		pixel.TMPredict(dst, dstStride, above, left, topLeft, 16)
+		if pixel.TMNative {
+			pixel.TMPredictNative(dst, dstStride, above, left, topLeft, 16)
+		} else {
+			pixel.TMPredict(dst, dstStride, above, left, topLeft, 16)
+		}
 	} else {
 		intraTMPredictScalar(dst, dstStride, above, left, topLeft, 16)
 	}
@@ -78,7 +82,11 @@ func intraTMPredict16x16(dst []byte, dstStride int, above []byte, left []byte, t
 
 func intraTMPredict8x8(dst []byte, dstStride int, above []byte, left []byte, topLeft byte) {
 	if pixel.Enabled {
-		pixel.TMPredict(dst, dstStride, above, left, topLeft, 8)
+		if pixel.TMNative {
+			pixel.TMPredictNative(dst, dstStride, above, left, topLeft, 8)
+		} else {
+			pixel.TMPredict(dst, dstStride, above, left, topLeft, 8)
+		}
 	} else {
 		intraTMPredictScalar(dst, dstStride, above, left, topLeft, 8)
 	}
