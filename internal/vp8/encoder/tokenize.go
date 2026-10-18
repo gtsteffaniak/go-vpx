@@ -1,6 +1,7 @@
 package encoder
 
 import (
+	"encoding/binary"
 	"github.com/thesyncim/govpx/internal/vp8/common"
 	"github.com/thesyncim/govpx/internal/vp8/tables"
 	"unsafe"
@@ -273,25 +274,11 @@ func KeyFrameMacroblockIsSkippable(mode *KeyFrameMacroblockMode, coeffs *Macrobl
 	if mode == nil || coeffs == nil {
 		return false
 	}
+	e := &coeffs.EOB
 	if mode.YMode != common.BPred {
-		for block := range 16 {
-			if coeffs.EOB[block] >= 2 {
-				return false
-			}
-		}
-		for block := 16; block < 25; block++ {
-			if coeffs.EOB[block] != 0 {
-				return false
-			}
-		}
-		return true
+		return (binary.LittleEndian.Uint64(e[:8])|binary.LittleEndian.Uint64(e[8:16]))&0xfefefefefefefefe == 0 && binary.LittleEndian.Uint64(e[16:24]) == 0 && e[24] == 0
 	}
-	for block := range 24 {
-		if coeffs.EOB[block] != 0 {
-			return false
-		}
-	}
-	return true
+	return binary.LittleEndian.Uint64(e[:8])|binary.LittleEndian.Uint64(e[8:16])|binary.LittleEndian.Uint64(e[16:24]) == 0
 }
 
 // ResetTokenContextPlanes applies the VP8 mb_no_coeff_skip context reset.
