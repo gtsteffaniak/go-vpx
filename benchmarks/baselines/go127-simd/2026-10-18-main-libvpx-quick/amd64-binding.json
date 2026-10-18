@@ -1,0 +1,371 @@
+{
+  "run": 39153782179,
+  "url": "https://github.com/thesyncim/govpx/actions/runs/39153782179",
+  "govpx_source": "715645fd212cfc65295f4f6fb1002dcc60856758",
+  "harness": "45c38dbc0d49470dd2df1c6b74275948900bc18c",
+  "Go_source_diff_empty": true,
+  "cpu": "AMD EPYC7763",
+  "native_Go_SIMD": true,
+  "ISA_scope": "CconfigSSE2/AVX2/runtimeCPUdetect+ASMverified; GoBackendSelected=true. SDKAVX512notseparatelyprobed.",
+  "rounds": 2,
+  "helper_invocations": 16,
+  "only_C_job_executed": true,
+  "job_scope_reference": "gh run view39153782179:libvpx-referenceSUCCESS,benchmark/fp-quickSKIPPED",
+  "config_optimized": true,
+  "cases": {
+    "vp9-320p": {
+      "govpx_ms_per_input": 3.907314,
+      "libvpx_ms_per_input": 1.4311785,
+      "Go_C_time_ratio": 2.7301374356867436,
+      "paired_Go_C_time_ratios": [
+        2.7448957734411112,
+        2.715623767878537
+      ],
+      "Go_C_throughput_ratio": 0.36628192666368764,
+      "PSNR_delta_dB": -0.05860857202225489,
+      "SSIM_delta": -0.0006380810252152314,
+      "exact_measured_fields_equal": {
+        "output_bytes": false,
+        "output_bitrate_kbps": false,
+        "bitrate_error_pct": false,
+        "encoded_frames": true,
+        "dropped_frames": true,
+        "keyframe_bytes": true,
+        "avg_interframe_bytes": false,
+        "psnr": false,
+        "ssim": false,
+        "quality_frames": true
+      },
+      "all_measured_output_quality_equal": false,
+      "quality_output_matches_timing": {
+        "govpx": true,
+        "libvpx": true
+      },
+      "Go_quality": {
+        "output_bytes": 246893,
+        "output_bitrate_kbps": 493.786,
+        "bitrate_error_pct": -1.2427999999999997,
+        "encoded_frames": 117,
+        "dropped_frames": 3,
+        "keyframe_bytes": 29346,
+        "avg_interframe_bytes": 1875.405172413793,
+        "psnr": 28.91097432360832,
+        "ssim": 0.9663734052397466,
+        "quality_frames": 117
+      },
+      "C_quality": {
+        "output_bytes": 246912,
+        "output_bitrate_kbps": 493.824,
+        "bitrate_error_pct": -1.2351999999999976,
+        "encoded_frames": 117,
+        "dropped_frames": 3,
+        "keyframe_bytes": 29346,
+        "avg_interframe_bytes": 1875.5689655172414,
+        "psnr": 28.969582895630573,
+        "ssim": 0.9670114862649618,
+        "quality_frames": 117
+      },
+      "govpx_allocation_samples": [
+        0.6166666666666667,
+        0.6166666666666667
+      ],
+      "actual_C_flags": [
+        "--passes=1",
+        "--lag-in-frames=0",
+        "--auto-alt-ref=0",
+        "--aq-mode=0",
+        "--row-mt=0",
+        "--tile-columns=0",
+        "--tile-rows=0",
+        "--profile=0",
+        "--end-usage=cbr",
+        "--target-bitrate=500",
+        "--min-q=2",
+        "--max-q=56",
+        "--kf-min-dist=0",
+        "--kf-max-dist=3000",
+        "--buf-sz=1000",
+        "--buf-initial-sz=500",
+        "--buf-optimal-sz=600",
+        "--undershoot-pct=100",
+        "--overshoot-pct=15",
+        "--threads=1",
+        "--timebase=1/30",
+        "--noise-sensitivity=4",
+        "--rt",
+        "--cpu-used=8",
+        "--drop-frame=30",
+        "--max-intra-rate=900",
+        "--static-thresh=1"
+      ]
+    },
+    "vp9-720p": {
+      "govpx_ms_per_input": 25.591461,
+      "libvpx_ms_per_input": 10.5746245,
+      "Go_C_time_ratio": 2.4200822450007564,
+      "paired_Go_C_time_ratios": [
+        2.446244701037955,
+        2.3946070530861943
+      ],
+      "Go_C_throughput_ratio": 0.4132090973625929,
+      "PSNR_delta_dB": -0.029682954936124162,
+      "SSIM_delta": 0.0002521722965962425,
+      "exact_measured_fields_equal": {
+        "output_bytes": false,
+        "output_bitrate_kbps": false,
+        "bitrate_error_pct": false,
+        "encoded_frames": true,
+        "dropped_frames": true,
+        "keyframe_bytes": true,
+        "avg_interframe_bytes": false,
+        "psnr": false,
+        "ssim": false,
+        "quality_frames": true
+      },
+      "all_measured_output_quality_equal": false,
+      "quality_output_matches_timing": {
+        "govpx": true,
+        "libvpx": true
+      },
+      "Go_quality": {
+        "output_bytes": 642654,
+        "output_bitrate_kbps": 2570.616,
+        "bitrate_error_pct": 2.8246399999999996,
+        "encoded_frames": 48,
+        "dropped_frames": 12,
+        "keyframe_bytes": 262153,
+        "avg_interframe_bytes": 8095.765957446809,
+        "psnr": 27.516433674845157,
+        "ssim": 0.9493477953174687,
+        "quality_frames": 48
+      },
+      "C_quality": {
+        "output_bytes": 643059,
+        "output_bitrate_kbps": 2572.236,
+        "bitrate_error_pct": 2.889439999999995,
+        "encoded_frames": 48,
+        "dropped_frames": 12,
+        "keyframe_bytes": 262153,
+        "avg_interframe_bytes": 8104.382978723404,
+        "psnr": 27.54611662978128,
+        "ssim": 0.9490956230208725,
+        "quality_frames": 48
+      },
+      "govpx_allocation_samples": [
+        1.25,
+        1.2666666666666666
+      ],
+      "actual_C_flags": [
+        "--passes=1",
+        "--lag-in-frames=0",
+        "--auto-alt-ref=0",
+        "--aq-mode=0",
+        "--row-mt=0",
+        "--tile-columns=0",
+        "--tile-rows=0",
+        "--profile=0",
+        "--end-usage=cbr",
+        "--target-bitrate=2500",
+        "--min-q=2",
+        "--max-q=56",
+        "--kf-min-dist=0",
+        "--kf-max-dist=3000",
+        "--buf-sz=1000",
+        "--buf-initial-sz=500",
+        "--buf-optimal-sz=600",
+        "--undershoot-pct=100",
+        "--overshoot-pct=15",
+        "--threads=1",
+        "--timebase=1/30",
+        "--noise-sensitivity=4",
+        "--rt",
+        "--cpu-used=8",
+        "--drop-frame=30",
+        "--max-intra-rate=900",
+        "--static-thresh=1"
+      ]
+    },
+    "vp8-720p-adaptive": {
+      "govpx_ms_per_input": 17.636233,
+      "libvpx_ms_per_input": 10.898383,
+      "Go_C_time_ratio": 1.6182430916586432,
+      "paired_Go_C_time_ratios": [
+        1.635269188950127,
+        1.601580261258726
+      ],
+      "Go_C_throughput_ratio": 0.6179541288664082,
+      "PSNR_delta_dB": -1.1926882435455433,
+      "SSIM_delta": -0.02458413835626838,
+      "exact_measured_fields_equal": {
+        "output_bytes": false,
+        "output_bitrate_kbps": false,
+        "bitrate_error_pct": false,
+        "encoded_frames": true,
+        "dropped_frames": true,
+        "keyframe_bytes": true,
+        "avg_interframe_bytes": false,
+        "psnr": false,
+        "ssim": false,
+        "quality_frames": true
+      },
+      "all_measured_output_quality_equal": false,
+      "quality_output_matches_timing": {
+        "govpx": true,
+        "libvpx": true
+      },
+      "Go_quality": {
+        "output_bytes": 685957,
+        "output_bitrate_kbps": 2743.828,
+        "bitrate_error_pct": 9.75312,
+        "encoded_frames": 58,
+        "dropped_frames": 2,
+        "keyframe_bytes": 133700,
+        "avg_interframe_bytes": 9688.719298245614,
+        "psnr": 27.983950811796223,
+        "ssim": 0.9085039479857897,
+        "quality_frames": 58
+      },
+      "C_quality": {
+        "output_bytes": 678205,
+        "output_bitrate_kbps": 2712.82,
+        "bitrate_error_pct": 8.512800000000006,
+        "encoded_frames": 58,
+        "dropped_frames": 2,
+        "keyframe_bytes": 133700,
+        "avg_interframe_bytes": 9552.719298245614,
+        "psnr": 29.176639055341766,
+        "ssim": 0.9330880863420581,
+        "quality_frames": 58
+      },
+      "govpx_allocation_samples": [
+        0,
+        0
+      ],
+      "actual_C_flags": [
+        "--passes=1",
+        "--lag-in-frames=0",
+        "--end-usage=cbr",
+        "--target-bitrate=2500",
+        "--min-q=2",
+        "--max-q=56",
+        "--kf-min-dist=3000",
+        "--kf-max-dist=3000",
+        "--buf-sz=1000",
+        "--buf-initial-sz=500",
+        "--buf-optimal-sz=600",
+        "--undershoot-pct=100",
+        "--overshoot-pct=15",
+        "--threads=1",
+        "--token-parts=0",
+        "--timebase=1/30",
+        "--noise-sensitivity=4",
+        "--rt",
+        "--cpu-used=8",
+        "--drop-frame=30",
+        "--max-intra-rate=900",
+        "--static-thresh=1"
+      ]
+    },
+    "vp8-720p-fixed": {
+      "govpx_ms_per_input": 15.2688585,
+      "libvpx_ms_per_input": 7.4987495,
+      "Go_C_time_ratio": 2.0361873002958695,
+      "paired_Go_C_time_ratios": [
+        2.046904345954203,
+        2.0256314351565456
+      ],
+      "Go_C_throughput_ratio": 0.49111395589919177,
+      "PSNR_delta_dB": 0.0,
+      "SSIM_delta": 0.0,
+      "exact_measured_fields_equal": {
+        "output_bytes": true,
+        "output_bitrate_kbps": true,
+        "bitrate_error_pct": true,
+        "encoded_frames": true,
+        "dropped_frames": true,
+        "keyframe_bytes": true,
+        "avg_interframe_bytes": true,
+        "psnr": true,
+        "ssim": true,
+        "quality_frames": true
+      },
+      "all_measured_output_quality_equal": true,
+      "quality_output_matches_timing": {
+        "govpx": true,
+        "libvpx": true
+      },
+      "Go_quality": {
+        "output_bytes": 723593,
+        "output_bitrate_kbps": 2894.372,
+        "bitrate_error_pct": 15.774879999999992,
+        "encoded_frames": 58,
+        "dropped_frames": 2,
+        "keyframe_bytes": 133700,
+        "avg_interframe_bytes": 10349,
+        "psnr": 27.157610871537482,
+        "ssim": 0.9259273287259608,
+        "quality_frames": 58
+      },
+      "C_quality": {
+        "output_bytes": 723593,
+        "output_bitrate_kbps": 2894.372,
+        "bitrate_error_pct": 15.774879999999992,
+        "encoded_frames": 58,
+        "dropped_frames": 2,
+        "keyframe_bytes": 133700,
+        "avg_interframe_bytes": 10349,
+        "psnr": 27.157610871537482,
+        "ssim": 0.9259273287259608,
+        "quality_frames": 58
+      },
+      "govpx_allocation_samples": [
+        0,
+        0
+      ],
+      "actual_C_flags": [
+        "--passes=1",
+        "--lag-in-frames=0",
+        "--end-usage=cbr",
+        "--target-bitrate=2500",
+        "--min-q=2",
+        "--max-q=56",
+        "--kf-min-dist=3000",
+        "--kf-max-dist=3000",
+        "--buf-sz=1000",
+        "--buf-initial-sz=500",
+        "--buf-optimal-sz=600",
+        "--undershoot-pct=100",
+        "--overshoot-pct=15",
+        "--threads=1",
+        "--token-parts=0",
+        "--timebase=1/30",
+        "--noise-sensitivity=4",
+        "--rt",
+        "--cpu-used=-8",
+        "--drop-frame=30",
+        "--max-intra-rate=900",
+        "--static-thresh=1"
+      ]
+    }
+  },
+  "metadata_note": "environment.txt retains stale six-round prose; commands.json,summary timing_contract.rounds and actual two files per case prove2rounds.",
+  "job_proof": "workflow-job-proof.json",
+  "job_states": {
+    "libvpx-reference": "success",
+    "benchmark": "skipped",
+    "fp-quick": "skipped"
+  },
+  "raw_build_proof": [
+    "raw/libvpx-build.txt",
+    "raw/vpx_config.h",
+    "raw/libvpx-config.mk",
+    "raw/libvpx-objects.txt",
+    "raw/dispatch.txt",
+    "raw/environment.txt",
+    "raw/binary-sha256.txt"
+  ],
+  "round_proof": [
+    "raw/commands.json",
+    "raw/summary.json"
+  ]
+}
