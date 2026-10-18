@@ -1408,7 +1408,7 @@ func retainMacroColumnValues(source string) string {
 		panic("initial column loader body changed")
 	}
 	load = load[open+1 : close]
-	const ret = "\treturn p3, p2, p1, p0, q0, q1, q2, q3\n"
+	const ret = "\treturn p3, p2, p1, p0, q0, q1, q2, q3, later0, later1, later2, later3, later4, later5, later6, later7\n"
 	if strings.Count(load, ret) != 1 {
 		panic("initial column result marker changed")
 	}
@@ -1419,5 +1419,25 @@ func retainMacroColumnValues(source string) string {
 		panic("initial column load marker changed")
 	}
 	body = strings.Replace(body, initial, strings.Trim(load, "\n"), 1)
+	// The first load now also owns columns 8..15. Consume those finalized
+	// transposes at their original sequential boundaries; keep only the last
+	// incoming four-column load (16..19). Retaining partial word transposes
+	// across all three boundaries otherwise causes seventeen vector spills
+	// with Go 1.27.2 on arm64.
+	const incoming = "// The wrapper proves all twenty columns, including the wide loads at column four."
+	const result = "q0, q1, q2, q3 = a0.InterleaveEven(a2), a0.InterleaveOdd(a2), a1.InterleaveEven(a3), a1.InterleaveOdd(a3)"
+	if strings.Count(body, incoming) != 3 {
+		panic("incoming macro column load count changed")
+	}
+	for group := range 2 {
+		begin := strings.Index(body, incoming)
+		end := strings.Index(body[begin:], result)
+		if end < 0 {
+			panic("incoming macro column result missing")
+		}
+		end += begin + len(result)
+		carry := fmt.Sprintf("q0, q1, q2, q3 = later%d, later%d, later%d, later%d", 4*group, 4*group+1, 4*group+2, 4*group+3)
+		body = body[:begin] + carry + body[end:]
+	}
 	return head + body
 }
