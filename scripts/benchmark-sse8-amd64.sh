@@ -177,4 +177,41 @@ for protocol in ('B.Loop public','B.N legacy diagnostic'):
  lines.append('')
 (root/'summary.md').write_text('\n'.join(lines)+'\n')
 PY
+# Separate current/base pixel API coverage AFTER every original SSE8 timing,
+# code capture and summary. Old691 has no pixel package and receives no adapter.
+phase=pixel-optional
+fp_fixture=internal/pixel/fp32_optional_native_test.go
+stats_fixture=internal/pixel/stats_reduction_native_test.go
+printf '{"head":"%s","base":"%s","assembly_excluded":true}\n' "$head_commit" "$base_commit" > "$output_dir/pixel-optional-commits.json"
+if [ -f "$scratch/head/$fp_fixture" ] && [ -f "$scratch/head/$stats_fixture" ] && [ -d "$scratch/base/internal/pixel" ]; then
+ mkdir -p "$output_dir/pixel-optional-fixtures"
+ for fixture in "$fp_fixture" "$stats_fixture"; do
+  cp "$scratch/head/$fixture" "$scratch/base/$fixture"
+  cmp "$scratch/head/$fixture" "$scratch/base/$fixture"
+  cp "$scratch/head/$fixture" "$output_dir/pixel-optional-fixtures/$(basename "$fixture")"
+  digest=$(sha256sum "$scratch/head/$fixture")
+  printf '%s  %s\n' "${digest%% *}" "$fixture" >> "$output_dir/pixel-optional-fixture-sha256.txt"
+ done
+ # Selected ordinary/race and genuinely disabled fallback states execute on
+ # this SAME runner. Only actual SDK AVX512 can enable selected32 assertions.
+ {
+  GOVPX_REQUIRE_SIMD=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off ./internal/pixel -run '^Test(FP16|FP32|.*Stats)' -count=1 -v
+  GOVPX_REQUIRE_SIMD=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^Test(FP16|FP32|.*Stats)' -count=1 -v
+  GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off ./internal/pixel -run '^Test(FP16|FP32|.*Stats)' -count=1 -v
+  GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^Test(FP16|FP32|.*Stats)' -count=1 -v
+  GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP16_AVX_OFF=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off ./internal/pixel -run '^Test(FP16|FP32|.*Stats)' -count=1 -v
+  GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP16_AVX_OFF=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^Test(FP16|FP32|.*Stats)' -count=1 -v
+ } > "$output_dir/pixel-optional-validation.txt" 2>&1
+ for variant in head base; do
+  scripts/go.sh -C "$scratch/$variant" test -mod=readonly -pgo=off -c -o "$scratch/$variant-pixel.test" ./internal/pixel > "$output_dir/pixel-$variant-build.txt" 2>&1
+ done
+ # Reuse identical strict runtime feature gating and the repaired inventory
+ # parser. Extra arguments bind source hashes to the archived head, not driver.
+ sh "$root/scripts/benchmark-pixel-optional.sh" "$scratch/base-pixel.test" "$scratch/head-pixel.test" "$output_dir/pixel-optional.txt" "$scratch/head" "$head_commit" "$base_commit"
+else
+ # Preserve historical manual SSE8-only head/base comparisons. No pixel or
+ # selected512 claim can be made when those older sources lack this API.
+ printf '# OPTIONAL_PIXEL_UNAVAILABLE_SOURCE_COMPATIBILITY; no selected512 evidence\n' > "$output_dir/pixel-optional.txt"
+fi
+
 phase=complete

@@ -96,6 +96,8 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 	sha256sum "$root/internal/pixel/fp32_optional_native_test.go"
 	sha256sum "$root/internal/pixel/stats_reduction_native_test.go"
 	sha256sum "$root/internal/pixel/goav1_pixelstats_simd.go"
+	sha256sum "$root/internal/pixel/stats16_amd64.go"
+	sha256sum "$root/internal/pixel/stats16_arm64.go"
 	sha256sum "$root/scripts/benchmark-pixel-optional.sh"
 	sha256sum "$root/internal/pixel/fp16_guard_component_native_test.go"
 	sha256sum "$root/scripts/benchmark-fp16-guard-diagnostic.sh"

@@ -49,7 +49,7 @@ jobs:
           command -v objdump
           objdump --version | grep '^GNU objdump'
 
-      - name: Compare all 36 public SSE8 cases in six balanced rounds
+      - name: Compare SSE8 and optional pixel APIs on the same native CPU
         env:
           HEAD_REF: ${{ inputs.head_ref || github.event.pull_request.head.sha || github.sha }}
           BASE_REF: ${{ inputs.base_ref || github.event.pull_request.base.sha || 'origin/main' }}
@@ -60,6 +60,10 @@ jobs:
         run: |
           if [ -f "$RUNNER_TEMP/sse8-amd64/summary.md" ]; then
             cat "$RUNNER_TEMP/sse8-amd64/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f "$RUNNER_TEMP/sse8-amd64/pixel-optional.txt" ]; then
+            grep '^# SELECTED_AVX512\|^# OPTIONAL_PIXEL_UNAVAILABLE' "$RUNNER_TEMP/sse8-amd64/pixel-optional.txt" >> "$GITHUB_STEP_SUMMARY" || true
+            tail -n 1 "$RUNNER_TEMP/sse8-amd64/pixel-optional.txt" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Save every sample, oracle check and source hash

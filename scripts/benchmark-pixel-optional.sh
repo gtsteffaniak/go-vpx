@@ -6,15 +6,20 @@ parent=${1:?usage: benchmark-pixel-optional.sh PARENT_PIXEL_TEST CURRENT_PIXEL_T
 current=${2:?usage: benchmark-pixel-optional.sh PARENT_PIXEL_TEST CURRENT_PIXEL_TEST OUTPUT_LOG}
 output=${3:?usage: benchmark-pixel-optional.sh PARENT_PIXEL_TEST CURRENT_PIXEL_TEST OUTPUT_LOG}
 [ -x "$parent" ] && [ -x "$current" ]
+source_dir=${4:-$(pwd)}
+head_commit=${5:-$(git rev-parse HEAD)}
+base_commit=${6:-}
 export GOMAXPROCS=1 GOVPX_REQUIRE_SIMD=1
 {
  printf '# additive component API only; qnil has no actual encoder caller claim\n'
- printf '# head '; git rev-parse HEAD
+ printf '# head %s\n' "$head_commit"
+ if [ -n "$base_commit" ]; then printf '# base %s\n' "$base_commit"; fi
+ printf '# driver checkout '; git rev-parse HEAD
  printf '# SDK=go1.27.2 GOEXPERIMENT=simd PGO=off GOMAXPROCS=1 rounds=6 benchtime=80ms\n'
  uname -a; lscpu
  scripts/go.sh version
  scripts/go.sh env GOOS GOARCH GOAMD64 GOEXPERIMENT GOCACHE
- sha256sum "$parent" "$current" internal/pixel/fp32_optional_native_test.go internal/pixel/stats_reduction_native_test.go internal/pixel/quantize_fp32_avx512_amd64.go internal/pixel/goav1_pixelstats_simd.go scripts/benchmark-pixel-optional.sh
+ sha256sum "$parent" "$current" "$source_dir/internal/pixel/fp32_optional_native_test.go" "$source_dir/internal/pixel/stats_reduction_native_test.go" "$source_dir/internal/pixel/quantize_fp32_avx512_amd64.go" "$source_dir/internal/pixel/goav1_pixelstats_simd.go" scripts/benchmark-pixel-optional.sh
  printf '# actual current SDK feature; unsupported AVX512 is explicitly unavailable\n'
  GOVPX_REQUIRE_FP32_NATIVE=0 "$current" -test.run '^TestFP32PublicHost$' -test.v -test.count=1
  for variant in parent current; do
@@ -56,6 +61,8 @@ for line in open(sys.argv[1]):
   phase='timed'
   if ' pixel ' in line:variant=line.split()[4]
  if not line.startswith(('BenchmarkFP32PublicOptionalNative/','BenchmarkStatsReductionNative/')):continue
+ # Verbose one-shot preflights print a leaf name before its result row.
+ if phase=='preflight' and re.fullmatch(r'(?:BenchmarkFP32PublicOptionalNative|BenchmarkStatsReductionNative)/\S+\s*',line):continue
  m=re.match(r'^(Benchmark\S+)\s+\d+\s+(?:([\d.eE+\-]+) ns/op\s+)?(\d+) B/op\s+(\d+) allocs/op',line)
  assert m,('unparseable',line)
  name,ns,b,a=m.groups();assert (int(b),int(a))==(0,0),line
