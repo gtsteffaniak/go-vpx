@@ -31,6 +31,10 @@ on:
         required: false
         type: boolean
 
+      quick_fixtures:
+        description: Optional newline-separated shared _test.go paths for quick mode
+        required: false
+        type: string
       bench_regex:
         description: Optional custom quick benchmark regex
         required: false
@@ -166,6 +170,7 @@ jobs:
         env:
           HEAD_REF: ${{ inputs.head_ref || github.sha }}
           BASE_REF: ${{ inputs.base_ref || 'origin/main' }}
+          GOVPX_QUICK_FIXTURES: ${{ inputs.quick_fixtures }}
           QUICK_BENCH: ${{ inputs.bench_regex }}
           QUICK_TEST: ${{ inputs.test_regex }}
           QUICK_PACKAGE: ${{ inputs.bench_package }}

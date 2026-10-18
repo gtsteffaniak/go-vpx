@@ -108,6 +108,14 @@ type vp9MLPartitionContext struct {
 	// -1 from ml_predict_var_partitioning for every level.
 	ready bool
 
+	// The source, estPred, qindex and speed are fixed for this frame's SB.
+	// Keep the 1 + 4 + 16 square-node classifier results so pickmode's
+	// pred_pixel_ready query reuses the partition walk's result. libvpx
+	// passes that decision through PICK_MODE_CONTEXT instead of evaluating
+	// ml_predict_var_partitioning again (vp9_encodeframe.c:4662-4673).
+	predictResult [21]vp9MLPredictResult
+	predictValid  uint32
+
 	// frameValid marks the per-frame slot as populated; reset every frame.
 	frameValid bool
 }
@@ -239,6 +247,7 @@ func (e *VP9Encoder) vp9ResetMLPartitionCache(miRows, miCols int) {
 		e.mlPartitionCtx = e.mlPartitionCtx[:need]
 		for i := range e.mlPartitionCtx {
 			e.mlPartitionCtx[i].frameValid = false
+			e.mlPartitionCtx[i].predictValid = 0
 		}
 	}
 	e.mlPartitionCtxLen = need
@@ -555,6 +564,43 @@ func vp9MLPredictVarPartitioning(bsize common.BlockSize, miRow, miCol int,
 	return vp9MLPredictNone1
 }
 
+// vp9MLPredictVarPartitioningCached shares the immutable per-SB classifier
+// result between the partition walk and its predictor-reuse query. The cache
+// excludes unsupported or non-tree-aligned windows, retaining the original
+// helper's behavior for those callers.
+func vp9MLPredictVarPartitioningCached(bsize common.BlockSize, miRow, miCol int,
+	ctx *vp9MLPartitionContext,
+) vp9MLPredictResult {
+	if ctx == nil || !ctx.ready {
+		return vp9MLPredictNone1
+	}
+	row, col := miRow&7, miCol&7
+	index := -1
+	switch bsize {
+	case common.Block64x64:
+		if row == 0 && col == 0 {
+			index = 0
+		}
+	case common.Block32x32:
+		if (row|col)&3 == 0 {
+			index = 1 + (row>>2)*2 + (col >> 2)
+		}
+	case common.Block16x16:
+		if (row|col)&1 == 0 {
+			index = 5 + (row>>1)*4 + (col >> 1)
+		}
+	}
+	if index < 0 {
+		return vp9MLPredictVarPartitioning(bsize, miRow, miCol, ctx)
+	}
+	bit := uint32(1) << uint(index)
+	if ctx.predictValid&bit == 0 {
+		ctx.predictResult[index] = vp9MLPredictVarPartitioning(bsize, miRow, miCol, ctx)
+		ctx.predictValid |= bit
+	}
+	return ctx.predictResult[index]
+}
+
 // vp9PredVariance computes the libvpx-equivalent variance of (src - pred)
 // over a block. Inputs are (src, srcStride, srcX, srcY) and (pred, predStride,
 // predY, predX) — both indexed (y, x) in pixel space. Returns the libvpx
@@ -675,7 +721,7 @@ func (e *VP9Encoder) vp9NonrdPickPartition(ctx *vp9MLPartitionContext,
 
 	// libvpx vp9_encodeframe.c:4660-4667 — ML predictor dispatch.
 	if partitionNoneAllowed && doSplit {
-		pred := vp9MLPredictVarPartitioning(bsize, miRow, miCol, ctx)
+		pred := vp9MLPredictVarPartitioningCached(bsize, miRow, miCol, ctx)
 		switch pred {
 		case vp9MLPredictNone:
 			// libvpx: do_split = 0 — commit current bsize.

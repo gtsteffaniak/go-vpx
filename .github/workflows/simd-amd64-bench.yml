@@ -9,6 +9,11 @@ on:
       - 'README*'
   workflow_dispatch:
     inputs:
+      libvpx_only:
+        description: Run the optimized libvpx comparison without the full native matrix
+        default: false
+        required: false
+        type: boolean
       fp_quick_only:
         description: Run preliminary two-round packet feedback instead of the full matrices
         default: false
@@ -20,6 +25,10 @@ on:
         type: string
       base_ref:
         description: Quick comparison base (defaults to origin/main)
+        required: false
+        type: string
+      quick_fixtures:
+        description: Optional newline-separated shared _test.go paths for quick mode
         required: false
         type: string
       bench_regex:
@@ -72,6 +81,7 @@ jobs:
         env:
           HEAD_REF: ${{ inputs.head_ref || github.event.pull_request.head.sha || github.sha }}
           BASE_REF: ${{ inputs.base_ref || github.event.pull_request.base.sha || 'origin/main' }}
+          GOVPX_QUICK_FIXTURES: ${{ inputs.quick_fixtures }}
           QUICK_BENCH: ${{ inputs.bench_regex }}
           QUICK_TEST: ${{ inputs.test_regex }}
           QUICK_PACKAGE: ${{ inputs.bench_package }}
@@ -98,7 +108,7 @@ jobs:
           if-no-files-found: error
 
   benchmark:
-    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.fp_quick_only }}
+    if: ${{ github.event_name == 'workflow_dispatch' && !inputs.fp_quick_only && !inputs.libvpx_only }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:

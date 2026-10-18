@@ -3,7 +3,23 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'benchmarks/baselines/**'
+      - 'AGENTS.md'
+      - 'README*'
   pull_request:
+    paths-ignore:
+      - 'benchmarks/baselines/**'
+      - 'AGENTS.md'
+      - 'README*'
+
+  workflow_dispatch:
+    inputs:
+      full:
+        description: Run conformance, quality, oracle and parity gates in addition to routine Go checks
+        default: false
+        required: false
+        type: boolean
 
 permissions:
   contents: read
@@ -15,6 +31,7 @@ concurrency:
 env:
   GOEXPERIMENT: simd
   GOTOOLCHAIN: go1.27.2
+  GOVPX_FULL_CI: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.full) }}
 
 jobs:
   test:
@@ -31,7 +48,16 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Report CI scope
+        run: |
+          if [ "$GOVPX_FULL_CI" = true ]; then
+            echo 'Full CI: routine Go checks plus conformance, quality, oracle and parity gates.' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'Routine CI: source/PGO, pinned control tables, native SIMD, pure-Go fallback and trace build. Full gates run on main pushes or manual full=true.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Install libvpx build tools
+        if: ${{ env.GOVPX_FULL_CI == 'true' }}
         run: |
           sudo apt-get update
           sudo apt-get install -y nasm yasm
@@ -52,22 +78,27 @@ jobs:
         run: make test-trace
 
       - name: VP9 decoder conformance
+        if: ${{ env.GOVPX_FULL_CI == 'true' }}
         run: make test-conformance
 
       - name: Encoder quality gates
+        if: ${{ env.GOVPX_FULL_CI == 'true' }}
         run: make test-quality
 
       - name: Libvpx oracle tests
+        if: ${{ env.GOVPX_FULL_CI == 'true' }}
         run: make test-oracle
 
       - name: Encoder byte parity
+        if: ${{ env.GOVPX_FULL_CI == 'true' }}
         run: make test-byte-parity
 
       - name: Parity regression report
+        if: ${{ env.GOVPX_FULL_CI == 'true' }}
         run: make test-parity-report
 
       - name: Save complete parity diagnostics
-        if: always()
+        if: ${{ always() && env.GOVPX_FULL_CI == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: parity-report-${{ github.event.pull_request.head.sha || github.sha }}
