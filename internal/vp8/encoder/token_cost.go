@@ -39,14 +39,49 @@ func FillCoefficientTokenCostTable(probs *tables.CoefficientProbs, costs *Coeffi
 	if probs == nil || costs == nil {
 		return false
 	}
-	for blockType := range tables.BlockTypes {
+	for bt := range tables.BlockTypes {
 		for band := range tables.CoefBands {
 			for ctx := range tables.PrevCoefContexts {
-				p := (*probs)[blockType][band][ctx]
-				for token := range tables.MaxEntropyTokens {
-					costs.Token[blockType][band][ctx][token] = coefTokenCostElided(p, token, blockType, band, ctx)
+				p := probs[bt][band][ctx]
+				var z, o [tables.EntropyNodes]int
+				for n := range tables.EntropyNodes {
+					z[n] = tables.ProbCost[p[n]]
+					o[n] = tables.ProbCost[255-int(p[n])]
 				}
-				costs.EOB[blockType][band][ctx] = coefEOBTokenCost(&p)
+				var v [tables.MaxEntropyTokens]int
+				v[11] = z[0]
+				v[0] = o[0] + z[1]
+				a := o[0] + o[1]
+				v[1] = a + z[2]
+				a += o[2]
+				b := a + z[3]
+				v[2] = b + z[4]
+				b += o[4]
+				v[3] = b + z[5]
+				v[4] = b + o[5]
+				b = a + o[3]
+				c := b + z[6]
+				v[5] = c + z[7]
+				v[6] = c + o[7]
+				c = b + o[6]
+				a = c + z[8]
+				v[7] = a + z[9]
+				v[8] = a + o[9]
+				a = c + o[8]
+				v[9] = a + z[10]
+				v[10] = a + o[10]
+				if ctx == 0 && band > coefElisionBandThreshold[bt] {
+					for t := 0; t < 11; t++ {
+						if v[t] <= o[0] {
+							v[t] = tokenCostMaxInt() / 4
+						} else {
+							v[t] -= o[0]
+						}
+					}
+					v[11] = 0
+				}
+				costs.Token[bt][band][ctx] = v
+				costs.EOB[bt][band][ctx] = z[0]
 			}
 		}
 	}
