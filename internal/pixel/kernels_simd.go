@@ -410,6 +410,10 @@ func TMPredict(dst []byte, ds int, above, left []byte, top byte, w int) {
 	}
 
 	if TMNative {
+		if w == 4 {
+			TMPredict4Native(dst, ds, above, left, top, false)
+			return
+		}
 		TMPredictNative(dst, ds, above, left, top, w)
 		return
 	}

@@ -74,6 +74,7 @@ for source_dir in "$reference_dir" "$previous_dir"; do
 	cp "$root/internal/vp8/dsp/tmpredict_bytes_native_test.go" "$source_dir/internal/vp8/dsp/tmpredict_bytes_native_test.go"
 	cp "$root/internal/vp8/dsp/tmpredict_rows_common_state_test.go" "$source_dir/internal/vp8/dsp/tmpredict_rows_common_state_test.go"
 	cp "$root/copy16_rows_native_test.go" "$source_dir/copy16_rows_native_test.go"
+	cp "$root/internal/vp8/dsp/dc_pair_native_bench_test.go" "$source_dir/internal/vp8/dsp/dc_pair_native_bench_test.go"
 done
 
 export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
@@ -169,6 +170,23 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 	sha256sum "$root/internal/pixel/tmpredict_disabled_scalar_arm64_test.go"
 	sha256sum "$root/internal/pixel/tmpredict_disabled_scalar_amd64_test.go"
 	sha256sum "$root/internal/pixel/tmpredict_disabled_scalar_other_test.go"
+	sha256sum "$root/internal/pixel/loopfilter_macro_axis_arm64.go"
+	sha256sum "$root/internal/pixel/loopfilter_macro_axis_arm64_test.go"
+	sha256sum "$root/internal/pixel/loopfilter_macro_axis_other.go"
+	sha256sum "$root/internal/pixel/tmpredict4_native_arm64.go"
+	sha256sum "$root/internal/pixel/tmpredict4_native_other.go"
+	sha256sum "$root/internal/pixel/tmpredict4_native_test.go"
+	sha256sum "$root/internal/vp8/decoder/loopfilter.go"
+	sha256sum "$root/internal/vp8/decoder/loopfilter_axis_frozen_test.go"
+	sha256sum "$root/internal/vp8/dsp/intra4x4.go"
+	sha256sum "$root/internal/pixel/dc_pair_native_arm64.go"
+	sha256sum "$root/internal/pixel/dc_pair_native_fallback.go"
+	sha256sum "$root/internal/pixel/dc_pair_native_other.go"
+	sha256sum "$root/internal/pixel/dc_pair_simd.go"
+	sha256sum "$root/internal/vp8/dsp/idct.go"
+	sha256sum "$root/internal/vp8/dsp/dc_pair_native_state_test.go"
+	sha256sum "$root/internal/vp8/dsp/dc_pair_native_disabled_amd64_test.go"
+	sha256sum "$root/internal/vp8/dsp/dc_pair_native_bench_test.go"
 	scripts/go.sh version
 	scripts/go.sh env GOOS GOARCH GOAMD64 GOEXPERIMENT GOTOOLCHAIN GOCACHE
 	lscpu
@@ -247,6 +265,19 @@ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBac
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./internal/vp8/dsp -run '^TestTMPredict' -count=1 -v
 	GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/dsp -run '^TestTMPredict' -count=1 -v
 	GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./internal/vp8/dsp -run '^TestTMPredict' -count=1 -v
+	# Current-only ARM DC-pair and axis dispatch retain their actual AMD
+	# scalar/old fallback, alias and partial-panic contracts. Never overlay
+	# these state tests onto old references with different invalid contracts.
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/dsp -run '^Test(DCOnly|DCPair|AddConstantPair)' -count=1 -v
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./internal/vp8/dsp -run '^Test(DCOnly|DCPair|AddConstantPair)' -count=1 -v
+	GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_SCALAR=1 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/dsp -run '^Test(DCOnly|DCPair|AddConstantPair)' -count=1 -v
+	GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_SCALAR=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./internal/vp8/dsp -run '^Test(DCOnly|DCPair|AddConstantPair)' -count=1 -v
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/decoder -run '^TestMacroAxis' -count=1 -v
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./internal/vp8/decoder -run '^TestMacroAxis' -count=1 -v
+	GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_SCALAR=1 scripts/go.sh test -pgo=off ./internal/pixel ./internal/vp8/decoder -run '^TestMacroAxis' -count=1 -v
+	GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_SCALAR=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./internal/vp8/decoder -run '^TestMacroAxis' -count=1 -v
+	# Existing ^TestTMPredict selected/off ordinary+race calls above already
+	# include all four new TestTMPredict4Tile* states and arithmetic tests.
 } > "$output_dir/quant-batch-validation.txt" 2>&1
 # The new FP16 specialization is current-only; references receive the same
 # public fixture, retaining their own production backends and class callers.
@@ -265,7 +296,7 @@ if [ -n "$previous_dir" ]; then
 fi
 
 packages='internal/vp9/dsp internal/vp8/dsp internal/vp9/encoder internal/vp8/encoder internal/vp8/decoder'
-benchmarks='Benchmark(Avg8x8Quad|ProjectionColumnsNative|Variance16x16Native)$|BenchmarkVP9(FP16Native|WideSADNative|FusedFPClassesNative|FPNoClassesNative|Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance(8x8|16x16|32x32|64x64)|SubpelPointerNative|LoopFilter(Horizontal|Vertical)8(Dual)?NonFlat)$|BenchmarkSAD16x16$|BenchmarkForwardDCT(16x16|32x32Native)$|Benchmark(SADLimitNative|SADLimitSliceNative|SADLimitX4Native|UVRoundedZeroNative|GatherPointerNative|GatherPackedPredictionNative|ResidualGatherNative|SixTapPhases|SplitSubpelPhases|DenoiserFilterYNative|LoopFilterLumaSSENative|VP8PickerFilterNative|FastQuantizeBatchNative|FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|DCOnlyIDCT4x4AddPairInt32|DCOnlyPairInPlace|ResidualGather16x16|ResidualGather8x8|SSE16x720PtrFast|SSE16x16|SSE8x8|SSE8RowsNative|TMPredictRowsNative|Copy(8|16)RowsNative|IntraDCFill(Exact|Supplement)|SubtractRowsNative|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|(MB)?LoopFilter(Horizontal|Vertical)EdgeUV|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
+benchmarks='Benchmark(Avg8x8Quad|ProjectionColumnsNative|Variance16x16Native)$|BenchmarkVP9(FP16Native|WideSADNative|FusedFPClassesNative|FPNoClassesNative|Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance(8x8|16x16|32x32|64x64)|SubpelPointerNative|LoopFilter(Horizontal|Vertical)8(Dual)?NonFlat)$|BenchmarkSAD16x16$|BenchmarkForwardDCT(16x16|32x32Native)$|Benchmark(SADLimitNative|SADLimitSliceNative|SADLimitX4Native|UVRoundedZeroNative|GatherPointerNative|GatherPackedPredictionNative|ResidualGatherNative|DCPairRowsNative|SixTapPhases|SplitSubpelPhases|DenoiserFilterYNative|LoopFilterLumaSSENative|VP8PickerFilterNative|FastQuantizeBatchNative|FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|DCOnlyIDCT4x4AddPairInt32|DCOnlyPairInPlace|ResidualGather16x16|ResidualGather8x8|SSE16x720PtrFast|SSE16x16|SSE8x8|SSE8RowsNative|TMPredictRowsNative|Copy(8|16)RowsNative|IntraDCFill(Exact|Supplement)|SubtractRowsNative|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|(MB)?LoopFilter(Horizontal|Vertical)EdgeUV|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
 for variant in $variants; do
 	case "$variant" in
 		assembly) source_dir=$reference_dir ;;
@@ -289,6 +320,13 @@ for variant in $variants; do
 	{
 		printf '# TM preflight: %s\n' "$variant"
 		GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp8-dsp.test" -test.run '^TestTMPredictRowsNativeState$' -test.bench '^BenchmarkTMPredictRowsNative$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem -test.v
+	} >> "$output_dir/quant-batch-validation.txt" 2>&1
+	# Standalone public DC pair fixture has its own clipped scalar equation,
+	# full backing/input canaries and live output sink. All 18 one-shot cases
+	# are oracle-only, excluded from timed inventories on every reference.
+	{
+		printf '# DC pair preflight: %s\n' "$variant"
+		GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp8-dsp.test" -test.run '^$' -test.bench '^BenchmarkDCPairRowsNative$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem
 	} >> "$output_dir/quant-batch-validation.txt" 2>&1
 	# Oracle work is untimed and identical on every pinned production source.
 	GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp9-encoder.test" -test.run '^$' -test.bench '^BenchmarkVP9FP16Native$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem > "$output_dir/$variant-fp16-fixture-validation.txt" 2>&1
