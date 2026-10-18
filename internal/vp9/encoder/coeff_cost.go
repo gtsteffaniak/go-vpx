@@ -660,40 +660,40 @@ func CoeffBlockRateCostFastKnownQCoeffTable(txSize common.TxSize,
 		eob = maxEob
 	}
 
+	return coeffKnownCostSegmentsR3(txSize, costs, scan, qcoeffs, initCtx, eob, maxEob)
+}
+
+// Keep the validated zero-EOB entry independent of the nonzero loop frame.
+func coeffKnownCostSegmentsR3(txSize common.TxSize, costs *CoeffTreeTokenCostTable, scan, qcoeffs []int16, initCtx, eob, maxEob int) int {
 	rate := 0
 	prevToken, extraCost := coeffTokenExtraCostQCoeff(qcoeffs[0])
 	rate += extraCost
 	rate += int((*costs)[0][initCtx][0][prevToken])
 
-	bandIdx := 1
-	bandLeft := coeffCostBandCounts[txSize][bandIdx]
-	for c := 1; c < eob; c++ {
-		raster := int(scan[c])
-		token, extra := coeffTokenExtraCostQCoeff(qcoeffs[raster])
-		ctx := 0
-		skipIdx := 0
-		if prevToken == ZeroToken {
-			ctx = 1
-			skipIdx = 1
-		}
-		rate += extra
-		rate += int((*costs)[bandIdx][ctx][skipIdx][token])
-		prevToken = token
-		bandLeft--
-		if bandLeft == 0 {
-			bandIdx++
-			if bandIdx >= len(coeffCostBandCounts[txSize]) {
-				break
+	c, band := 1, 1
+	for c < eob {
+		stop := c + coeffCostBandCounts[txSize][band]
+		end := min(stop, eob)
+		normal, zero := &costs[band][0][0], &costs[band][1][1]
+		for ; c < end; c++ {
+			token, extra := coeffTokenExtraCostQCoeff(qcoeffs[int(scan[c])])
+			row := normal
+			if prevToken == ZeroToken {
+				row = zero
 			}
-			bandLeft = coeffCostBandCounts[txSize][bandIdx]
+			rate += extra + int(row[token])
+			prevToken = token
+		}
+		if c == stop {
+			band++
 		}
 	}
-	if bandLeft != 0 {
+	if eob < maxEob {
 		ctx := 0
 		if prevToken == ZeroToken {
 			ctx = 1
 		}
-		rate += int((*costs)[bandIdx][ctx][0][EobToken])
+		rate += int(costs[band][ctx][0][EobToken])
 	}
 	return rate
 }
