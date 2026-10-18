@@ -247,6 +247,11 @@ func (a *FirstPassMotionAccumulator) Finish(stats *FirstPassFrameStats, blocks i
 func FirstPassMotionSearch(src []byte, srcStride int, ref []byte, refStride int,
 	x int, y int, w int, h int, width int, height int,
 ) (best uint64, bestRowQ3 int16, bestColQ3 int16) {
+	// A zero SSE is globally minimal. Only shortcut after complete frame
+	// windows prove that later candidates cannot expose an invalid input.
+	canStop := (uint(x)|uint(y)|uint(w)|uint(h)|uint(width)|uint(height)|uint(srcStride)|uint(refStride))>>30 == 0 &&
+		w > 0 && h > 0 && width > 0 && height > 0 && width <= srcStride && width <= refStride && x+w <= width && y+h <= height &&
+		len(src) >= (height-1)*srcStride+width && len(ref) >= (height-1)*refStride+width
 	best = ^uint64(0)
 	for dy := -FirstPassSearchRange; dy <= FirstPassSearchRange; dy++ {
 		refY := y + dy
@@ -263,6 +268,9 @@ func FirstPassMotionSearch(src []byte, srcStride int, ref []byte, refStride int,
 				best = err
 				bestRowQ3 = int16(dy << 3)
 				bestColQ3 = int16(dx << 3)
+				if canStop && err == 0 {
+					return best, bestRowQ3, bestColQ3
+				}
 			}
 		}
 	}
