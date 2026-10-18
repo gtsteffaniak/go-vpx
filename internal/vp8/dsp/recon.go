@@ -27,6 +27,9 @@ func Copy16x16(src []byte, srcStride int, dst []byte, dstStride int) {
 }
 
 func AddResidual4x4(dst []byte, dstStride int, residual *[16]int16) {
+	if addResidual4Go(dst, dstStride, residual) {
+		return
+	}
 	for y := range 4 {
 		// Pinning the row to a [4]byte view drops the per-cell bounds
 		// check from each of the four writes.
