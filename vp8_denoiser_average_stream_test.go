@@ -13,6 +13,9 @@ func TestDenoiserAverageStream(t *testing.T) {
 			t.Run(fmt.Sprintf("%dx%d/threads%d", sz[0], sz[1], threads), func(t *testing.T) {
 
 				opts := newSizedTestEncoder(t, sz[0], sz[1]).opts
+				// Packet pins require a fixed speed: small adaptive frames use
+				// real wall-clock feedback and can change picker dispatch.
+				opts.CpuUsed = -8
 				opts.NoiseSensitivity = 4
 				opts.Threads = threads
 				e, err := NewVP8Encoder(opts)
@@ -41,13 +44,16 @@ func TestDenoiserAverageStream(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
+					if e.libvpxCPUUsed() != 8 {
+						t.Fatalf("fixed speed changed to %d", e.libvpxCPUUsed())
+					}
 					binary.LittleEndian.PutUint64(n[:], uint64(len(result.Data)))
 					hash.Write(n[:])
 					hash.Write(result.Data)
 					fmt.Fprintf(hash, "%t/%t/%t|", result.KeyFrame, result.Dropped, result.Droppable)
 				}
 				got := fmt.Sprintf("%x", hash.Sum(nil))
-				want := map[string]string{"64x48/threads1": "cdd96a435153bfb0024d15c0d0e4bb57cb7d0fca08100afa98026663e47cd20c", "64x48/threads2": "7a428727004408a6e1e1e812d93263e2729e3556a05c92cab4f06034641d0ac7", "65x49/threads1": "0e7bd69da2203e038c8724f149b88b9689cbcea6417b6e4f4386e3e01d311ced", "65x49/threads2": "737cefc7e128dd3a1bf750b7cdcf385684517a95f845b70bcfa53b01c973fd8b"}
+				want := map[string]string{"64x48/threads1": "5bbc766d749d29e12dc496520ccdcb10b7b30737e45b2f03de136adc98e2c5b8", "64x48/threads2": "5d596825da65e6350753cd65fb4df7ebc6683075da3a62fca842dda89c9fe260", "65x49/threads1": "f5b4ca0def5a7e0ded48a0164a95f58bcb12546eca1d1dda3153011438a04f15", "65x49/threads2": "5d4f2efc5d3f3da952a986e4c250957374f9376ebaa5545ac3be3e5c8d905b17"}
 				if got != want[t.Name()[len("TestDenoiserAverageStream/"):]] {
 					t.Fatalf("noise stream hash %s", got)
 				}

@@ -37,9 +37,10 @@
     "internal/pixel/denoise_complete_arm64.go": "5142d787fcb71f1d34253158796f4b652e51b94c00bbacaf5c7149d2e30609ae",
     "internal/pixel/denoise_complete_amd64.go": "92bbf483556c01d8ff95ad7fa50bbb2b1f5eb2573d3d9bc1c37c61a1ee2a6a6a",
     "vp8_denoiser_luma_only_test.go": "e1e71033ce10605e30ca0067fd27524f4186c052bbb9d68ff214226f128c5a79",
-    "vp8_denoiser_average_stream_test.go": "80f332b57a41af5d1d23c647a09860aeac30c510066a04e84c3f2b189194ae39",
+    "vp8_denoiser_average_stream_test.go": "a134a5de83ae095c8428a3ed0374079c9c9e58f15de7db9de7242210c5ce693a",
     "internal/vp8/encoder/denoiser_average_only_test.go": "0b11abcbc06f2b41f86bd0daaa95fed91ba4f335f0b7a412846cc1edfdfd7ca2"
   },
   "report": "/private/tmp/govpx-frame-inter-next/REPORT.md",
-  "post_timing_format": "Only gofmt was applied to the newly pinned stream test after timing; exact timed fixture snapshots remain under timing-source/. Runtime sources and binaries are unchanged."
+  "post_timing_format": "Only gofmt was applied to the newly pinned stream test after timing; exact timed fixture snapshots remain under timing-source/. Runtime sources and binaries are unchanged.",
+  "fixed_speed_fixture_correction": "FIXTURE_CORRECTION.md"
 }
