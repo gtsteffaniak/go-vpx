@@ -23,7 +23,20 @@ func quantizeFPBlockSIMD(coeff, iscan, qcoeff, dqcoeff []int16, n int, r, q, d [
 		// Unsigned magnitude handles -32768; adding a nonnegative int16 round
 		// fits uint16 exactly, then clips to the scalar signed-int16 bound.
 		a := c.Abs().ToBits().Add(vr.ToBits()).Min(max16).BitsToInt16()
-		t := fpMulHigh16(a, vq).Masked(a.GreaterEqual(vd))
+		active := a.GreaterEqual(vd)
+		// libvpx quantize_fp skips arithmetic and scan work for zero packets.
+		// Use the exact public threshold, rather than its table-specific shortcut.
+		if active.ToInt16x8().ToBits().ReduceMax() == 0 {
+			if qcoeff != nil {
+				zero.Store(qcoeff[i:])
+			}
+			zero.Store(dqcoeff[i:])
+			if classes != nil {
+				storeBytes8(classes[i:], archsimd.Uint8x16{})
+			}
+			continue
+		}
+		t := fpMulHigh16(a, vq).Masked(active)
 		magnitude := t
 		t = zero.Sub(t).IfElse(c.Less(zero), t)
 		if qcoeff != nil {
