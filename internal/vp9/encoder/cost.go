@@ -73,6 +73,12 @@ func CostBranch256(ct [2]uint32, p uint8) uint64 {
 //
 // `upd` is the update-decision prob (typically DIFF_UPDATE_PROB).
 func ProbDiffUpdateSavingsSearch(ct [2]uint32, oldp uint8, bestp *uint8, upd uint8) int64 {
+	// The candidate walk is empty when its seed already equals oldp.
+	// Preserve invalid-probability panics by retaining the original path there.
+	if oldp != 0 && upd != 0 && *bestp == oldp {
+		return 0
+	}
+
 	oldB := int64(CostBranch256(ct, oldp))
 	bestSavings := int64(0)
 	bestNewP := oldp
@@ -127,6 +133,12 @@ const PivotNode = 2
 func ProbDiffUpdateSavingsSearchModel(ct *[EntropyNodes][2]uint32,
 	oldp uint8, bestp *uint8, upd uint8, stepsize int,
 ) int64 {
+	// The candidate walk is empty when its seed already equals oldp.
+	// Preserve invalid-probability panics by retaining the original path there.
+	if oldp != 0 && upd != 0 && *bestp == oldp {
+		return 0
+	}
+
 	stepSign := int64(1)
 	if int(*bestp) > int(oldp) {
 		stepSign = -1
