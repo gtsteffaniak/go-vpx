@@ -170,9 +170,42 @@ func loopFilterMacroInternalFusedHorizontal(p []byte, pitch, mblimit, blimit, li
 func loopFilterMacroInternalFusedVertical(p []byte, pitch, mblimit, blimit, limit, thresh int) {
 	const kind, lanes, step = 4, 16, 1
 	outer := pitch
-	p3, p2, p1, p0, q0, q1, q2, q3 := loadLFColumnsWide20(p, outer)
-	var output [16]archsimd.Uint8x16
-	output[0], output[1], output[2] = p2, p1, p0
+	var p3, p2, p1, p0, q0, q1, q2, q3 archsimd.Uint8x16
+	ptr := unsafe.Pointer(unsafe.SliceData(p))
+	r0 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 0*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 8*outer))).ReshapeToUint64s()).ReshapeToUint32s()
+	r1 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 1*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 9*outer))).ReshapeToUint64s()).ReshapeToUint32s()
+	r2 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 2*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 10*outer))).ReshapeToUint64s()).ReshapeToUint32s()
+	r3 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 3*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 11*outer))).ReshapeToUint64s()).ReshapeToUint32s()
+	r4 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 4*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 12*outer))).ReshapeToUint64s()).ReshapeToUint32s()
+	r5 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 5*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 13*outer))).ReshapeToUint64s()).ReshapeToUint32s()
+	r6 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 6*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 14*outer))).ReshapeToUint64s()).ReshapeToUint32s()
+	r7 := archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 7*outer))).ReshapeToUint64s().InterleaveLo(archsimd.LoadUint8x16Array((*[16]byte)(unsafe.Add(ptr, 15*outer))).ReshapeToUint64s()).ReshapeToUint32s()
+	a0 := r0.InterleaveEven(r4).ReshapeToUint16s()
+	a1 := r0.InterleaveOdd(r4).ReshapeToUint16s()
+	a2 := r1.InterleaveEven(r5).ReshapeToUint16s()
+	a3 := r1.InterleaveOdd(r5).ReshapeToUint16s()
+	a4 := r2.InterleaveEven(r6).ReshapeToUint16s()
+	a5 := r2.InterleaveOdd(r6).ReshapeToUint16s()
+	a6 := r3.InterleaveEven(r7).ReshapeToUint16s()
+	a7 := r3.InterleaveOdd(r7).ReshapeToUint16s()
+	b0 := a0.InterleaveEven(a4).ReshapeToUint8s()
+	b1 := a0.InterleaveOdd(a4).ReshapeToUint8s()
+	b2 := a2.InterleaveEven(a6).ReshapeToUint8s()
+	b3 := a2.InterleaveOdd(a6).ReshapeToUint8s()
+	b4 := a1.InterleaveEven(a5).ReshapeToUint8s()
+	b5 := a1.InterleaveOdd(a5).ReshapeToUint8s()
+	b6 := a3.InterleaveEven(a7).ReshapeToUint8s()
+	b7 := a3.InterleaveOdd(a7).ReshapeToUint8s()
+	p3 = b0.InterleaveEven(b2)
+	p2 = b0.InterleaveOdd(b2)
+	p1 = b1.InterleaveEven(b3)
+	p0 = b1.InterleaveOdd(b3)
+	q0 = b4.InterleaveEven(b6)
+	q1 = b4.InterleaveOdd(b6)
+	q2 = b5.InterleaveEven(b7)
+	q3 = b5.InterleaveOdd(b7)
+	var lfO0, lfO1, lfO2, lfO3, lfO4, lfO5, lfO6, lfO7, lfO8, lfO9, lfO10, lfO11, lfO12, lfO13, lfO14, lfO15 archsimd.Uint8x16
+	lfO0, lfO1, lfO2 = p2, p1, p0
 	changed := false
 	{
 		const kind = 6
@@ -209,7 +242,7 @@ func loopFilterMacroInternalFusedVertical(p []byte, pitch, mblimit, blimit, limi
 					np1, nq1 := p1c.AddSaturated(u).ToBits().Xor(bias), q1c.SubSaturated(u).ToBits().Xor(bias)
 					u = lfMacroCorrection(ff, 9)
 					np2, nq2 := p2.Xor(bias).BitsToInt8().AddSaturated(u).ToBits().Xor(bias), q2.Xor(bias).BitsToInt8().SubSaturated(u).ToBits().Xor(bias)
-					output[0], output[1], output[2] = np2, np1, np0
+					lfO0, lfO1, lfO2 = np2, np1, np0
 					changed = true
 
 					q0, q1, q2 = nq0, nq1, nq2
@@ -265,7 +298,7 @@ func loopFilterMacroInternalFusedVertical(p []byte, pitch, mblimit, blimit, limi
 	{
 		const edge = 8
 
-		output[edge-5], output[edge-4], output[edge-3], output[edge-2] = p3, p2, p1, p0
+		lfO3, lfO4, lfO5, lfO6 = p3, p2, p1, p0
 		off := edge * step
 		d1, d2, d0, d3 := lfAbsByte(p1, p0), lfAbsByte(q1, q0), lfAbsByte(p0, q0), lfAbsByte(p1, q1)
 		threshold := d0.AddSaturated(d0).AddSaturated(lfByteHalf(d3))
@@ -313,7 +346,7 @@ func loopFilterMacroInternalFusedVertical(p []byte, pitch, mblimit, blimit, limi
 				u := lfByteShift1(f1.Add(archsimd.BroadcastInt8x16(1))).Masked(lfByteNot(hev))
 				np1, nq1 := p1c.AddSaturated(u).ToBits().Xor(bias), q1c.SubSaturated(u).ToBits().Xor(bias)
 
-				output[edge-3], output[edge-2] = np1, np0
+				lfO5, lfO6 = np1, np0
 				changed = true
 
 				q0, q1 = nq0, nq1
@@ -363,7 +396,7 @@ func loopFilterMacroInternalFusedVertical(p []byte, pitch, mblimit, blimit, limi
 	{
 		const edge = 12
 
-		output[edge-5], output[edge-4], output[edge-3], output[edge-2] = p3, p2, p1, p0
+		lfO7, lfO8, lfO9, lfO10 = p3, p2, p1, p0
 		off := edge * step
 		d1, d2, d0, d3 := lfAbsByte(p1, p0), lfAbsByte(q1, q0), lfAbsByte(p0, q0), lfAbsByte(p1, q1)
 		threshold := d0.AddSaturated(d0).AddSaturated(lfByteHalf(d3))
@@ -411,7 +444,7 @@ func loopFilterMacroInternalFusedVertical(p []byte, pitch, mblimit, blimit, limi
 				u := lfByteShift1(f1.Add(archsimd.BroadcastInt8x16(1))).Masked(lfByteNot(hev))
 				np1, nq1 := p1c.AddSaturated(u).ToBits().Xor(bias), q1c.SubSaturated(u).ToBits().Xor(bias)
 
-				output[edge-3], output[edge-2] = np1, np0
+				lfO9, lfO10 = np1, np0
 				changed = true
 
 				q0, q1 = nq0, nq1
@@ -461,7 +494,7 @@ func loopFilterMacroInternalFusedVertical(p []byte, pitch, mblimit, blimit, limi
 	{
 		const edge = 16
 
-		output[edge-5], output[edge-4], output[edge-3], output[edge-2] = p3, p2, p1, p0
+		lfO11, lfO12, lfO13, lfO14 = p3, p2, p1, p0
 		off := edge * step
 		d1, d2, d0, d3 := lfAbsByte(p1, p0), lfAbsByte(q1, q0), lfAbsByte(p0, q0), lfAbsByte(p1, q1)
 		threshold := d0.AddSaturated(d0).AddSaturated(lfByteHalf(d3))
@@ -509,7 +542,7 @@ func loopFilterMacroInternalFusedVertical(p []byte, pitch, mblimit, blimit, limi
 				u := lfByteShift1(f1.Add(archsimd.BroadcastInt8x16(1))).Masked(lfByteNot(hev))
 				np1, nq1 := p1c.AddSaturated(u).ToBits().Xor(bias), q1c.SubSaturated(u).ToBits().Xor(bias)
 
-				output[edge-3], output[edge-2] = np1, np0
+				lfO13, lfO14 = np1, np0
 				changed = true
 
 				q0, q1 = nq0, nq1
@@ -518,8 +551,8 @@ func loopFilterMacroInternalFusedVertical(p []byte, pitch, mblimit, blimit, limi
 	}
 
 	if changed {
-		output[15] = q0
-		storeLFRowVectors(p, pitch, &output, q1)
+		lfO15 = q0
+		storeLFRowValues(p, pitch, lfO0, lfO1, lfO2, lfO3, lfO4, lfO5, lfO6, lfO7, lfO8, lfO9, lfO10, lfO11, lfO12, lfO13, lfO14, lfO15, q1)
 	}
 
 }

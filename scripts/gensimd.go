@@ -14,6 +14,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -1000,7 +1001,7 @@ q0,q1,q2,q3=a0.InterleaveEven(a2),a0.InterleaveOdd(a2),a1.InterleaveEven(a3),a1.
 	}
 	// ARM has a single unsigned byte reduction for the zero-correction check.
 	// Preserve the separately measured AMD64 network.
-	armData, err := format.Source([]byte(specializeMacroVerticalLoads(skipRoundedZeroMacroCorrections(arm))))
+	armData, err := format.Source([]byte(retainMacroColumnValues(specializeMacroVerticalLoads(skipRoundedZeroMacroCorrections(arm)))))
 	if err != nil {
 		panic(err)
 	}
@@ -1317,4 +1318,106 @@ func storeLFRowVectors(p []byte,pitch int,cols *[16]archsimd.Uint8x16,tail archs
 	if err = os.WriteFile("internal/pixel/loopfilter_rowstore_arm64.go", data, 0644); err != nil {
 		panic(err)
 	}
+
+	valueSource := strings.ReplaceAll(string(data), "storeLFRowVectors", "storeLFRowValues")
+	valueSource = strings.Replace(valueSource, "cols *[16]archsimd.Uint8x16, tail archsimd.Uint8x16", "c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, tail archsimd.Uint8x16", 1)
+	for i := range 16 {
+		valueSource = strings.ReplaceAll(valueSource, fmt.Sprintf("cols[%d]", i), fmt.Sprintf("c%d", i))
+	}
+	valueData, err := format.Source([]byte(valueSource))
+	if err != nil {
+		panic(err)
+	}
+	if err = os.WriteFile("internal/pixel/loopfilter_rowvalues_arm64.go", valueData, 0644); err != nil {
+		panic(err)
+	}
+}
+
+// Keep finalized ARM columns in SSA values until the dependent edges finish.
+// The pointer-based helper remains generated for callers using column arrays.
+func retainMacroColumnValues(source string) string {
+	formatted, err := format.Source([]byte(source))
+	if err != nil {
+		panic(err)
+	}
+	source = string(formatted)
+	const name = "func loopFilterMacroInternalFusedVertical("
+	start := strings.Index(source, name)
+	if start < 0 {
+		panic("vertical macro boundary missing")
+	}
+	head, body := source[:start], source[start:]
+	const decl = "var output [16]archsimd.Uint8x16"
+	if strings.Count(body, decl) != 1 {
+		panic("column array marker changed")
+	}
+	var names []string
+	for i := range 16 {
+		names = append(names, fmt.Sprintf("lfO%d", i))
+	}
+	body = strings.Replace(body, decl, "var "+strings.Join(names, ", ")+" archsimd.Uint8x16", 1)
+	index := regexp.MustCompile(`output\[([0-9]+|edge\s*-\s*[0-9]+)\]`)
+	lines := strings.SplitAfter(body, "\n")
+	edge, replacements := 0, 0
+	for i, line := range lines {
+		if strings.HasPrefix(strings.TrimSpace(line), "const edge = ") {
+			if n, err := fmt.Sscanf(strings.TrimSpace(line), "const edge = %d", &edge); n != 1 || err != nil {
+				panic("constant edge changed")
+			}
+		}
+		lines[i] = index.ReplaceAllStringFunc(line, func(match string) string {
+			expr := strings.TrimSuffix(strings.TrimPrefix(match, "output["), "]")
+			expr = strings.ReplaceAll(expr, " ", "")
+			var value int
+			if strings.HasPrefix(expr, "edge-") {
+				var offset int
+				if n, err := fmt.Sscanf(expr, "edge-%d", &offset); n != 1 || err != nil {
+					panic("column edge index changed")
+				}
+				value = edge - offset
+			} else if n, err := fmt.Sscanf(expr, "%d", &value); n != 1 || err != nil {
+				panic("column index changed")
+			}
+			if value < 0 || value >= 16 {
+				panic("column index out of range")
+			}
+			replacements++
+			return fmt.Sprintf("lfO%d", value)
+		})
+	}
+	if replacements != 25 {
+		panic("column assignment network changed")
+	}
+	body = strings.Join(lines, "")
+	const call = "storeLFRowVectors(p, pitch, &output, q1)"
+	if strings.Count(body, call) != 1 {
+		panic("column store marker changed")
+	}
+	body = strings.Replace(body, call, "storeLFRowValues(p, pitch, "+strings.Join(names, ", ")+", q1)", 1)
+	input, err := os.ReadFile("internal/pixel/loopfilter_columns_wide20_arm64.go")
+	if err != nil {
+		panic(err)
+	}
+	load := string(input)
+	first := strings.Index(load, "func loadLFColumnsWide20(")
+	if first < 0 {
+		panic("initial column loader missing")
+	}
+	open, close := first+strings.Index(load[first:], "{"), strings.LastIndex(load, "}")
+	if open < first || close <= open {
+		panic("initial column loader body changed")
+	}
+	load = load[open+1 : close]
+	const ret = "\treturn p3, p2, p1, p0, q0, q1, q2, q3\n"
+	if strings.Count(load, ret) != 1 {
+		panic("initial column result marker changed")
+	}
+	load = strings.Replace(load, ret, "", 1)
+	load = strings.ReplaceAll(load, "pitch", "outer")
+	const initial = "\tp3, p2, p1, p0, q0, q1, q2, q3 := loadLFColumnsWide20(p, outer)"
+	if strings.Count(body, initial) != 1 {
+		panic("initial column load marker changed")
+	}
+	body = strings.Replace(body, initial, strings.Trim(load, "\n"), 1)
+	return head + body
 }

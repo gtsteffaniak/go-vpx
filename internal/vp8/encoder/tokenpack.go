@@ -250,6 +250,10 @@ func writePreparedCoefficientTokenRecords(w *BoolWriter, probs *tables.Coefficie
 		if token == tables.DCTEOBToken {
 			split := uint32(1 + (((rng - 1) * uint32(p[0])) >> 8))
 			rng = split
+			// A normalized EOB needs neither a shift nor a byte flush.
+			if rng&0x80 != 0 && count < 0 {
+				continue
+			}
 
 			shift := uint(bits.LeadingZeros8(uint8(rng)))
 			rng <<= shift

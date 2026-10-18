@@ -15,6 +15,16 @@ on:
         required: false
         type: string
 
+      runner_label:
+        description: Hosted runner pool for native ISA coverage (CPU features are still checked)
+        default: ubuntu-latest
+        required: false
+        type: choice
+        options:
+          - ubuntu-latest
+          - ubuntu-24.04
+          - ubuntu-22.04
+
 permissions:
   contents: read
 
@@ -32,7 +42,7 @@ env:
 
 jobs:
   sse8:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner_label || 'ubuntu-latest' }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
@@ -60,6 +70,9 @@ jobs:
         run: |
           if [ -f "$RUNNER_TEMP/sse8-amd64/summary.md" ]; then
             cat "$RUNNER_TEMP/sse8-amd64/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -f "$RUNNER_TEMP/sse8-amd64/dc-pair/summary.md" ]; then
+            cat "$RUNNER_TEMP/sse8-amd64/dc-pair/summary.md" >> "$GITHUB_STEP_SUMMARY"
           fi
           if [ -f "$RUNNER_TEMP/sse8-amd64/pixel-optional.txt" ]; then
             grep '^# SELECTED_AVX512\|^# OPTIONAL_PIXEL_UNAVAILABLE' "$RUNNER_TEMP/sse8-amd64/pixel-optional.txt" >> "$GITHUB_STEP_SUMMARY" || true

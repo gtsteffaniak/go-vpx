@@ -81,6 +81,30 @@ for variant in base assembly; do
  cmp "$scratch/head/$fixture" "$scratch/$variant/$fixture"
 done
 
+# Add the same paired-DC fixtures without altering any original SSE8 timing.
+dc_available=0
+if [ -f "$scratch/head/internal/vp8/dsp/dc_pair_native_bench_test.go" ] && [ -f "$scratch/head/internal/vp8/dsp/dc_pair_inplace_native_bench_test.go" ]; then
+ dc_available=1
+ for variant in head base assembly; do
+  for fixture in dc_pair_native_bench_test.go dc_pair_inplace_native_bench_test.go; do
+   if [ "$variant" != head ]; then cp "$scratch/head/internal/vp8/dsp/$fixture" "$scratch/$variant/internal/vp8/dsp/$fixture"; fi
+   cmp "$scratch/head/internal/vp8/dsp/$fixture" "$scratch/$variant/internal/vp8/dsp/$fixture"
+  done
+  if ! grep -q '^func DCOnlyIDCT4x4AddPairInPlaceInt32(' "$scratch/$variant/internal/vp8/dsp/idct.go"; then
+   cp "$root/scripts/benchmark-fixtures/dc_pair_inplace_reference_shim.go.txt" "$scratch/$variant/internal/vp8/dsp/dc_pair_inplace_reference_shim_test.go"
+   printf '%s shim=reference-only\n' "$variant" >> "$output_dir/dc-pair-fixtures.txt"
+  else
+   printf '%s shim=absent-original-API-retained\n' "$variant" >> "$output_dir/dc-pair-fixtures.txt"
+  fi
+ done
+ for fixture in dc_pair_native_bench_test.go dc_pair_inplace_native_bench_test.go; do
+  cp "$scratch/head/internal/vp8/dsp/$fixture" "$output_dir/$fixture"
+  sha256sum "$scratch/head/internal/vp8/dsp/$fixture" >> "$output_dir/dc-pair-fixtures.txt"
+ done
+ cp "$root/scripts/benchmark-fixtures/dc_pair_inplace_reference_shim.go.txt" "$output_dir/dc-pair-reference-shim.go.txt"
+ sha256sum "$root/scripts/benchmark-dc-pair-focused.sh" "$root/scripts/benchmark-fixtures/dc_pair_inplace_reference_shim.go.txt" >> "$output_dir/dc-pair-fixtures.txt"
+fi
+
 phase=dispatch-and-oracles
 # AVX2 must be genuinely selected on this runner. The old assembly reference
 # retains its own backend; copied public fixtures verify its actual outputs.
@@ -177,6 +201,20 @@ for protocol in ('B.Loop public','B.N legacy diagnostic'):
  lines.append('')
 (root/'summary.md').write_text('\n'.join(lines)+'\n')
 PY
+# Keep the paired-DC component comparison separate from the original SSE8 data.
+phase=dc-pair
+if [ "$dc_available" = 1 ]; then
+ {
+  GOVPX_REQUIRE_SIMD=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off ./internal/pixel ./internal/vp8/dsp -run '^Test(DCOnly|DCPair|AddConstantPair)' -count=1 -v
+  GOVPX_REQUIRE_SIMD=1 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./internal/vp8/dsp -run '^Test(DCOnly|DCPair|AddConstantPair)' -count=1 -v
+  GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off ./internal/pixel ./internal/vp8/dsp -run '^Test(DCOnly|DCPair|AddConstantPair)' -count=1 -v
+  GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh -C "$scratch/head" test -mod=readonly -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel ./internal/vp8/dsp -run '^Test(DCOnly|DCPair|AddConstantPair)' -count=1 -v
+ } > "$output_dir/dc-pair-validation.txt" 2>&1
+ sh "$root/scripts/benchmark-dc-pair-focused.sh" "$scratch/assembly.test" "$scratch/base.test" "$scratch/head.test" "$output_dir/dc-pair"
+else
+ printf '# DCPAIR_UNAVAILABLE_SOURCE_COMPATIBILITY\n' > "$output_dir/dc-pair-fixtures.txt"
+fi
+
 # Separate current/base pixel API coverage AFTER every original SSE8 timing,
 # code capture and summary. Old691 has no pixel package and receives no adapter.
 phase=pixel-optional

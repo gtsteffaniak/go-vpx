@@ -18,7 +18,6 @@ func DCPairInt32Native(c0, c1 int32, pred []byte, ps int, dst []byte, ds int) {
 		dcPairNativeScalar(c0, c1, pred, ps, dst, ds)
 		return
 	}
-	d0, d1 := dcPairNativeDelta(c0), dcPairNativeDelta(c1)
 fast:
 	for {
 		if ps < 8 || ds < 8 || len(pred) < 8 || len(dst) < 8 || ps > (len(pred)-8)/3 || ds > (len(dst)-8)/3 {
@@ -30,12 +29,13 @@ fast:
 		if !exact && !disjoint {
 			break fast
 		}
-		delta := dcPairSignedDelta8(d0, d1)
+		delta := dcPairSignedCoeff8(c0, c1)
 		sp, out := unsafe.Pointer(unsafe.SliceData(pred)), unsafe.Pointer(unsafe.SliceData(dst))
 		dcPairSignedRows2(sp, ps, out, ds, delta)
 		dcPairSignedRows2(unsafe.Add(sp, 2*ps), ps, unsafe.Add(out, 2*ds), ds, delta)
 		return
 	}
+	d0, d1 := dcPairNativeDelta(c0), dcPairNativeDelta(c1)
 	// Exact enabled fallback: block0 is complete before slicing block1.
 	// Capture each four-byte prediction before its store as AddConstant does.
 	for block := range 2 {
