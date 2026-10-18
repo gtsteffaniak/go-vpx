@@ -653,7 +653,10 @@ func (e *VP8Encoder) buildReconstructingInterFrameCoefficientsWithSegmentation(s
 					mbSource = denoiseOverlay
 				} else {
 					overlay := e.applyDenoiserToInterMacroblock(src, denoiseOverlay, rows, cols, row, col, &decision)
-					if overlay.y {
+					if overlay.yAverage {
+						mbSource.Y = e.denoiser.runningAvg[denoiserAvgIntra].Img.Y
+						mbSource.YStride = e.denoiser.runningAvg[denoiserAvgIntra].Img.YStride
+					} else if overlay.y {
 						mbSource.Y = denoiseOverlay.Y
 						mbSource.YStride = denoiseOverlay.YStride
 					}

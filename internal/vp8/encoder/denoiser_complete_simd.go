@@ -7,6 +7,14 @@ package encoder
 import "github.com/thesyncim/govpx/internal/pixel"
 
 func denoiserFilterYCompleteSIMD(mc []byte, ms int, avg []byte, as int, sig []byte, ss int, motion uint32, increase bool) (int, bool) {
+	return denoiserFilterYCompleteSIMDWork(mc, ms, avg, as, sig, ss, motion, increase, true)
+}
+
+func denoiserFilterYCompleteAverageSIMD(mc []byte, ms int, avg []byte, as int, sig []byte, ss int, motion uint32, increase bool) (int, bool) {
+	return denoiserFilterYCompleteSIMDWork(mc, ms, avg, as, sig, ss, motion, increase, false)
+}
+
+func denoiserFilterYCompleteSIMDWork(mc []byte, ms int, avg []byte, as int, sig []byte, ss int, motion uint32, increase bool, updateSignal bool) (int, bool) {
 	if !pixel.Enabled {
 		return 0, false
 	}
@@ -20,7 +28,12 @@ func denoiserFilterYCompleteSIMD(mc []byte, ms int, avg []byte, as int, sig []by
 			inc, level = 1, 5
 		}
 	}
-	filtered, ok := pixel.DenoiseLuma16(mc, ms, avg, as, sig, ss, inc, level, threshold)
+	var filtered, ok bool
+	if updateSignal {
+		filtered, ok = pixel.DenoiseLuma16(mc, ms, avg, as, sig, ss, inc, level, threshold)
+	} else {
+		filtered, ok = pixel.DenoiseLuma16Average(mc, ms, avg, as, sig, ss, inc, level, threshold)
+	}
 	if filtered {
 		return DenoiserFilterBlock, ok
 	}

@@ -89,12 +89,12 @@ func astraNewDenoiserFixture(tb testing.TB, pattern string, partial, alias, spat
 
 func astraDenoiserCompare(t *testing.T, got, want *astraDenoiserFixture, gm, wm denoiserPlaneOverlay) {
 	t.Helper()
-	if gm != wm || !bytes.Equal(got.e.denoiser.state, want.e.denoiser.state) {
+	if (gm.y || gm.yAverage) != (wm.y || wm.yAverage) || gm.u != wm.u || gm.v != wm.v || !bytes.Equal(got.e.denoiser.state, want.e.denoiser.state) {
 		t.Fatalf("overlay/state mismatch: %+v/%+v, %v/%v", gm, wm, got.e.denoiser.state, want.e.denoiser.state)
 	}
 	for _, pair := range [][2][]byte{
 		{got.source.Y, want.source.Y}, {got.source.U, want.source.U}, {got.source.V, want.source.V},
-		{got.filtered.Y, want.filtered.Y}, {got.filtered.U, want.filtered.U}, {got.filtered.V, want.filtered.V},
+		{got.filtered.U, want.filtered.U}, {got.filtered.V, want.filtered.V},
 		{got.e.denoiser.mcY[:], want.e.denoiser.mcY[:]},
 		{got.e.denoiser.mcRunning.Img.YFull, want.e.denoiser.mcRunning.Img.YFull},
 		{got.e.denoiser.mcRunning.Img.UFull, want.e.denoiser.mcRunning.Img.UFull},
@@ -102,6 +102,27 @@ func astraDenoiserCompare(t *testing.T, got, want *astraDenoiserFixture, gm, wm 
 	} {
 		if !bytes.Equal(pair[0], pair[1]) {
 			t.Fatal("source, overlay, luma scratch, or fallback image mismatch")
+		}
+	}
+	// The overlay's Y plane is scratch when its signal is average-backed or
+	// raw-backed. Compare exactly the Y view the coefficient consumer receives.
+	selectedY := func(f *astraDenoiserFixture, mask denoiserPlaneOverlay) ([]byte, int) {
+		if mask.yAverage {
+			img := &f.e.denoiser.runningAvg[denoiserAvgIntra].Img
+			return img.Y, img.YStride
+		}
+		if mask.y {
+			return f.filtered.Y, f.filtered.YStride
+		}
+		return f.source.Y, f.source.YStride
+	}
+	gy, gs := selectedY(got, gm)
+	wy, ws := selectedY(want, wm)
+	for r := range 16 {
+		goff := (got.row*16+r)*gs + got.col*16
+		woff := (want.row*16+r)*ws + want.col*16
+		if !bytes.Equal(gy[goff:goff+16], wy[woff:woff+16]) {
+			t.Fatal("selected Y signal differs")
 		}
 	}
 	for k := range got.e.denoiser.runningAvg {

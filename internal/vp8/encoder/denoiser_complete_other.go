@@ -7,3 +7,7 @@ package encoder
 func denoiserFilterYCompleteSIMD(_ []byte, _ int, _ []byte, _ int, _ []byte, _ int, _ uint32, _ bool) (int, bool) {
 	return 0, false
 }
+
+func denoiserFilterYCompleteAverageSIMD(_ []byte, _ int, _ []byte, _ int, _ []byte, _ int, _ uint32, _ bool) (int, bool) {
+	return 0, false
+}

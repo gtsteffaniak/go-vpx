@@ -138,6 +138,15 @@ func DenoiserFilterY(mcRunningAvg []byte, mcStride int, runningAvg []byte, avgSt
 	return DenoiserFilterYScalar(mcRunningAvg, mcStride, runningAvg, avgStride, sig, sigStride, motionMagnitude, increaseDenoising)
 }
 
+// DenoiserFilterYAverageOnly attempts a complete filter without modifying
+// sig. handled=false leaves all buffers untouched, so callers can retain
+// their staged-signal fallback. A handled DenoiserFilterBlock leaves the final
+// signal in avg. A handled DenoiserCopyBlock may leave tentative pixels in avg;
+// the caller must restore avg from sig, as in the regular denoiser path.
+func DenoiserFilterYAverageOnly(mc []byte, ms int, avg []byte, as int, sig []byte, ss int, motion uint32, increase bool) (int, bool) {
+	return denoiserFilterYCompleteAverageSIMD(mc, ms, avg, as, sig, ss, motion, increase)
+}
+
 func DenoiserFilterYScalar(mcRunningAvg []byte, mcStride int, runningAvg []byte, avgStride int, sig []byte, sigStride int, motionMagnitude uint32, increaseDenoising bool) int {
 	adj := [3]int{3, 4, 6}
 	shiftInc1 := 0

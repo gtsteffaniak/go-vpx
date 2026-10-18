@@ -11,6 +11,16 @@ import (
 // correction pass. It returns (filtered, handled). Declines do not write.
 // Column sums clamp to127 before the first decision and again after correction.
 func DenoiseLuma16(mc []byte, ms int, avg []byte, as int, sig []byte, ss, inc, level, thresholdSum int) (bool, bool) {
+	return denoiseLuma16(mc, ms, avg, as, sig, ss, inc, level, thresholdSum, true)
+}
+
+// DenoiseLuma16Average leaves the signal read-only. An accepted caller can
+// consume avg directly instead of copying it back into a staged signal block.
+func DenoiseLuma16Average(mc []byte, ms int, avg []byte, as int, sig []byte, ss, inc, level, thresholdSum int) (bool, bool) {
+	return denoiseLuma16(mc, ms, avg, as, sig, ss, inc, level, thresholdSum, false)
+}
+
+func denoiseLuma16(mc []byte, ms int, avg []byte, as int, sig []byte, ss, inc, level, thresholdSum int, updateSignal bool) (bool, bool) {
 	if !Enabled || inc < 0 || inc > 1 || level < 3 || level > 5 || (thresholdSum != 512 && thresholdSum != 600) || ms < 16 || as < 16 || ss < 16 || len(mc) < 16 || len(avg) < 16 || len(sig) < 16 || ms > (len(mc)-16)/15 || as > (len(avg)-16)/15 || ss > (len(sig)-16)/15 {
 		return false, false
 	}
@@ -63,8 +73,10 @@ func DenoiseLuma16(mc []byte, ms int, avg []byte, as int, sig []byte, ss, inc, l
 			return false, true
 		}
 	}
-	for y := range 16 {
-		archsimd.LoadUint8x16(avg[y*as:]).Store(sig[y*ss:])
+	if updateSignal {
+		for y := range 16 {
+			archsimd.LoadUint8x16(avg[y*as:]).Store(sig[y*ss:])
+		}
 	}
 	return true, true
 }
