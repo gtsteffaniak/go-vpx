@@ -73,6 +73,8 @@ func updateCoefProbsTxSize(bw *bitstream.Writer,
 		return
 	}
 
+	// Retain each independent slot decision for the emit pass.
+	var proposed vp9dec.CoefProbsModel
 	// Dry run.
 	var totalSavings int64
 	updateCount := 0
@@ -82,7 +84,8 @@ func updateCoefProbsTxSize(bw *bitstream.Writer,
 				bcc := vp9dec.BandCoefContexts(k)
 				for l := range bcc {
 					for t := range UnconstrainedNodes {
-						s, _ := coefSlotSavings(probs, counts, i, j, k, l, t, stepsize)
+						s, newp := coefSlotSavings(probs, counts, i, j, k, l, t, stepsize)
+						proposed[i][j][k][l][t] = newp
 						if s > 0 {
 							totalSavings += s - int64(VP9CostZero(DiffUpdateProb))
 							updateCount++
@@ -108,9 +111,9 @@ func updateCoefProbsTxSize(bw *bitstream.Writer,
 				bcc := vp9dec.BandCoefContexts(k)
 				for l := range bcc {
 					for t := range UnconstrainedNodes {
-						s, newp := coefSlotSavings(probs, counts, i, j, k, l, t, stepsize)
+						newp := proposed[i][j][k][l][t]
 						oldp := probs[i][j][k][l][t]
-						if s > 0 && newp != oldp {
+						if newp != oldp {
 							bw.Write(1, DiffUpdateProb)
 							WriteProbDiffUpdate(bw, newp, oldp)
 							probs[i][j][k][l][t] = newp
