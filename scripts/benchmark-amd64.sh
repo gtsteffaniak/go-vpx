@@ -316,8 +316,8 @@ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBac
  GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestFP32' -count=1 -v
  GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestFP32' -count=1 -v
  GODEBUG=cpu.avx512f=off GOVPX_REQUIRE_SIMD=1 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestFP32' -count=1 -v
- GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestFP32' -count=1 -v
- GODEBUG=cpu.avx=off,cpu.avx2=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestFP32' -count=1 -v
+ GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestFP32' -count=1 -v
+ GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 GOVPX_REQUIRE_FP32_OFF=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestFP32' -count=1 -v
 } >> "$output_dir/fp16-validation.txt" 2>&1
 
 if [ -n "$previous_dir" ]; then
