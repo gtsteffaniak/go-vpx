@@ -173,13 +173,24 @@ func Average(src []byte, ss int, dst []byte, ds, w, h int) {
 		return
 	}
 
-	one := archsimd.BroadcastInt16x8(1)
+	// Small rows contain no vector packet. Avoid rechecking the packet loop
+	// at every row while retaining the original scalar read/store order.
+	if w < 8 {
+		for y := range h {
+			a, b := src[y*ss:], dst[y*ds:]
+			for x := 0; x < w; x++ {
+				b[x] = byte((int(a[x]) + int(b[x]) + 1) >> 1)
+			}
+		}
+		return
+	}
+
 	for y := range h {
 		a, b := src[y*ss:], dst[y*ds:]
 		x := 0
 		for ; x+8 <= w; x += 8 {
-			v := widen8(load8(a[x:])).Add(widen8(load8(b[x:]))).Add(one).ShiftAllRight(1)
-			storeBytes8(b[x:], packBytes(v))
+			v := load8(a[x:]).Average(load8(b[x:]))
+			storeBytes8(b[x:], v)
 		}
 		for ; x < w; x++ {
 			b[x] = byte((int(a[x]) + int(b[x]) + 1) >> 1)

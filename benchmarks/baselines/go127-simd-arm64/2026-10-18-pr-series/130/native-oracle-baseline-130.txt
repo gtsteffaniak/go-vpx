@@ -1,0 +1,3 @@
+=== RUN   TestRound3Average
+--- PASS: TestRound3Average (0.01s)
+PASS
