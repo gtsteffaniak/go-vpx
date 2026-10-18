@@ -1,0 +1,6 @@
+goos: linux
+goarch: amd64
+pkg: github.com/thesyncim/govpx
+cpu: AMD EPYC 7763 64-Core Processor                
+BenchmarkInterFrameSubpelStepNoStats 	   59343	       807.0 ns/op	       0 B/op	       0 allocs/op
+PASS

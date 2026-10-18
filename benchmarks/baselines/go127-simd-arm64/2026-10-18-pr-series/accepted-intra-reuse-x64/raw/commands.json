@@ -1,0 +1,419 @@
+[
+  {
+    "argv": [
+      "uname",
+      "-a"
+    ],
+    "output": "uname.txt",
+    "start_utc": "2026-10-18T19:51:53.926991+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:51:53.928241+00:00"
+  },
+  {
+    "argv": [
+      "lscpu"
+    ],
+    "output": "lscpu.txt",
+    "start_utc": "2026-10-18T19:51:53.928418+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:51:53.932343+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "env",
+      "GOVERSION"
+    ],
+    "output": "goversion.txt",
+    "start_utc": "2026-10-18T19:51:53.932558+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:51:53.942310+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "env",
+      "GOCACHE"
+    ],
+    "output": "gocache.txt",
+    "start_utc": "2026-10-18T19:51:53.942675+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:51:53.951979+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-jkmk_0om/parent",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-jkmk_0om/parent-pixel",
+      "./internal/pixel"
+    ],
+    "output": "build-parent-pixel.txt",
+    "start_utc": "2026-10-18T19:51:54.685071+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:52:12.130258+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-jkmk_0om/parent",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-jkmk_0om/parent-custom",
+      "."
+    ],
+    "output": "build-parent-custom.txt",
+    "start_utc": "2026-10-18T19:52:12.130735+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:52:35.753268+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-jkmk_0om/parent",
+      "build",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-jkmk_0om/parent-whole",
+      "./cmd/govpx-bench"
+    ],
+    "output": "build-parent-whole.txt",
+    "start_utc": "2026-10-18T19:52:35.753668+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:52:43.367733+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/parent-pixel",
+      "-test.run=^Test(BackendSelected$|FP32PublicHost$|FP32ActualFeature$)",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "oracle-parent.txt",
+    "start_utc": "2026-10-18T19:52:43.368214+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:52:43.370435+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/parent-custom",
+      "-test.run=^Test(AcceptedWholeIntraReuse|AcceptedWholeIntraReuseSkipped|VP8Algorithm2Stream|MLCacheStreamNative|ThreadedKeyFrameReferencesMatchDecoder)$",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "custom-oracle-parent-custom.txt",
+    "start_utc": "2026-10-18T19:52:43.370999+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:52:43.723881+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-jkmk_0om/current",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-jkmk_0om/current-pixel",
+      "./internal/pixel"
+    ],
+    "output": "build-current-pixel.txt",
+    "start_utc": "2026-10-18T19:52:43.761410+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:52:46.492501+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-jkmk_0om/current",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-jkmk_0om/current-custom",
+      "."
+    ],
+    "output": "build-current-custom.txt",
+    "start_utc": "2026-10-18T19:52:46.492998+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:10.025814+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-jkmk_0om/current",
+      "build",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-jkmk_0om/current-whole",
+      "./cmd/govpx-bench"
+    ],
+    "output": "build-current-whole.txt",
+    "start_utc": "2026-10-18T19:53:10.026350+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:17.757170+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/current-pixel",
+      "-test.run=^Test(BackendSelected$|FP32PublicHost$|FP32ActualFeature$)",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "oracle-current.txt",
+    "start_utc": "2026-10-18T19:53:17.757678+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:17.759766+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/current-custom",
+      "-test.run=^Test(AcceptedWholeIntraReuse|AcceptedWholeIntraReuseSkipped|VP8Algorithm2Stream|MLCacheStreamNative|ThreadedKeyFrameReferencesMatchDecoder)$",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "custom-oracle-current-custom.txt",
+    "start_utc": "2026-10-18T19:53:17.760220+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:18.125996+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/parent-custom",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkInterFrameSubpelStepNoStats$",
+      "-test.benchtime=40ms",
+      "-test.cpu=1",
+      "-test.count=1",
+      "-test.benchmem"
+    ],
+    "output": "r1-parent-custom.txt",
+    "start_utc": "2026-10-18T19:53:18.160734+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:18.228670+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/current-custom",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkInterFrameSubpelStepNoStats$",
+      "-test.benchtime=40ms",
+      "-test.cpu=1",
+      "-test.count=1",
+      "-test.benchmem"
+    ],
+    "output": "r1-current-custom.txt",
+    "start_utc": "2026-10-18T19:53:18.229483+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:18.297548+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/parent-whole",
+      "-codec=vp8",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-fps=30",
+      "-bitrate=2500",
+      "-mode=realtime",
+      "-cpu-used=-8",
+      "-threads=1",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "output": "r1-parent-whole-vp8-cpu-8.json",
+    "start_utc": "2026-10-18T19:53:18.298035+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:21.033105+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/current-whole",
+      "-codec=vp8",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-fps=30",
+      "-bitrate=2500",
+      "-mode=realtime",
+      "-cpu-used=-8",
+      "-threads=1",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "output": "r1-current-whole-vp8-cpu-8.json",
+    "start_utc": "2026-10-18T19:53:21.033717+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:23.712402+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/parent-whole",
+      "-codec=vp8",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-fps=30",
+      "-bitrate=2500",
+      "-mode=realtime",
+      "-cpu-used=8",
+      "-threads=1",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "output": "r1-parent-whole-vp8-cpu8.json",
+    "start_utc": "2026-10-18T19:53:23.713067+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:26.874725+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/current-whole",
+      "-codec=vp8",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-fps=30",
+      "-bitrate=2500",
+      "-mode=realtime",
+      "-cpu-used=8",
+      "-threads=1",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "output": "r1-current-whole-vp8-cpu8.json",
+    "start_utc": "2026-10-18T19:53:26.875398+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:29.968310+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/current-custom",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkInterFrameSubpelStepNoStats$",
+      "-test.benchtime=40ms",
+      "-test.cpu=1",
+      "-test.count=1",
+      "-test.benchmem"
+    ],
+    "output": "r2-current-custom.txt",
+    "start_utc": "2026-10-18T19:53:29.968991+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:30.037377+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/parent-custom",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkInterFrameSubpelStepNoStats$",
+      "-test.benchtime=40ms",
+      "-test.cpu=1",
+      "-test.count=1",
+      "-test.benchmem"
+    ],
+    "output": "r2-parent-custom.txt",
+    "start_utc": "2026-10-18T19:53:30.038014+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:30.106098+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/current-whole",
+      "-codec=vp8",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-fps=30",
+      "-bitrate=2500",
+      "-mode=realtime",
+      "-cpu-used=-8",
+      "-threads=1",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "output": "r2-current-whole-vp8-cpu-8.json",
+    "start_utc": "2026-10-18T19:53:30.106595+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:32.787676+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/parent-whole",
+      "-codec=vp8",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-fps=30",
+      "-bitrate=2500",
+      "-mode=realtime",
+      "-cpu-used=-8",
+      "-threads=1",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "output": "r2-parent-whole-vp8-cpu-8.json",
+    "start_utc": "2026-10-18T19:53:32.788370+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:35.516984+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/current-whole",
+      "-codec=vp8",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-fps=30",
+      "-bitrate=2500",
+      "-mode=realtime",
+      "-cpu-used=8",
+      "-threads=1",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "output": "r2-current-whole-vp8-cpu8.json",
+    "start_utc": "2026-10-18T19:53:35.517674+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:38.688432+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-jkmk_0om/parent-whole",
+      "-codec=vp8",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-fps=30",
+      "-bitrate=2500",
+      "-mode=realtime",
+      "-cpu-used=8",
+      "-threads=1",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "output": "r2-parent-whole-vp8-cpu8.json",
+    "start_utc": "2026-10-18T19:53:38.689134+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T19:53:41.826083+00:00"
+  }
+]

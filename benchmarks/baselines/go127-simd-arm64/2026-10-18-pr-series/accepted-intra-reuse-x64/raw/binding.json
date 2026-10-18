@@ -1,0 +1,96 @@
+{
+  "commits": {
+    "parent": "7e0e37b7bbbcda65523f5581e7879c7d2d93827c",
+    "current": "2bbc6431b7e1c69e09ab086fa030f2ab7d6dc24d"
+  },
+  "PGO": "off",
+  "CGO_ENABLED": 1,
+  "GOMAXPROCS": 1,
+  "driver_sha256": "36729cdc79dc6d9ff0bf642eb7dd9f0d9bc98344b8351dfbf94512238f685f23",
+  "shared_fixture_sha256": {
+    "internal/pixel/fp32_optional_native_test.go": "9cfc327f50e989209bd69d5dd75d51e9905379b96b09dffa4686387bea2d9bac",
+    "internal/vp9/encoder/quant_fp16_native_test.go": "6db86483a9c1a7d6cfd8c59453375a39d86a6d9d9109c75114982cd71e14f67e",
+    "internal/pixel/quantize_fp_packets_test.go": "2f596d080e68ef3f969bfda94829c827c0afa8eb386bc4f44edd5633b315e419"
+  },
+  "scope": "Preliminary two-round feedback; no race/profiles/trace/codegen or full source audit.",
+  "variants": {
+    "parent": {
+      "actual_SDK_features": {
+        "AVX512": false,
+        "AVX2": true,
+        "Enabled": true
+      },
+      "original_fixture_sha256": {
+        "internal/pixel/fp32_optional_native_test.go": "9cfc327f50e989209bd69d5dd75d51e9905379b96b09dffa4686387bea2d9bac",
+        "internal/vp9/encoder/quant_fp16_native_test.go": "6db86483a9c1a7d6cfd8c59453375a39d86a6d9d9109c75114982cd71e14f67e",
+        "internal/pixel/quantize_fp_packets_test.go": "2f596d080e68ef3f969bfda94829c827c0afa8eb386bc4f44edd5633b315e419"
+      },
+      "production_source_sha256": {
+        "internal/pixel/quantize_fp_amd64.go": "aa838dec9cd8733b7c74b20220b7f39f0059209573fc43c09bd61bbb093b572a",
+        "internal/pixel/quantize_fp32_avx512_amd64.go": "d487f136dbc121772b77abf7da0c49630b54acbc40ca355577f1cbb5e1b6e96b",
+        "internal/pixel/quantize_fp_simd.go": "47b401b2e9f34afc5bdaf3f2c49d41f2f6559ee4bf85a6442878960a7f830572"
+      },
+      "binaries": {
+        "pixel": {
+          "sha256": "abe6897dcae9b068ef1101088bed69f8a5cf68a325525fcd134a3c7f06ecf4d5",
+          "bytes": 5933163
+        },
+        "custom": {
+          "sha256": "5ffc733ac8a3bc21c7514a73cede50ed59e3234d2877a8d3c4b23c15350e0b0a",
+          "bytes": 25078513
+        },
+        "whole": {
+          "sha256": "e4eb733c8b3b89007df6819587a48881250611782447cde5ba7e1f696c30b633",
+          "bytes": 12887848
+        }
+      }
+    },
+    "current": {
+      "actual_SDK_features": {
+        "AVX512": false,
+        "AVX2": true,
+        "Enabled": true
+      },
+      "original_fixture_sha256": {
+        "internal/pixel/fp32_optional_native_test.go": "9cfc327f50e989209bd69d5dd75d51e9905379b96b09dffa4686387bea2d9bac",
+        "internal/vp9/encoder/quant_fp16_native_test.go": "6db86483a9c1a7d6cfd8c59453375a39d86a6d9d9109c75114982cd71e14f67e",
+        "internal/pixel/quantize_fp_packets_test.go": "2f596d080e68ef3f969bfda94829c827c0afa8eb386bc4f44edd5633b315e419"
+      },
+      "production_source_sha256": {
+        "internal/pixel/quantize_fp_amd64.go": "aa838dec9cd8733b7c74b20220b7f39f0059209573fc43c09bd61bbb093b572a",
+        "internal/pixel/quantize_fp32_avx512_amd64.go": "d487f136dbc121772b77abf7da0c49630b54acbc40ca355577f1cbb5e1b6e96b",
+        "internal/pixel/quantize_fp_simd.go": "47b401b2e9f34afc5bdaf3f2c49d41f2f6559ee4bf85a6442878960a7f830572"
+      },
+      "binaries": {
+        "pixel": {
+          "sha256": "7ff2c39f70158c59e4ed6043dbc4ec867e478be2520c9ed07e2aa8b576aea69e",
+          "bytes": 5933427
+        },
+        "custom": {
+          "sha256": "419bcd73833fda8ccfb82c8e73fddb0be1b38955fd548b9d494dc0e48ec18af2",
+          "bytes": 25088707
+        },
+        "whole": {
+          "sha256": "f1d6453c4a652eb8ec4bee81e1382e3638f2733744bc1e199b7eaaa5665787f2",
+          "bytes": 12884307
+        }
+      }
+    }
+  },
+  "benchmark_plan": [
+    [
+      "custom",
+      ".",
+      "^BenchmarkInterFrameSubpelStepNoStats$"
+    ]
+  ],
+  "whole_codec_plan": {
+    "mode": "two720p-rounds",
+    "codec": "vp8",
+    "cpu_used": [
+      -8,
+      8
+    ]
+  },
+  "oracle_override": "^Test(AcceptedWholeIntraReuse|AcceptedWholeIntraReuseSkipped|VP8Algorithm2Stream|MLCacheStreamNative|ThreadedKeyFrameReferencesMatchDecoder)$"
+}

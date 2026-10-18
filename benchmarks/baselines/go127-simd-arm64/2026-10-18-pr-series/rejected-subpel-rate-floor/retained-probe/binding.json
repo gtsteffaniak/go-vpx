@@ -1,0 +1,15 @@
+{
+  "preliminary": true,
+  "retained_in_production": false,
+  "parent_runtime": "2bbc6431b7e1c69e09ab086fa030f2ab7d6dc24d",
+  "hardware": "Apple M4 Max arm64 Darwin",
+  "go": "1.27.2",
+  "flags": "GOEXPERIMENT=simd CGO_ENABLED=1 GOMAXPROCS=1 PGO=off",
+  "binaries": {
+    "/private/tmp/govpx-frame-recon-next/whole": "cfed21be3e60f4b7a495286495f78ca4b09e4cfaa31df356e89e777963e9959a",
+    "/private/tmp/govpx-subpel-floor/whole": "d1a2542ae1af57972ff6649bcd035f9cecd6a7f3390c397af291c13873643363",
+    "/private/tmp/govpx-subpel-floor/iterative-whole": "c70910f301c8fb24b0cdbbe68153df3226768a679676447e21d9caf366e19136"
+  },
+  "correctness": "scripts/go.sh -C /private/tmp/govpx-subpel-floor test -pgo=off . -run ^Test(InterFrameSubpelStepNoStatsMatchesStatsPath|VP8Algorithm2Stream|MLCacheStreamNative)$ -count=1 passed",
+  "limit": "First pair of iterative-only follow-up overlapped Astra shared-fixture compilation. Follow-up did not show codec win; both variants rejected. No full CI/C/profile."
+}

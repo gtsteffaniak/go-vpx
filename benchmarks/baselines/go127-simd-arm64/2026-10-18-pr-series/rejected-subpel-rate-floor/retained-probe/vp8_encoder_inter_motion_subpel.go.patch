@@ -1,0 +1,35 @@
+--- a/vp8_encoder_inter_motion_subpel.go
++++ b/vp8_encoder_inter_motion_subpel.go
+@@ -130,6 +130,7 @@
+ 	if !bestEval.ok {
+ 		return vp8enc.MotionVector{}, 0, 0, 0, false
+ 	}
++
+ 	bestEval, bestRow, bestCol = s.directionalStepNoStats(&subCtx, bestRow, bestCol, 2, bestEval, errorPerBit)
+ 	if quarter {
+ 		bestEval, bestRow, bestCol = s.directionalStepNoStats(&subCtx, bestRow, bestCol, 1, bestEval, errorPerBit)
+@@ -265,6 +266,13 @@
+ 		return s.mvCosts.ErrorCostFromEighthDeltas(mvRow8, mvCol8, int(s.bestRefMV.Row), int(s.bestRefMV.Col), errorPerBit)
+ 	}
+ 	return vp8enc.MotionVectorErrorCost(vp8enc.MotionVector{Row: int16(mvRow8), Col: int16(mvCol8)}, s.bestRefMV, s.mvProbs, errorPerBit)
++}
++
++func (s *interFrameSubpixelSearch) minimumSubpelCostReached(eval subpelCandidateEval, errorPerBit int) bool {
++	if s.mvProbs == nil {
++		return eval.cost == 0
++	}
++	return s.mvCosts != nil && eval.cost <= s.mvCosts.MinimumErrorCost(errorPerBit)
+ }
+ 
+ // subpelSearchCtx hoists the per-MB invariants for the iterative sub-pel
+@@ -567,6 +575,10 @@
+ 	if !bestEval.ok {
+ 		return vp8enc.MotionVector{}, 0, 0, 0, false
+ 	}
++	// Strict search comparisons cannot beat the global MV-rate floor.
++	if s.minimumSubpelCostReached(bestEval, errorPerBit) && vp8enc.InterFrameSubpixelMotionVectorInRange(s.best, s.bestRefMV) {
++		return s.best, bestEval.cost, bestEval.variance, bestEval.sse, true
++	}
+ 
+ 	for range 3 {
+ 		leftEval := s.boundedCandidateEvalNoStats(&subCtx, bounds, tr, tc-2, refRow4, refCol4, errorPerBit)

@@ -1,0 +1,32 @@
+--- a/internal/vp8/encoder/motion.go
++++ b/internal/vp8/encoder/motion.go
+@@ -36,6 +36,7 @@
+ 
+ type MotionVectorCostTables struct {
+ 	Component [2][2*mvComponentMax + 1]int32
++	minimum   [2]int32
+ }
+ 
+ func WriteMotionVector(w *BoolWriter, probs *[2][tables.MVPCount]uint8, mv MotionVector) error {
+@@ -167,9 +168,19 @@
+ 		return
+ 	}
+ 	table := &t.Component[component]
++	minimum := int32(1 << 30)
+ 	for delta := -mvComponentMax; delta <= mvComponentMax; delta++ {
+-		table[delta+mvComponentMax] = int32(motionVectorComponentCost(delta, probs))
+-	}
++		cost := int32(motionVectorComponentCost(delta, probs))
++		table[delta+mvComponentMax] = cost
++		minimum = min(minimum, cost)
++	}
++	t.minimum[component] = minimum
++}
++
++// MinimumErrorCost is a lower bound for every signed or clamped table lookup.
++// BuildComponents keeps it synchronized with the component costs.
++func (t *MotionVectorCostTables) MinimumErrorCost(errorPerBit int) int {
++	return ((int(t.minimum[0])+int(t.minimum[1]))*errorPerBit + 128) >> 8
+ }
+ 
+ // MotionVectorSADCost mirrors libvpx mvsad_err_cost (mcomp.c). libvpx

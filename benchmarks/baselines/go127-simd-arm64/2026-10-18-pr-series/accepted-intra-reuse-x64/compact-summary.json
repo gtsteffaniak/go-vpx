@@ -1,0 +1,133 @@
+{
+  "run": 39160666370,
+  "url": "https://github.com/thesyncim/govpx/actions/runs/39160666370",
+  "cpu": "AMD EPYC7763",
+  "actual_features": {
+    "AVX2": true,
+    "AVX512": false,
+    "Enabled": true
+  },
+  "commits": {
+    "parent": "7e0e37b7bbbcda65523f5581e7879c7d2d93827c",
+    "current": "2bbc6431b7e1c69e09ab086fa030f2ab7d6dc24d"
+  },
+  "whole_codec_plan": {
+    "mode": "two720p-rounds",
+    "codec": "vp8",
+    "cpu_used": [
+      -8,
+      8
+    ]
+  },
+  "scope": "VP8 1280x720/60inputs/30fps/2500kbps/realtime/threads1/GOMAX1/PGOoff;twoAB/BArounds perCPU. No C/profiles/fullCI.",
+  "whole": {
+    "-8": {
+      "pairs": [
+        {
+          "round": 1,
+          "order": [
+            "parent",
+            "current"
+          ],
+          "parent_ms": 14.545363,
+          "current_ms": 14.226403,
+          "speedup": 1.0224202843122046,
+          "time_delta_percent": -2.192863801336553,
+          "throughput_delta_percent": 2.2420284312204553,
+          "semantic_fields_equal": 22,
+          "allocations_parent": 0,
+          "allocations_current": 0
+        },
+        {
+          "round": 2,
+          "order": [
+            "current",
+            "parent"
+          ],
+          "parent_ms": 14.635821,
+          "current_ms": 14.329881,
+          "speedup": 1.0213497934839795,
+          "time_delta_percent": -2.0903507907072627,
+          "throughput_delta_percent": 2.1349793483979473,
+          "semantic_fields_equal": 22,
+          "allocations_parent": 0,
+          "allocations_current": 0
+        }
+      ],
+      "median_speedup": 1.0218830993556447,
+      "median_throughput_delta_percent": 2.1883099355644697,
+      "median_time_delta_percent": -2.141448407302482
+    },
+    "8": {
+      "pairs": [
+        {
+          "round": 1,
+          "order": [
+            "parent",
+            "current"
+          ],
+          "parent_ms": 17.152662,
+          "current_ms": 16.506257,
+          "speedup": 1.0391612102004713,
+          "time_delta_percent": -3.76854041664203,
+          "throughput_delta_percent": 3.9161210200471253,
+          "semantic_fields_equal": 22,
+          "allocations_parent": 0,
+          "allocations_current": 0
+        },
+        {
+          "round": 2,
+          "order": [
+            "current",
+            "parent"
+          ],
+          "parent_ms": 16.747204,
+          "current_ms": 16.765289,
+          "speedup": 0.9989212831344572,
+          "time_delta_percent": 0.10798817522017501,
+          "throughput_delta_percent": -0.10787168655428392,
+          "semantic_fields_equal": 22,
+          "allocations_parent": 0,
+          "allocations_current": 0
+        }
+      ],
+      "median_speedup": 1.0188846048813,
+      "median_throughput_delta_percent": 1.888460488130006,
+      "median_time_delta_percent": -1.8534586537893638
+    }
+  },
+  "unrelated_control_benchmark": {
+    "BenchmarkInterFrameSubpelStepNoStats": {
+      "raw_ns": {
+        "parent": [
+          804.5,
+          813.9
+        ],
+        "current": [
+          814.3,
+          807.0
+        ]
+      },
+      "speedup": 0.9982113119101956,
+      "paired_speedups": [
+        0.9879651234188874,
+        1.008550185873606
+      ]
+    }
+  },
+  "control_note": "InterFrameSubpelStepNoStats is unrelated control, not claimed optimization.",
+  "ordinary_oracles": "All requested exact-head custom selectors passed; baseline missing new tests still runs existing stream/ML/threaded-reference tests.",
+  "routine_CI": 39160624898,
+  "automatic_quick": 39160624852,
+  "merge": {
+    "baseRefOid": "7e0e37b7bbbcda65523f5581e7879c7d2d93827c",
+    "headRefOid": "2bbc6431b7e1c69e09ab086fa030f2ab7d6dc24d",
+    "mergeCommit": {
+      "oid": "88fe29f77914a38e96a23adb28bd0275b827ce87"
+    },
+    "mergedAt": "2026-10-18T19:55:05Z",
+    "number": 110,
+    "state": "MERGED",
+    "url": "https://github.com/thesyncim/govpx/pull/110"
+  }
+}
