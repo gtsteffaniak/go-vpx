@@ -7,28 +7,68 @@ import (
 	"unsafe"
 )
 
-// sse8RowsWide requires the existing bounded SSE8 complete-window checks.
-// Two exact eight-byte rows share one AVX2 int16 subtraction/dot product.
-// The maximum 64-row sum is 64*8*255*255, which fits int32.
-const sse8WideAvailable = true
+// SSE8 packs pairs of exact eight-byte rows into one SIMD packet. An odd
+// final row reads eight bytes, including for a minimally sized allocation.
+func SSE8(src []byte, ss int, ref []byte, rs, h int) uint32 {
+	if !Enabled {
+		return SSE8Scalar(src, ss, ref, rs, h)
+	}
 
-func sse8RowsWide(sp unsafe.Pointer, ss int, rp unsafe.Pointer, rs, h int) uint32 {
-	defer archsimd.ClearAVXUpperBits()
-	var acc archsimd.Int32x8
-	so, ro, y := 0, 0, 0
+	// Bounded nonnegative geometry proves the final row offsets fit int64.
+	// The two endpoint checks cover exact8-byte loads, including unaligned,
+	// zero-stride and overlapping read-only rows, without requiring padding.
+	if h > 0 && h <= 64 && (uint(ss)|uint(rs))>>30 == 0 {
+		_ = src[(h-1)*ss+7]
+		_ = ref[(h-1)*rs+7]
+		sp, rp := unsafe.Pointer(unsafe.SliceData(src)), unsafe.Pointer(unsafe.SliceData(ref))
+		if h >= 8 {
+			var acc archsimd.Int32x8
+			so, ro, y := 0, 0, 0
+			for ; y+2 <= h; y += 2 {
+				a := (archsimd.Uint64x2{}).SetElem(0, *(*uint64)(unsafe.Add(sp, so))).SetElem(1, *(*uint64)(unsafe.Add(sp, so+ss))).ReshapeToUint8s().ExtendToUint16().BitsToInt16()
+				b := (archsimd.Uint64x2{}).SetElem(0, *(*uint64)(unsafe.Add(rp, ro))).SetElem(1, *(*uint64)(unsafe.Add(rp, ro+rs))).ReshapeToUint8s().ExtendToUint16().BitsToInt16()
+				d := a.Sub(b)
+				acc = acc.Add(d.DotProductPairs(d))
+				so += 2 * ss
+				ro += 2 * rs
+			}
+			if y < h {
+				a := archsimd.BroadcastUint64x4(*(*uint64)(unsafe.Add(sp, so))).InterleaveLoGrouped(archsimd.Uint64x4{}).GetLo().ReshapeToUint8s().ExtendToUint16().BitsToInt16()
+				b := archsimd.BroadcastUint64x4(*(*uint64)(unsafe.Add(rp, ro))).InterleaveLoGrouped(archsimd.Uint64x4{}).GetLo().ReshapeToUint8s().ExtendToUint16().BitsToInt16()
+				d := a.Sub(b)
+				acc = acc.Add(d.DotProductPairs(d))
+			}
+			result := uint32(sum32(acc.GetLo().Add(acc.GetHi())))
+			archsimd.ClearAVXUpperBits()
+			return result
+		}
+		var lo, hi archsimd.Int32x4
+		so, ro, y := 0, 0, 0
+		for ; y+2 <= h; y += 2 {
+			a := (archsimd.Uint64x2{}).SetElem(0, *(*uint64)(unsafe.Add(sp, so))).SetElem(1, *(*uint64)(unsafe.Add(sp, so+ss))).ReshapeToUint8s()
+			b := (archsimd.Uint64x2{}).SetElem(0, *(*uint64)(unsafe.Add(rp, ro))).SetElem(1, *(*uint64)(unsafe.Add(rp, ro+rs))).ReshapeToUint8s()
+			d := a.Max(b).Sub(a.Min(b))
+			dl := widen8(d)
+			dh := widen8(highBytes(d))
+			lo = lo.Add(square8(dl))
+			hi = hi.Add(square8(dh))
+			so += 2 * ss
+			ro += 2 * rs
+		}
+		if y < h {
+			a := archsimd.BroadcastUint64x2(*(*uint64)(unsafe.Add(sp, so))).ReshapeToUint8s()
+			b := archsimd.BroadcastUint64x2(*(*uint64)(unsafe.Add(rp, ro))).ReshapeToUint8s()
+			lo = lo.Add(square8(widen8(a.Max(b).Sub(a.Min(b)))))
+		}
+		return uint32(sum32(lo.Add(hi)))
+	}
+	var lo, hi archsimd.Int32x4
+	y := 0
 	for ; y+2 <= h; y += 2 {
-		a := archsimd.BroadcastUint64x4(*(*uint64)(unsafe.Add(sp, so))).InterleaveLoGrouped(archsimd.BroadcastUint64x4(*(*uint64)(unsafe.Add(sp, so+ss)))).GetLo().ReshapeToUint8s().ExtendToUint16().BitsToInt16()
-		b := archsimd.BroadcastUint64x4(*(*uint64)(unsafe.Add(rp, ro))).InterleaveLoGrouped(archsimd.BroadcastUint64x4(*(*uint64)(unsafe.Add(rp, ro+rs)))).GetLo().ReshapeToUint8s().ExtendToUint16().BitsToInt16()
-		d := a.Sub(b)
-		acc = acc.Add(d.DotProductPairs(d))
-		so += 2 * ss
-		ro += 2 * rs
+		lo, hi = ssePacket(lo, hi, packRows8(src, y*ss, ss), packRows8(ref, y*rs, rs))
 	}
 	if y < h {
-		a := archsimd.BroadcastUint64x4(*(*uint64)(unsafe.Add(sp, so))).InterleaveLoGrouped(archsimd.Uint64x4{}).GetLo().ReshapeToUint8s().ExtendToUint16().BitsToInt16()
-		b := archsimd.BroadcastUint64x4(*(*uint64)(unsafe.Add(rp, ro))).InterleaveLoGrouped(archsimd.Uint64x4{}).GetLo().ReshapeToUint8s().ExtendToUint16().BitsToInt16()
-		d := a.Sub(b)
-		acc = acc.Add(d.DotProductPairs(d))
+		lo, hi = ssePacket(lo, hi, load8(src[y*ss:]), load8(ref[y*rs:]))
 	}
-	return uint32(sum32(acc.GetLo().Add(acc.GetHi())))
+	return uint32(sum32(lo.Add(hi)))
 }
