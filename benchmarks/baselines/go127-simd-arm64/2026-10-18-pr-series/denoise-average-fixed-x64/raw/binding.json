@@ -1,0 +1,99 @@
+{
+  "commits": {
+    "parent": "88fe29f77914a38e96a23adb28bd0275b827ce87",
+    "current": "e760c8f8f21175175474be40d6a21d90614f3d2b"
+  },
+  "PGO": "off",
+  "CGO_ENABLED": 1,
+  "GOMAXPROCS": 1,
+  "driver_sha256": "762362f76441865b2850c97bf1aea02c5629d2ea728c43ee86334b3f41f3912f",
+  "shared_fixture_sha256": {
+    "internal/pixel/fp32_optional_native_test.go": "9cfc327f50e989209bd69d5dd75d51e9905379b96b09dffa4686387bea2d9bac",
+    "internal/vp9/encoder/quant_fp16_native_test.go": "6db86483a9c1a7d6cfd8c59453375a39d86a6d9d9109c75114982cd71e14f67e",
+    "internal/pixel/quantize_fp_packets_test.go": "2f596d080e68ef3f969bfda94829c827c0afa8eb386bc4f44edd5633b315e419",
+    "vp8_denoiser_average_stream_test.go": "a134a5de83ae095c8428a3ed0374079c9c9e58f15de7db9de7242210c5ce693a"
+  },
+  "scope": "Preliminary two-round feedback; no race/profiles/trace/codegen or full source audit.",
+  "variants": {
+    "parent": {
+      "actual_SDK_features": {
+        "AVX512": false,
+        "AVX2": true,
+        "Enabled": true
+      },
+      "original_fixture_sha256": {
+        "internal/pixel/fp32_optional_native_test.go": "9cfc327f50e989209bd69d5dd75d51e9905379b96b09dffa4686387bea2d9bac",
+        "internal/vp9/encoder/quant_fp16_native_test.go": "6db86483a9c1a7d6cfd8c59453375a39d86a6d9d9109c75114982cd71e14f67e",
+        "internal/pixel/quantize_fp_packets_test.go": "2f596d080e68ef3f969bfda94829c827c0afa8eb386bc4f44edd5633b315e419",
+        "vp8_denoiser_average_stream_test.go": null
+      },
+      "production_source_sha256": {
+        "internal/pixel/quantize_fp_amd64.go": "aa838dec9cd8733b7c74b20220b7f39f0059209573fc43c09bd61bbb093b572a",
+        "internal/pixel/quantize_fp32_avx512_amd64.go": "d487f136dbc121772b77abf7da0c49630b54acbc40ca355577f1cbb5e1b6e96b",
+        "internal/pixel/quantize_fp_simd.go": "47b401b2e9f34afc5bdaf3f2c49d41f2f6559ee4bf85a6442878960a7f830572"
+      },
+      "binaries": {
+        "pixel": {
+          "sha256": "b762bb0ca74d3d27c5f3934ebeed107fbe82e2fed296e0bfe4188193504dad21",
+          "bytes": 5933163
+        },
+        "custom": {
+          "sha256": "03a6551c779bcac893910aee3d1578d56e8d1cc8dd82b3c701e01c59d2802ed4",
+          "bytes": 25096140
+        },
+        "whole": {
+          "sha256": "12458fb8c5b18189dba140b69d8f317dd7516f76071d2a665fa5c78cec00c198",
+          "bytes": 12884555
+        }
+      }
+    },
+    "current": {
+      "actual_SDK_features": {
+        "AVX512": false,
+        "AVX2": true,
+        "Enabled": true
+      },
+      "original_fixture_sha256": {
+        "internal/pixel/fp32_optional_native_test.go": "9cfc327f50e989209bd69d5dd75d51e9905379b96b09dffa4686387bea2d9bac",
+        "internal/vp9/encoder/quant_fp16_native_test.go": "6db86483a9c1a7d6cfd8c59453375a39d86a6d9d9109c75114982cd71e14f67e",
+        "internal/pixel/quantize_fp_packets_test.go": "2f596d080e68ef3f969bfda94829c827c0afa8eb386bc4f44edd5633b315e419",
+        "vp8_denoiser_average_stream_test.go": "a134a5de83ae095c8428a3ed0374079c9c9e58f15de7db9de7242210c5ce693a"
+      },
+      "production_source_sha256": {
+        "internal/pixel/quantize_fp_amd64.go": "aa838dec9cd8733b7c74b20220b7f39f0059209573fc43c09bd61bbb093b572a",
+        "internal/pixel/quantize_fp32_avx512_amd64.go": "d487f136dbc121772b77abf7da0c49630b54acbc40ca355577f1cbb5e1b6e96b",
+        "internal/pixel/quantize_fp_simd.go": "47b401b2e9f34afc5bdaf3f2c49d41f2f6559ee4bf85a6442878960a7f830572"
+      },
+      "binaries": {
+        "pixel": {
+          "sha256": "562400380d389d8df99bbd9a98fccdb8de23de66d2f079320d5dd135fa901617",
+          "bytes": 5933427
+        },
+        "custom": {
+          "sha256": "10eaac092b3315ae7994900c515363d3ca0dd0f0b4673c9aee71488a23c349c7",
+          "bytes": 25104035
+        },
+        "whole": {
+          "sha256": "2228d99e2fafad653f854c2692ab60af8f657da97fda06bafc2162b72cc848a0",
+          "bytes": 12889586
+        }
+      }
+    }
+  },
+  "benchmark_plan": [
+    [
+      "custom",
+      ".",
+      "^BenchmarkAstraDenoiserLuma$"
+    ]
+  ],
+  "whole_codec_plan": {
+    "mode": "two720p-rounds",
+    "codec": "vp8",
+    "cpu_used": [
+      -8,
+      8
+    ]
+  },
+  "oracle_override": "^Test(DenoiserAverageStream|VP8Algorithm2DenoiserLumaFrozen|VP8Algorithm2DenoiserLumaAllocs|VP8Algorithm2Stream|MLCacheStreamNative)"
+}

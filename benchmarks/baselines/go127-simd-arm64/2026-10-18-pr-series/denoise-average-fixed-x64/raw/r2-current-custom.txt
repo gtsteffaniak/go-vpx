@@ -1,0 +1,13 @@
+goos: linux
+goarch: amd64
+pkg: github.com/thesyncim/govpx
+cpu: AMD EPYC 7763 64-Core Processor                
+BenchmarkAstraDenoiserLuma/subpel         	   64238	       744.3 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAstraDenoiserLuma/odd-integer    	  246608	       193.2 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAstraDenoiserLuma/fullpel        	  250245	       191.8 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAstraDenoiserLuma/y-only         	  328771	       144.4 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAstraDenoiserLuma/zero-yuv       	  111709	       428.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAstraDenoiserLuma/rejected       	   62874	       762.9 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAstraDenoiserLuma/split-fallback 	  104232	       459.5 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAstraDenoiserLuma/state-fallback 	   52545	       929.4 ns/op	       0 B/op	       0 allocs/op
+PASS

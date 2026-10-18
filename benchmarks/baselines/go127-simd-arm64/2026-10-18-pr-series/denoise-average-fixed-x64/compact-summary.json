@@ -1,0 +1,246 @@
+{
+  "run": 39162855642,
+  "url": "https://github.com/thesyncim/govpx/actions/runs/39162855642",
+  "commits": {
+    "parent": "88fe29f77914a38e96a23adb28bd0275b827ce87",
+    "current": "e760c8f8f21175175474be40d6a21d90614f3d2b"
+  },
+  "cpu": "AMD EPYC7763",
+  "actualISA": {
+    "AVX2": true,
+    "AVX512": false,
+    "Enabled": true
+  },
+  "whole": {
+    "-8": {
+      "pairs": [
+        {
+          "round": 1,
+          "parent_ms": 14.379937,
+          "current_ms": 14.478177,
+          "speedup": 0.9932146153483273,
+          "throughput_delta_percent": -0.6785384651672666,
+          "time_delta_percent": 0.683174063975378,
+          "semantic_fields_equal": 22,
+          "parent_allocations": 0,
+          "current_allocations": 0
+        },
+        {
+          "round": 2,
+          "parent_ms": 14.450711,
+          "current_ms": 14.553973,
+          "speedup": 0.9929048927052427,
+          "throughput_delta_percent": -0.7095107294757264,
+          "time_delta_percent": 0.71458075661468,
+          "semantic_fields_equal": 22,
+          "parent_allocations": 0,
+          "current_allocations": 0
+        }
+      ],
+      "median_speedup": 0.9930593497209128,
+      "median_time_delta_percent": 0.6989159591556993,
+      "median_throughput_delta_percent": -0.694065027908719
+    },
+    "8": {
+      "pairs": [
+        {
+          "round": 1,
+          "parent_ms": 16.597083,
+          "current_ms": 16.621064,
+          "speedup": 0.9985571922471389,
+          "throughput_delta_percent": -0.14428077528610972,
+          "time_delta_percent": 0.14448924548970954,
+          "semantic_fields_equal": 22,
+          "parent_allocations": 0,
+          "current_allocations": 0
+        },
+        {
+          "round": 2,
+          "parent_ms": 16.565692,
+          "current_ms": 16.882311,
+          "speedup": 0.9812455178677848,
+          "throughput_delta_percent": -1.87544821322152,
+          "time_delta_percent": 1.91129353364774,
+          "semantic_fields_equal": 22,
+          "parent_allocations": 0,
+          "current_allocations": 0
+        }
+      ],
+      "median_speedup": 0.9898338600215647,
+      "median_time_delta_percent": 1.0270551846159215,
+      "median_throughput_delta_percent": -1.0166139978435296
+    }
+  },
+  "components": {
+    "BenchmarkAstraDenoiserLuma/fullpel": {
+      "raw_ns": {
+        "parent": [
+          234.1,
+          233.2
+        ],
+        "current": [
+          191.1,
+          191.8
+        ]
+      },
+      "speedup": 1.2204230869678767,
+      "paired_speedups": [
+        1.2250130821559393,
+        1.2158498435870697
+      ]
+    },
+    "BenchmarkAstraDenoiserLuma/odd-integer": {
+      "raw_ns": {
+        "parent": [
+          233.0,
+          233.2
+        ],
+        "current": [
+          191.5,
+          193.2
+        ]
+      },
+      "speedup": 1.2118533922537043,
+      "paired_speedups": [
+        1.216710182767624,
+        1.2070393374741202
+      ]
+    },
+    "BenchmarkAstraDenoiserLuma/rejected": {
+      "raw_ns": {
+        "parent": [
+          729.9,
+          728.3
+        ],
+        "current": [
+          761.8,
+          762.9
+        ]
+      },
+      "speedup": 0.9563848625959205,
+      "paired_speedups": [
+        0.9581254922551851,
+        0.954646742692358
+      ]
+    },
+    "BenchmarkAstraDenoiserLuma/split-fallback": {
+      "raw_ns": {
+        "parent": [
+          494.3,
+          496.5
+        ],
+        "current": [
+          462.1,
+          459.5
+        ]
+      },
+      "speedup": 1.0750868055555556,
+      "paired_speedups": [
+        1.0696818870374378,
+        1.0805223068552774
+      ]
+    },
+    "BenchmarkAstraDenoiserLuma/state-fallback": {
+      "raw_ns": {
+        "parent": [
+          1120.0,
+          1118.0
+        ],
+        "current": [
+          914.8,
+          929.4
+        ]
+      },
+      "speedup": 1.2135343238260494,
+      "paired_speedups": [
+        1.2243113248797552,
+        1.2029266193242953
+      ]
+    },
+    "BenchmarkAstraDenoiserLuma/subpel": {
+      "raw_ns": {
+        "parent": [
+          755.9,
+          754.7
+        ],
+        "current": [
+          741.7,
+          744.3
+        ]
+      },
+      "speedup": 1.0165545087483177,
+      "paired_speedups": [
+        1.0191452069569906,
+        1.0139728604057505
+      ]
+    },
+    "BenchmarkAstraDenoiserLuma/y-only": {
+      "raw_ns": {
+        "parent": [
+          176.7,
+          176.5
+        ],
+        "current": [
+          144.6,
+          144.4
+        ]
+      },
+      "speedup": 1.222145328719723,
+      "paired_speedups": [
+        1.2219917012448132,
+        1.2222991689750693
+      ]
+    },
+    "BenchmarkAstraDenoiserLuma/zero-yuv": {
+      "raw_ns": {
+        "parent": [
+          482.0,
+          480.2
+        ],
+        "current": [
+          429.1,
+          428.6
+        ]
+      },
+      "speedup": 1.1218374723096654,
+      "paired_speedups": [
+        1.1232812864134234,
+        1.1203919738684087
+      ]
+    }
+  },
+  "component_zeroalloc_samples": 32,
+  "fixed_fixture_streams": {
+    "parent": [
+      "5bbc766d749d29e12dc496520ccdcb10b7b30737e45b2f03de136adc98e2c5b8",
+      "5d596825da65e6350753cd65fb4df7ebc6683075da3a62fca842dda89c9fe260",
+      "f5b4ca0def5a7e0ded48a0164a95f58bcb12546eca1d1dda3153011438a04f15",
+      "5d4f2efc5d3f3da952a986e4c250957374f9376ebaa5545ac3be3e5c8d905b17"
+    ],
+    "current": [
+      "5bbc766d749d29e12dc496520ccdcb10b7b30737e45b2f03de136adc98e2c5b8",
+      "5d596825da65e6350753cd65fb4df7ebc6683075da3a62fca842dda89c9fe260",
+      "f5b4ca0def5a7e0ded48a0164a95f58bcb12546eca1d1dda3153011438a04f15",
+      "5d4f2efc5d3f3da952a986e4c250957374f9376ebaa5545ac3be3e5c8d905b17"
+    ]
+  },
+  "ordinary_oracle_scope": "50PASS/ref including4fixed-stream hashes, productionfrozen-state/allocation,96VP8/72ML.",
+  "fixture_correction": "Originaltiny-frame+8 test used wall-clock adaptivefeedback. Fixedfixtureuses\u22128 andassertseffectivespeed8; pinscapturedfromimmutablebaselinefirst,thenvalidatedcandidate. Runtimeunchanged;originalfailedreceiptsretained.",
+  "failed_adaptive_evidence": [
+    "/private/tmp/govpx-ci-vp8-average-39161665317",
+    "/private/tmp/govpx-ci-vp8-average-oracle-39162342059"
+  ],
+  "scope": "Two40mscomponentAB/BApairs;2720p60inputVP8codecpairsperCPU\u22128,+8;2500kbps/threads1/PGOoff. No C/profiles/fullCI.",
+  "merge": {
+    "baseRefOid": "88fe29f77914a38e96a23adb28bd0275b827ce87",
+    "headRefOid": "e760c8f8f21175175474be40d6a21d90614f3d2b",
+    "mergeCommit": {
+      "oid": "159dce5b931af4f7c600f157d64c2a813092ec57"
+    },
+    "mergedAt": "2026-10-18T20:25:35Z",
+    "number": 112,
+    "state": "MERGED",
+    "url": "https://github.com/thesyncim/govpx/pull/112"
+  },
+  "accepted_tradeoff": "Explicit root authorization: retain ARMcodec+4.4%fixed/+5.6%adaptive and x64component+21\u201322%; preserveall4x64codeclosses,notflat/orgain. No extra timing/validation."
+}
