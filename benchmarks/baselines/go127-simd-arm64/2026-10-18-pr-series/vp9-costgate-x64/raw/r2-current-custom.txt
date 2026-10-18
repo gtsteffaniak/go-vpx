@@ -1,0 +1,9 @@
+goos: linux
+goarch: amd64
+pkg: github.com/thesyncim/govpx
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkVP9NonrdCoeffCostPrepare/nonrd-inter         	  436492	       108.7 ns/op	       0 B/op	       0 allocs/op
+BenchmarkVP9NonrdCoeffCostPrepare/key                 	    9272	      5166 ns/op	       0 B/op	       0 allocs/op
+BenchmarkVP9NonrdCoeffCostPrepare/fullrd-inter        	   63914	       753.6 ns/op	       0 B/op	       0 allocs/op
+BenchmarkVP9NonrdCoeffCostPrepare/compound-inter      	   63102	       754.2 ns/op	       0 B/op	       0 allocs/op
+PASS

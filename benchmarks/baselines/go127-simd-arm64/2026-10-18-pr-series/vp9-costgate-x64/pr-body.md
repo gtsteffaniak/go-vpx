@@ -1,0 +1,9 @@
+VP9 non-RD inter frames use modeled rates, so building the complete coefficient-token cost table during frame-context preparation and adaptation repeats work with no normal consumer. Skip that setup on those frames and invalidate the old cache; unusual coefficient-rate consumers use the existing current-probability scalar fallback. Keyframes, intra-only, full-RD and compound frames keep their table setup. This follows the pinned libvpx non-RD token-cost gate conservatively.
+
+Preliminary Apple M4 Max / Go 1.27.2 SIMD, realtime CPU8, single-thread 720p60 codec screen: paired throughput ratios **1.0373× / 1.0162×**. The small-resolution screen contains a slow parent outlier, preserved without a gain claim. Raw measurements, losses, source and binary bindings are retained with the experiment.
+
+Validation: independent scalar cost comparisons across frame-context transitions, focused entropy/error-resilient restoration controls, 96 VP8 packet/flag hashes and 72 VP9 ML hashes. Output fields match. Codec allocations remain unchanged at **1.25 per input frame (75/60)** on both ARM and x64; only the setup component has zero allocations. No full CI, new C comparison, profile audit or README changes.
+
+### Native x64 feedback
+
+[Quick run 39161547354](https://github.com/thesyncim/govpx/actions/runs/39161547354) on AMD EPYC 9V74 (actual AVX2/AVX512 enabled) measured non-RD frame-context setup at **6.91× faster** (paired 6.903×/6.916×). Key/full-RD/compound controls were 1.005×/.995×/.998×; all setup samples allocated zero. Two balanced VP9 720p codec pairs were mixed: throughput −0.074%/+1.848%, with all 22 output fields equal and codec allocations unchanged at 1.25/frame. This supports the component win; it does not establish a robust x64 codec gain. No C, profiles, or full CI were added.

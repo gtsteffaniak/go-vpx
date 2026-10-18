@@ -1,0 +1,335 @@
+[
+  {
+    "argv": [
+      "uname",
+      "-a"
+    ],
+    "output": "uname.txt",
+    "start_utc": "2026-10-18T20:03:43.492299+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:03:43.493271+00:00"
+  },
+  {
+    "argv": [
+      "lscpu"
+    ],
+    "output": "lscpu.txt",
+    "start_utc": "2026-10-18T20:03:43.493404+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:03:43.550836+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "env",
+      "GOVERSION"
+    ],
+    "output": "goversion.txt",
+    "start_utc": "2026-10-18T20:03:43.551071+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:03:43.559151+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "env",
+      "GOCACHE"
+    ],
+    "output": "gocache.txt",
+    "start_utc": "2026-10-18T20:03:43.559485+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:03:43.566653+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-mrlaauas/parent",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-mrlaauas/parent-pixel",
+      "./internal/pixel"
+    ],
+    "output": "build-parent-pixel.txt",
+    "start_utc": "2026-10-18T20:03:44.030496+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:03:57.487632+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-mrlaauas/parent",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-mrlaauas/parent-custom",
+      "."
+    ],
+    "output": "build-parent-custom.txt",
+    "start_utc": "2026-10-18T20:03:57.488147+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:16.958293+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-mrlaauas/parent",
+      "build",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-mrlaauas/parent-whole",
+      "./cmd/govpx-bench"
+    ],
+    "output": "build-parent-whole.txt",
+    "start_utc": "2026-10-18T20:04:16.958766+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:23.202549+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-mrlaauas/parent-pixel",
+      "-test.run=^Test(BackendSelected$|FP32PublicHost$|FP32ActualFeature$)",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "oracle-parent.txt",
+    "start_utc": "2026-10-18T20:04:23.203037+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:23.204940+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-mrlaauas/parent-custom",
+      "-test.run=^Test(VP9NonrdCoeffCostFrameTransitions|VP8Algorithm2Stream|MLCacheStreamNative|VP9EncoderEncodeIntoWithFlagsNoUpdateEntropyRestoresFrameContext|VP9EncoderErrorResilientRestoresDefaultFrameContext)$",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "custom-oracle-parent-custom.txt",
+    "start_utc": "2026-10-18T20:04:23.205480+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:23.431026+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-mrlaauas/current",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-mrlaauas/current-pixel",
+      "./internal/pixel"
+    ],
+    "output": "build-current-pixel.txt",
+    "start_utc": "2026-10-18T20:04:23.463783+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:25.727179+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-mrlaauas/current",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-mrlaauas/current-custom",
+      "."
+    ],
+    "output": "build-current-custom.txt",
+    "start_utc": "2026-10-18T20:04:25.727691+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:44.904509+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-mrlaauas/current",
+      "build",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-mrlaauas/current-whole",
+      "./cmd/govpx-bench"
+    ],
+    "output": "build-current-whole.txt",
+    "start_utc": "2026-10-18T20:04:44.905041+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:51.201676+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-mrlaauas/current-pixel",
+      "-test.run=^Test(BackendSelected$|FP32PublicHost$|FP32ActualFeature$)",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "oracle-current.txt",
+    "start_utc": "2026-10-18T20:04:51.202223+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:51.204032+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-mrlaauas/current-custom",
+      "-test.run=^Test(VP9NonrdCoeffCostFrameTransitions|VP8Algorithm2Stream|MLCacheStreamNative|VP9EncoderEncodeIntoWithFlagsNoUpdateEntropyRestoresFrameContext|VP9EncoderErrorResilientRestoresDefaultFrameContext)$",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "custom-oracle-current-custom.txt",
+    "start_utc": "2026-10-18T20:04:51.204417+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:51.428461+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-mrlaauas/parent-custom",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkVP9NonrdCoeffCostPrepare$",
+      "-test.benchtime=40ms",
+      "-test.cpu=1",
+      "-test.count=1",
+      "-test.benchmem"
+    ],
+    "output": "r1-parent-custom.txt",
+    "start_utc": "2026-10-18T20:04:51.460121+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:51.687307+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-mrlaauas/current-custom",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkVP9NonrdCoeffCostPrepare$",
+      "-test.benchtime=40ms",
+      "-test.cpu=1",
+      "-test.count=1",
+      "-test.benchmem"
+    ],
+    "output": "r1-current-custom.txt",
+    "start_utc": "2026-10-18T20:04:51.688057+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:51.907384+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-mrlaauas/parent-whole",
+      "-codec=vp9",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-fps=30",
+      "-bitrate=2500",
+      "-mode=realtime",
+      "-cpu-used=8",
+      "-threads=1",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "output": "r1-parent-whole-vp9-cpu8.json",
+    "start_utc": "2026-10-18T20:04:51.907973+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:55.299300+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-mrlaauas/current-whole",
+      "-codec=vp9",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-fps=30",
+      "-bitrate=2500",
+      "-mode=realtime",
+      "-cpu-used=8",
+      "-threads=1",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "output": "r1-current-whole-vp9-cpu8.json",
+    "start_utc": "2026-10-18T20:04:55.299943+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:58.735240+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-mrlaauas/current-custom",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkVP9NonrdCoeffCostPrepare$",
+      "-test.benchtime=40ms",
+      "-test.cpu=1",
+      "-test.count=1",
+      "-test.benchmem"
+    ],
+    "output": "r2-current-custom.txt",
+    "start_utc": "2026-10-18T20:04:58.735877+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:58.957194+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-mrlaauas/parent-custom",
+      "-test.run=^$",
+      "-test.bench=^BenchmarkVP9NonrdCoeffCostPrepare$",
+      "-test.benchtime=40ms",
+      "-test.cpu=1",
+      "-test.count=1",
+      "-test.benchmem"
+    ],
+    "output": "r2-parent-custom.txt",
+    "start_utc": "2026-10-18T20:04:58.957816+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:04:59.182543+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-mrlaauas/current-whole",
+      "-codec=vp9",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-fps=30",
+      "-bitrate=2500",
+      "-mode=realtime",
+      "-cpu-used=8",
+      "-threads=1",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "output": "r2-current-whole-vp9-cpu8.json",
+    "start_utc": "2026-10-18T20:04:59.183201+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:05:02.608458+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-mrlaauas/parent-whole",
+      "-codec=vp9",
+      "-width=1280",
+      "-height=720",
+      "-frames=60",
+      "-fps=30",
+      "-bitrate=2500",
+      "-mode=realtime",
+      "-cpu-used=8",
+      "-threads=1",
+      "-encode-only",
+      "-auto-libvpx=false",
+      "-format=json"
+    ],
+    "output": "r2-parent-whole-vp9-cpu8.json",
+    "start_utc": "2026-10-18T20:05:02.609526+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:05:06.111875+00:00"
+  }
+]

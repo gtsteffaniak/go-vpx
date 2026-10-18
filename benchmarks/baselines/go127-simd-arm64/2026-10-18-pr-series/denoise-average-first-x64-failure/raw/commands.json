@@ -1,0 +1,191 @@
+[
+  {
+    "argv": [
+      "uname",
+      "-a"
+    ],
+    "output": "uname.txt",
+    "start_utc": "2026-10-18T20:05:11.063584+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:05:11.064842+00:00"
+  },
+  {
+    "argv": [
+      "lscpu"
+    ],
+    "output": "lscpu.txt",
+    "start_utc": "2026-10-18T20:05:11.065026+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:05:11.069251+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "env",
+      "GOVERSION"
+    ],
+    "output": "goversion.txt",
+    "start_utc": "2026-10-18T20:05:11.069494+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:05:11.079655+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "env",
+      "GOCACHE"
+    ],
+    "output": "gocache.txt",
+    "start_utc": "2026-10-18T20:05:11.080053+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:05:11.088948+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-643ggpod/parent",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-643ggpod/parent-pixel",
+      "./internal/pixel"
+    ],
+    "output": "build-parent-pixel.txt",
+    "start_utc": "2026-10-18T20:05:11.718824+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:05:30.034874+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-643ggpod/parent",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-643ggpod/parent-custom",
+      "."
+    ],
+    "output": "build-parent-custom.txt",
+    "start_utc": "2026-10-18T20:05:30.035429+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:05:55.113506+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-643ggpod/parent",
+      "build",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-643ggpod/parent-whole",
+      "./cmd/govpx-bench"
+    ],
+    "output": "build-parent-whole.txt",
+    "start_utc": "2026-10-18T20:05:55.113941+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:06:03.066579+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-643ggpod/parent-pixel",
+      "-test.run=^Test(BackendSelected$|FP32PublicHost$|FP32ActualFeature$)",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "oracle-parent.txt",
+    "start_utc": "2026-10-18T20:06:03.067058+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:06:03.069326+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-643ggpod/parent-custom",
+      "-test.run=^Test(DenoiserAverageStream|VP8Algorithm2DenoiserLumaFrozen|VP8Algorithm2DenoiserLumaAllocs|VP8Algorithm2Stream|MLCacheStreamNative)",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "custom-oracle-parent-custom.txt",
+    "start_utc": "2026-10-18T20:06:03.069921+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:06:03.372791+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-643ggpod/current",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-643ggpod/current-pixel",
+      "./internal/pixel"
+    ],
+    "output": "build-current-pixel.txt",
+    "start_utc": "2026-10-18T20:06:03.411570+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:06:06.195738+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-643ggpod/current",
+      "test",
+      "-c",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-643ggpod/current-custom",
+      "."
+    ],
+    "output": "build-current-custom.txt",
+    "start_utc": "2026-10-18T20:06:06.196266+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:06:30.642997+00:00"
+  },
+  {
+    "argv": [
+      "/home/runner/work/govpx/govpx/scripts/go.sh",
+      "-C",
+      "/tmp/govpx-fp-quick-643ggpod/current",
+      "build",
+      "-pgo=off",
+      "-o",
+      "/tmp/govpx-fp-quick-643ggpod/current-whole",
+      "./cmd/govpx-bench"
+    ],
+    "output": "build-current-whole.txt",
+    "start_utc": "2026-10-18T20:06:30.643581+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:06:38.606640+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-643ggpod/current-pixel",
+      "-test.run=^Test(BackendSelected$|FP32PublicHost$|FP32ActualFeature$)",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "oracle-current.txt",
+    "start_utc": "2026-10-18T20:06:38.607152+00:00",
+    "exit_code": 0,
+    "end_utc": "2026-10-18T20:06:38.609403+00:00"
+  },
+  {
+    "argv": [
+      "/tmp/govpx-fp-quick-643ggpod/current-custom",
+      "-test.run=^Test(DenoiserAverageStream|VP8Algorithm2DenoiserLumaFrozen|VP8Algorithm2DenoiserLumaAllocs|VP8Algorithm2Stream|MLCacheStreamNative)",
+      "-test.count=1",
+      "-test.v"
+    ],
+    "output": "custom-oracle-current-custom.txt",
+    "start_utc": "2026-10-18T20:06:38.609791+00:00",
+    "exit_code": 1,
+    "end_utc": "2026-10-18T20:06:39.270740+00:00"
+  }
+]
