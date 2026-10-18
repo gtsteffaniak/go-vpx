@@ -35,7 +35,7 @@ func VarianceBlock8x8PtrFast(src *byte, srcStride int, ref *byte, refStride int)
 }
 
 func sse8x8PtrFast(src *byte, srcStride int, ref *byte, refStride int) int {
-	return int(pixel.SSE8(unsafe.Slice(src, 7*srcStride+8), srcStride, unsafe.Slice(ref, 7*refStride+8), refStride, 8))
+	return int(pixel.SSE8Ptr(src, srcStride, ref, refStride))
 }
 
 func SSE16xNPtrFast(src *byte, srcStride int, ref *byte, refStride int, height int) int {

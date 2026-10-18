@@ -87,6 +87,19 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 	sha256sum "$root/internal/pixel/subtract_rows_amd64.go"
 	sha256sum "$root/internal/vp9/dsp/subtract_rows_native_test.go"
 	sha256sum "$root/internal/pixel/sse_simd.go"
+	sha256sum "$root/internal/pixel/sse8_rows_wide_amd64.go"
+	sha256sum "$root/internal/pixel/sse8_rows_arm64.go"
+	sha256sum "$root/internal/pixel/sse8_entry_fallback_amd64_test.go"
+	sha256sum "$root/internal/pixel/sse8_rows_wide_amd64_test.go"
+	sha256sum "$root/internal/pixel/sse8_ptr_amd64.go"
+	sha256sum "$root/internal/pixel/sse8_ptr_other.go"
+	sha256sum "$root/internal/pixel/sse8_ptr_amd64_test.go"
+	sha256sum "$root/internal/vp8/encoder/token_dense_arm64.go"
+	sha256sum "$root/internal/vp8/encoder/token_dense_bench_test.go"
+	sha256sum "$root/internal/vp8/encoder/token_dense_other.go"
+	sha256sum "$root/internal/vp8/encoder/token_dense_overlap.go"
+	sha256sum "$root/internal/vp8/encoder/token_dense_test.go"
+	sha256sum "$root/internal/vp8/dsp/variance_block_sized_other.go"
 	sha256sum "$root/internal/pixel/sse_plane_amd64.go"
 	sha256sum "$root/internal/pixel/sse_plane_avx512_amd64_test.go"
 	sha256sum "$root/internal/pixel/copy16_rows_arm64.go"
@@ -117,14 +130,16 @@ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBac
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^Test(Stats16|DiffMetricsAndStats)' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/dsp -run '^TestVariance' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/encoder -run '^TestDenoiser' -count=1 -v
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/encoder -run '^TestDenseToken' -count=1 -v
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/vp8/encoder -run '^TestDenseToken' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./ ./internal/vp8/dsp -run '^TestCopy16RowsPublicState$' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./ ./internal/vp8/dsp -run '^TestCopy16RowsPublicState$' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestSSEPlane16' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestSSEPlane16' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestSubtractRows' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestSubtractRows' -count=1 -v
-	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^Test(SSE8ExactRows|SquaredError)' -count=1 -v
-	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestSSE8ExactRows' -count=1 -v
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^Test(SSE8|SquaredError)' -count=1 -v
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestSSE8' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/encoder -run '^TestLoopFilterLumaSSE' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestMacroInternal' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestGatherPointer' -count=1 -v

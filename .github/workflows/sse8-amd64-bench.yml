@@ -1,0 +1,66 @@
+name: Native amd64 SSE8 focused benchmarks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      head_ref:
+        description: Head commit or ref (defaults to this workflow commit)
+        required: false
+        type: string
+      base_ref:
+        description: Comparison base commit or ref
+        default: origin/main
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  # This lane never queues behind or cancels the full native/C comparisons.
+  group: sse8-amd64-focused-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+env:
+  GOEXPERIMENT: simd
+  GOTOOLCHAIN: local
+  GOAMD64: v1
+  GOMAXPROCS: '1'
+  CODEX_AGENT_ID: amd64-sse8-focused
+
+jobs:
+  sse8:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version: '1.27.2'
+
+      - name: Compare all 36 public SSE8 cases in six balanced rounds
+        env:
+          HEAD_REF: ${{ inputs.head_ref || github.event.pull_request.head.sha || github.sha }}
+          BASE_REF: ${{ inputs.base_ref || github.event.pull_request.base.sha || 'origin/main' }}
+        run: sh scripts/benchmark-sse8-amd64.sh "$HEAD_REF" "$BASE_REF" "$RUNNER_TEMP/sse8-amd64" 691cd0512c4829d9ee40d483205dd223f9eb028d
+
+      - name: Show all focused comparisons
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/sse8-amd64/summary.md" ]; then
+            cat "$RUNNER_TEMP/sse8-amd64/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Save every sample, oracle check and source hash
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: amd64-sse8-focused-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sse8-amd64/
+          if-no-files-found: error
