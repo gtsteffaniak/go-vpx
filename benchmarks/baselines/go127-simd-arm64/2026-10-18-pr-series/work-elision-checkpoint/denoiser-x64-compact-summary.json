@@ -1,0 +1,188 @@
+{
+  "run": 39156757003,
+  "url": "https://github.com/thesyncim/govpx/actions/runs/39156757003",
+  "head": "78f1c59b0e9fe289f6a4f159c4eb3a6db4fc645b",
+  "base": "499ef24ee5f30dbb44890e3fb19b88bbe2e0407b",
+  "cpu": "AMD EPYC7763",
+  "actualISA": {
+    "AVX2": true,
+    "AVX512": false,
+    "Enabled": true
+  },
+  "status": {
+    "complete": true,
+    "phase": "complete",
+    "variant_status": {
+      "1": "screened"
+    }
+  },
+  "zeroalloc_timing_samples": 32,
+  "live_frozen_oracles": "TestVP8Algorithm2DenoiserLumaFrozen128 fullstate comparisons and allocation checks;MLCacheStreamNative3resolutions;allPASSonbaseline/candidate",
+  "live_fixture": "Sharedcomplete-denoiserpublicbenchmark,exactfixtureSHAinraw/binding.json",
+  "protocol": "Two40msAB/BApairs,8cases,no whole/C/profile/fullrun. Kernel gains and control losses retained.",
+  "summary": {
+    "1": {
+      "hypothesis": "Skip denoiser chroma prediction on moving blocks and in Y-only mode; preserve zero-motion/fallback controls.",
+      "components": {
+        "BenchmarkAstraDenoiserLuma/fullpel": {
+          "raw_ns": {
+            "baseline": [
+              256.0,
+              255.7
+            ],
+            "candidate": [
+              244.7,
+              245.9
+            ]
+          },
+          "paired_speedups": [
+            1.0461789946873723,
+            1.0398535990239934
+          ],
+          "median_speedup": 1.0430162968556829,
+          "slower_pairs": 0
+        },
+        "BenchmarkAstraDenoiserLuma/odd-integer": {
+          "raw_ns": {
+            "baseline": [
+              354.0,
+              353.2
+            ],
+            "candidate": [
+              244.3,
+              243.3
+            ]
+          },
+          "paired_speedups": [
+            1.4490380679492427,
+            1.451705713111385
+          ],
+          "median_speedup": 1.450371890530314,
+          "slower_pairs": 0
+        },
+        "BenchmarkAstraDenoiserLuma/rejected": {
+          "raw_ns": {
+            "baseline": [
+              1015.0,
+              1014.0
+            ],
+            "candidate": [
+              755.7,
+              756.9
+            ]
+          },
+          "paired_speedups": [
+            1.343125578933439,
+            1.3396749900911613
+          ],
+          "median_speedup": 1.3414002845123,
+          "slower_pairs": 0
+        },
+        "BenchmarkAstraDenoiserLuma/split-fallback": {
+          "raw_ns": {
+            "baseline": [
+              474.0,
+              474.7
+            ],
+            "candidate": [
+              486.8,
+              487.7
+            ]
+          },
+          "paired_speedups": [
+            0.9737058340180772,
+            0.9733442690178389
+          ],
+          "median_speedup": 0.9735250515179581,
+          "slower_pairs": 2
+        },
+        "BenchmarkAstraDenoiserLuma/state-fallback": {
+          "raw_ns": {
+            "baseline": [
+              1094.0,
+              1096.0
+            ],
+            "candidate": [
+              1112.0,
+              1119.0
+            ]
+          },
+          "paired_speedups": [
+            0.9838129496402878,
+            0.9794459338695264
+          ],
+          "median_speedup": 0.9816294417549071,
+          "slower_pairs": 2
+        },
+        "BenchmarkAstraDenoiserLuma/subpel": {
+          "raw_ns": {
+            "baseline": [
+              1055.0,
+              1040.0
+            ],
+            "candidate": [
+              770.6,
+              772.9
+            ]
+          },
+          "paired_speedups": [
+            1.3690630677394238,
+            1.3455815758830378
+          ],
+          "median_speedup": 1.357322321811231,
+          "slower_pairs": 0
+        },
+        "BenchmarkAstraDenoiserLuma/y-only": {
+          "raw_ns": {
+            "baseline": [
+              210.1,
+              210.0
+            ],
+            "candidate": [
+              179.3,
+              179.8
+            ]
+          },
+          "paired_speedups": [
+            1.1717791411042944,
+            1.167964404894327
+          ],
+          "median_speedup": 1.1698717729993107,
+          "slower_pairs": 0
+        },
+        "BenchmarkAstraDenoiserLuma/zero-yuv": {
+          "raw_ns": {
+            "baseline": [
+              448.7,
+              447.1
+            ],
+            "candidate": [
+              473.0,
+              473.0
+            ]
+          },
+          "paired_speedups": [
+            0.9486257928118393,
+            0.9452431289640593
+          ],
+          "median_speedup": 0.9469344608879493,
+          "slower_pairs": 2
+        }
+      },
+      "zero_allocations": true,
+      "preliminary": true
+    }
+  },
+  "routine_CI": 39156705673,
+  "automatic_quick": 39156705605,
+  "merge": {
+    "headRefOid": "78f1c59b0e9fe289f6a4f159c4eb3a6db4fc645b",
+    "mergeCommit": {
+      "oid": "7e0e37b7bbbcda65523f5581e7879c7d2d93827c"
+    },
+    "mergedAt": "2026-10-18T19:03:31Z",
+    "number": 109,
+    "state": "MERGED",
+    "url": "https://github.com/thesyncim/govpx/pull/109"
+  }
+}
