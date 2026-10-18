@@ -248,7 +248,7 @@ func coefTokenCostElided(probs [tables.EntropyNodes]uint8, token int, blockType 
 			// entirely, so the cell stays at the calloc'd zero seed.
 			return 0
 		}
-		full := coefTokenCostFromPath(&coefTokenPaths[token], &probs)
+		full := r3DirectCoefTokenCost(&probs, token)
 		// nonEOB == BoolBitCost(probs[0], 1) == ProbCost[255-probs[0]].
 		nonEOB := tables.ProbCost[255-int(probs[0])]
 		if full <= nonEOB {
@@ -256,7 +256,7 @@ func coefTokenCostElided(probs [tables.EntropyNodes]uint8, token int, blockType 
 		}
 		return full - nonEOB
 	}
-	return coefTokenCostFromPath(&coefTokenPaths[token], &probs)
+	return r3DirectCoefTokenCost(&probs, token)
 }
 
 // coefElisionBandThreshold maps blockType -> the first band that participates
@@ -426,4 +426,34 @@ func BoolBitCost(prob uint8, bit int) int {
 	// Branchless sign-XOR: prob^uint8(-bit) flips prob to 255-prob
 	// (== ^prob) when bit is set.
 	return tables.ProbCost[prob^uint8(-bit)]
+}
+
+func r3DirectCoefTokenCost(p *[tables.EntropyNodes]uint8, t int) int {
+	switch t {
+	case 0:
+		return tables.ProbCost[255-int(p[0])] + tables.ProbCost[p[1]]
+	case 1:
+		return tables.ProbCost[255-int(p[0])] + tables.ProbCost[255-int(p[1])] + tables.ProbCost[p[2]]
+	case 2:
+		return tables.ProbCost[255-int(p[0])] + tables.ProbCost[255-int(p[1])] + tables.ProbCost[255-int(p[2])] + tables.ProbCost[p[3]] + tables.ProbCost[p[4]]
+	case 3:
+		return tables.ProbCost[255-int(p[0])] + tables.ProbCost[255-int(p[1])] + tables.ProbCost[255-int(p[2])] + tables.ProbCost[p[3]] + tables.ProbCost[255-int(p[4])] + tables.ProbCost[p[5]]
+	case 4:
+		return tables.ProbCost[255-int(p[0])] + tables.ProbCost[255-int(p[1])] + tables.ProbCost[255-int(p[2])] + tables.ProbCost[p[3]] + tables.ProbCost[255-int(p[4])] + tables.ProbCost[255-int(p[5])]
+	case 5:
+		return tables.ProbCost[255-int(p[0])] + tables.ProbCost[255-int(p[1])] + tables.ProbCost[255-int(p[2])] + tables.ProbCost[255-int(p[3])] + tables.ProbCost[p[6]] + tables.ProbCost[p[7]]
+	case 6:
+		return tables.ProbCost[255-int(p[0])] + tables.ProbCost[255-int(p[1])] + tables.ProbCost[255-int(p[2])] + tables.ProbCost[255-int(p[3])] + tables.ProbCost[p[6]] + tables.ProbCost[255-int(p[7])]
+	case 7:
+		return tables.ProbCost[255-int(p[0])] + tables.ProbCost[255-int(p[1])] + tables.ProbCost[255-int(p[2])] + tables.ProbCost[255-int(p[3])] + tables.ProbCost[255-int(p[6])] + tables.ProbCost[p[8]] + tables.ProbCost[p[9]]
+	case 8:
+		return tables.ProbCost[255-int(p[0])] + tables.ProbCost[255-int(p[1])] + tables.ProbCost[255-int(p[2])] + tables.ProbCost[255-int(p[3])] + tables.ProbCost[255-int(p[6])] + tables.ProbCost[p[8]] + tables.ProbCost[255-int(p[9])]
+	case 9:
+		return tables.ProbCost[255-int(p[0])] + tables.ProbCost[255-int(p[1])] + tables.ProbCost[255-int(p[2])] + tables.ProbCost[255-int(p[3])] + tables.ProbCost[255-int(p[6])] + tables.ProbCost[255-int(p[8])] + tables.ProbCost[p[10]]
+	case 10:
+		return tables.ProbCost[255-int(p[0])] + tables.ProbCost[255-int(p[1])] + tables.ProbCost[255-int(p[2])] + tables.ProbCost[255-int(p[3])] + tables.ProbCost[255-int(p[6])] + tables.ProbCost[255-int(p[8])] + tables.ProbCost[255-int(p[10])]
+	case 11:
+		return tables.ProbCost[p[0]]
+	}
+	return tokenCostMaxInt() / 4
 }
