@@ -16,6 +16,10 @@ func IDCT4x4Add(input *[16]int16, pred []byte, predStride int, dst []byte, dstSt
 
 // DCOnlyIDCT4x4Add dispatches to the SIMD or scalar DC-only fast path.
 func DCOnlyIDCT4x4Add(inputDC int16, pred []byte, predStride int, dst []byte, dstStride int) {
+	if uint16(inputDC)+4 <= 7 && zeroDCSameWindow(pred, predStride, dst, dstStride) {
+		return
+	}
+
 	dcOnlyIDCT4x4AddSIMD(inputDC, pred, predStride, dst, dstStride)
 }
 
@@ -34,6 +38,9 @@ func DCOnlyIDCT4x4Add(inputDC int16, pred []byte, predStride int, dst []byte, ds
 // semantics here.
 func DCOnlyIDCT4x4AddInt32(inputDC int32, pred []byte, predStride int, dst []byte, dstStride int) {
 	a1 := dcOnlyIDCT4x4AddInt32Delta(inputDC)
+	if a1 == 0 && zeroDCSameWindow(pred, predStride, dst, dstStride) {
+		return
+	}
 	dcOnlyIDCT4x4AddSIMD(int16(a1<<3), pred, predStride, dst, dstStride)
 }
 
@@ -168,4 +175,8 @@ func dcOnlyIDCT4x4AddScalar(inputDC int16, pred []byte, predStride int, dst []by
 		dstRow[2] = ClipPixel(a1 + int(predRow[2]))
 		dstRow[3] = ClipPixel(a1 + int(predRow[3]))
 	}
+}
+
+func zeroDCSameWindow(pred []byte, ps int, dst []byte, ds int) bool {
+	return ps == ds && ps >= 4 && len(pred) >= 4 && ps <= (len(pred)-4)/3 && len(dst) >= 4 && ds <= (len(dst)-4)/3 && &pred[0] == &dst[0]
 }
