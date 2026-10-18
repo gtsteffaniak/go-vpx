@@ -31,3 +31,13 @@ func fastQuantizeBlockBatchScalar(coeff []int16, quant *BlockQuant, qcoeff []int
 		eobs[i] = uint8(fastQuantizeBlockScalar(c, quant, q, dq))
 	}
 }
+
+func fastQuantizeBlockBatchOnly(coeff []int16, quant *BlockQuant, qcoeff []int16, eobs []uint8, count int) {
+	if count >= 2 && pixel.QuantizeVP8BatchOnly(coeff, &quant.Round, &quant.QuantFast, qcoeff, &tables.DefaultInvZigZag, eobs, count) {
+		return
+	}
+	var dq [16]int16
+	for i := range count {
+		eobs[i] = uint8(fastQuantizeBlockSIMD((*[16]int16)(coeff[i*16:]), quant, (*[16]int16)(qcoeff[i*16:]), &dq))
+	}
+}

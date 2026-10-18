@@ -22,3 +22,13 @@ func FastQuantizeBlockBatch(coeff []int16, quant *BlockQuant, qcoeff []int16, dq
 	}
 	fastQuantizeBlockBatchSIMD(coeff, quant, qcoeff, dqcoeff, eobs, count)
 }
+
+// FastQuantizeBlockBatchOnly writes quantized coefficients and EOBs without
+// computing the dequantized coefficients. Accepted fast-quant macroblocks
+// reconstruct from QCoeff later; only RD distortion scoring consumes DQCoeff.
+func FastQuantizeBlockBatchOnly(coeff []int16, quant *BlockQuant, qcoeff []int16, eobs []uint8, count int) {
+	if count <= 0 {
+		return
+	}
+	fastQuantizeBlockBatchOnly(coeff, quant, qcoeff, eobs, count)
+}
