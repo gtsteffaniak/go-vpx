@@ -50,12 +50,22 @@ func pixelStatsPairs8(src []byte, srcStride int, ref []byte, refStride int, h in
 	for ; r+2 <= h; r += 2 {
 		sseAcc, sumAcc = pixelDiffAcc(sseAcc, sumAcc, packRows8(src, r*srcStride, srcStride), packRows8(ref, r*refStride, refStride))
 	}
-	total, signed := reducePixelAcc(sseAcc, sumAcc)
 	if r < h {
-		t, sg := pixelStatsPureGo(src[r*srcStride:], srcStride, ref[r*refStride:], refStride, 8, 1)
-		total += pixelStatsReduction(t)
-		signed += pixelStatsReduction(sg)
+		srow, rrow := src[r*srcStride:], ref[r*refStride:]
+		if len(srow) < 8 || len(rrow) < 8 {
+			// Preserve the original scalar access/panic order for short rows.
+			total, signed := reducePixelAcc(sseAcc, sumAcc)
+			t, sg := pixelStatsPureGo(srow, srcStride, rrow, refStride, 8, 1)
+			return uint32(total + pixelStatsReduction(t)), int32(signed + pixelStatsReduction(sg))
+		}
+		// The final eight pixels need only one exact low-half packet.
+		a := archsimd.Uint64x2{}.SetElem(0, binary.LittleEndian.Uint64(srow)).ReshapeToUint8s()
+		b := archsimd.Uint64x2{}.SetElem(0, binary.LittleEndian.Uint64(rrow)).ReshapeToUint8s()
+		delta := a.ExtendLo8ToUint16().BitsToInt16().Sub(b.ExtendLo8ToUint16().BitsToInt16())
+		sseAcc = sseAcc.Add(square8(delta))
+		sumAcc = sumAcc.Add(sumDiff16(delta))
 	}
+	total, signed := reducePixelAcc(sseAcc, sumAcc)
 	return uint32(total), int32(signed)
 }
 

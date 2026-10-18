@@ -53,7 +53,7 @@ fi
  scripts/go.sh env GOOS GOARCH GOAMD64 GOEXPERIMENT GOTOOLCHAIN GOCACHE GOFLAGS
  uname -a
  lscpu
- sha256sum "$driver_path" "$root/scripts/go.sh" "$root/.github/workflows/sse8-amd64-bench.yml" "$root/scripts/capture-sse8-codegen.py"
+ sha256sum "$driver_path" "$root/scripts/go.sh" "$root/.github/workflows/sse8-amd64-bench.yml" "$root/scripts/capture-sse8-codegen.py" "$root/scripts/capture-stats-codegen.py"
 } > "$output_dir/environment.txt"
 printf '{"head":"%s","base":"%s","assembly":"%s"}\n' "$head_commit" "$base_commit" "$assembly_commit" > "$output_dir/commits.json"
 
@@ -245,7 +245,7 @@ if [ -f "$scratch/head/$fp_fixture" ] && [ -f "$scratch/head/$stats_fixture" ] &
  done
  # Reuse identical strict runtime feature gating and the repaired inventory
  # parser. Extra arguments bind source hashes to the archived head, not driver.
- sh "$root/scripts/benchmark-pixel-optional.sh" "$scratch/base-pixel.test" "$scratch/head-pixel.test" "$output_dir/pixel-optional.txt" "$scratch/head" "$head_commit" "$base_commit"
+ sh "$root/scripts/benchmark-pixel-optional.sh" "$scratch/base-pixel.test" "$scratch/head-pixel.test" "$output_dir/pixel-optional.txt" "$scratch/head" "$head_commit" "$base_commit" "$scratch/base"
 else
  # Preserve historical manual SSE8-only head/base comparisons. No pixel or
  # selected512 claim can be made when those older sources lack this API.

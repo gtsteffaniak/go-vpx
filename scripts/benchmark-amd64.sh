@@ -43,6 +43,7 @@ fi
 # remain unchanged at their respective pinned commits.
 for source_dir in "$reference_dir" "$previous_dir"; do
 	[ -n "$source_dir" ] || continue
+	cp "$root/internal/vp8/encoder/token_count_macro_test.go" "$source_dir/internal/vp8/encoder/token_count_macro_test.go"
 	cp "$root/internal/vp8/encoder/token_eob_native_test.go" "$source_dir/internal/vp8/encoder/token_eob_native_test.go"
 	cp "$root/internal/vp8/encoder/dct_batch_native_test.go" "$source_dir/internal/vp8/encoder/dct_batch_native_test.go"
 	cp "$root/internal/vp8/encoder/denoiser_native_bench_test.go" "$source_dir/internal/vp8/encoder/denoiser_native_bench_test.go"
@@ -100,6 +101,11 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 		fi
 	done
 	printf '%s\n' 'GOMAXPROCS=1 PGO=off rounds=6 kernel-benchtime=150ms'
+	sha256sum "$root/scripts/capture-stats-codegen.py"
+	sha256sum "$root/internal/pixel/stats_odd_row_frozen_test.go"
+	sha256sum "$root/internal/pixel/stats_odd_row_state_test.go"
+	sha256sum "$root/internal/vp8/encoder/probability_tokens.go"
+	sha256sum "$root/internal/vp8/encoder/token_count_macro_test.go"
 	sha256sum "$root/internal/pixel/dc_pair_coeff_amd64_test.go"
 	sha256sum "$root/internal/pixel/dc_pair_coeff_arm64_test.go"
 	sha256sum "$root/internal/pixel/dc_pair_inplace_amd64.go"
@@ -244,6 +250,12 @@ GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestBac
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/dsp -run '^TestSixTap' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestDenoiseBytes' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^Test(Stats16|DiffMetricsAndStats)' -count=1 -v
+	# Current-only odd-row/tall Stats correctness preserves exact backing and
+	# malformed-window behavior on both actual SIMD and disabled fallback.
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestStatsOddRow' -count=1 -v
+	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestStatsOddRow' -count=1 -v
+	GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off ./internal/pixel -run '^TestStatsOddRow' -count=1 -v
+	GODEBUG=cpu.avx=off,cpu.avx2=off,cpu.avx512f=off GOVPX_REQUIRE_SIMD=0 scripts/go.sh test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/pixel -run '^TestStatsOddRow' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/dsp -run '^TestVariance' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/encoder -run '^TestDenoiser' -count=1 -v
 	GOVPX_REQUIRE_SIMD=1 scripts/go.sh test -pgo=off ./internal/vp8/encoder -run '^TestDenseToken' -count=1 -v
@@ -348,7 +360,7 @@ if [ -n "$previous_dir" ]; then
 fi
 
 packages='internal/vp9/dsp internal/vp8/dsp internal/vp9/encoder internal/vp8/encoder internal/vp8/decoder'
-benchmarks='Benchmark(Avg8x8Quad|ProjectionColumnsNative|Variance16x16Native)$|BenchmarkVP9(FP16Native|WideSADNative|FusedFPClassesNative|FPNoClassesNative|Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance(8x8|16x16|32x32|64x64)|SubpelPointerNative|LoopFilter(Horizontal|Vertical)8(Dual)?NonFlat)$|BenchmarkSAD16x16$|BenchmarkForwardDCT(16x16|32x32Native)$|Benchmark(SADLimitNative|SADLimitSliceNative|SADLimitX4Native|UVRoundedZeroNative|GatherPointerNative|GatherPackedPredictionNative|ResidualGatherNative|PreparedTokenEOBNative|DCPairRowsNative|DCPairInPlaceRowsNative|SixTapPhases|SplitSubpelPhases|DenoiserFilterYNative|LoopFilterLumaSSENative|VP8PickerFilterNative|FastQuantizeBatchNative|FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|DCOnlyIDCT4x4AddPairInt32|DCOnlyPairInPlace|ResidualGather16x16|ResidualGather8x8|SSE16x720PtrFast|SSE16x16|SSE8x8|SSE8RowsNative|TMPredictRowsNative|Copy(8|16)RowsNative|IntraDCFill(Exact|Supplement)|SubtractRowsNative|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|(MB)?LoopFilter(Horizontal|Vertical)EdgeUV|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
+benchmarks='Benchmark(Avg8x8Quad|ProjectionColumnsNative|Variance16x16Native)$|BenchmarkVP9(FP16Native|WideSADNative|FusedFPClassesNative|FPNoClassesNative|Idct4x4_16Add|Idct8x8_64Add|Convolve8Horiz16x16|Convolve8Vert16x16|SubPixelVariance(8x8|16x16|32x32|64x64)|SubpelPointerNative|LoopFilter(Horizontal|Vertical)8(Dual)?NonFlat)$|BenchmarkSAD16x16$|BenchmarkForwardDCT(16x16|32x32Native)$|Benchmark(SADLimitNative|SADLimitSliceNative|SADLimitX4Native|UVRoundedZeroNative|GatherPointerNative|GatherPackedPredictionNative|ResidualGatherNative|PreparedTokenEOBNative|TokenCountMacroNative|DCPairRowsNative|DCPairInPlaceRowsNative|SixTapPhases|SplitSubpelPhases|DenoiserFilterYNative|LoopFilterLumaSSENative|VP8PickerFilterNative|FastQuantizeBatchNative|FastQuantizeBlockSIMD|ForwardDCT4x4SIMD|ForwardDCTBatchResidual25|DCOnlyIDCT4x4AddPairInt32|DCOnlyPairInPlace|ResidualGather16x16|ResidualGather8x8|SSE16x720PtrFast|SSE16x16|SSE8x8|SSE8RowsNative|TMPredictRowsNative|Copy(8|16)RowsNative|IntraDCFill(Exact|Supplement)|SubtractRowsNative|LoopFilterHorizontalEdgesY|LoopFilterVerticalEdgesY|(MB)?LoopFilter(Horizontal|Vertical)EdgeUV|SAD16x16LimitEarly|SAD16x16x4LimitPtrFastFull)$'
 for variant in $variants; do
 	case "$variant" in
 		assembly) source_dir=$reference_dir ;;
@@ -395,6 +407,14 @@ for variant in $variants; do
 		GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp8-encoder.test" -test.run '^TestPreparedEOBNoShiftState$' -test.bench '^BenchmarkPreparedTokenEOBNative$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem -test.v
 		GOVPX_REQUIRE_SIMD=1 scripts/go.sh -C "$source_dir" test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/vp8/encoder -run '^TestPreparedEOBNoShiftState$' -count=1 -v
 	} > "$output_dir/$variant-token-eob-fixture-validation.txt" 2>&1
+	# Keep count-only and prepared-record macroblock controls independent of
+	# the existing prepared-token writer fixture. All12 live cases and the
+	# frozen full-state/error/panic oracle run on every pinned reference.
+	{
+		printf '# token macro preflight: %s\n' "$variant"
+		GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp8-encoder.test" -test.run '^TestTokenCountMacroFrozenState$' -test.bench '^BenchmarkTokenCountMacroNative$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem -test.v
+		GOVPX_REQUIRE_SIMD=1 scripts/go.sh -C "$source_dir" test -pgo=off -race -gcflags=all=-d=checkptr=2 ./internal/vp8/encoder -run '^TestTokenCountMacroFrozenState$' -count=1 -v
+	} > "$output_dir/$variant-token-count-macro-validation.txt" 2>&1
 	# Oracle work is untimed and identical on every pinned production source.
 	GOVPX_REQUIRE_SIMD=1 "$output_dir/$variant-internal-vp9-encoder.test" -test.run '^$' -test.bench '^BenchmarkVP9FP16Native$' -test.benchtime=1x -test.count=1 -test.cpu=1 -test.benchmem > "$output_dir/$variant-fp16-fixture-validation.txt" 2>&1
 	if [ "$variant" = simd ]; then
@@ -424,6 +444,29 @@ for variant in sys.argv[2:]:
         names.append(name)
     assert len(names)==len(set(names))==15 and set(names)==expected,(variant,names)
 TOKEN_EOB_PREFLIGHT
+
+# The new macroblock one-shots are excluded from all timed counts. Require
+# the complete independent state oracle twice and exactly12 zeroalloc cases.
+python3 - "$output_dir" $variants <<'TOKEN_MACRO_PREFLIGHT'
+from pathlib import Path
+import re, sys
+expected={f"BenchmarkTokenCountMacroNative/is4{a}/{p}/records{b}" for a in ("false","true") for p in ("zero","sparse","dense") for b in ("false","true")}
+for variant in sys.argv[2:]:
+    text=(Path(sys.argv[1])/(variant+"-token-count-macro-validation.txt")).read_text()
+    assert text.count("--- PASS: TestTokenCountMacroFrozenState ")==2, variant
+    assert text.count("full-state/error/panic/backing cases=12288")==2, variant
+    assert "--- FAIL:" not in text and not re.search(r"^FAIL(?:\s|$)",text,re.M),variant
+    names=[]
+    for line in text.splitlines():
+        if not line.startswith("BenchmarkTokenCountMacroNative/"): continue
+        if line.strip() in expected: continue
+        m=re.fullmatch(r"(BenchmarkTokenCountMacroNative/\S+)\s+(\d+)\s+(?:(\S+) ns/op\s+)?(\S+) B/op\s+(\S+) allocs/op",line.rstrip())
+        assert m,(variant,line)
+        name,it,ns,byte,alloc=m.groups()
+        assert name in expected and int(it)==1 and float(byte)==float(alloc)==0,(variant,line)
+        names.append(name)
+    assert len(names)==len(set(names))==12 and set(names)==expected,(variant,names)
+TOKEN_MACRO_PREFLIGHT
 
 for round in 1 2 3 4 5 6; do
 	order='assembly simd'
@@ -486,7 +529,7 @@ if [ -n "$previous_dir" ]; then
  cp "$root/internal/pixel/fp32_optional_native_test.go" "$previous_dir/internal/pixel/fp32_optional_native_test.go"
  cp "$root/internal/pixel/stats_reduction_native_test.go" "$previous_dir/internal/pixel/stats_reduction_native_test.go"
  scripts/go.sh -C "$previous_dir" test -pgo=off -c -o "$output_dir/previous-pixel-optional.test" ./internal/pixel
- scripts/benchmark-pixel-optional.sh "$output_dir/previous-pixel-optional.test" "$output_dir/simd-fp16-guard.test" "$output_dir/pixel-optional.txt"
+ scripts/benchmark-pixel-optional.sh "$output_dir/previous-pixel-optional.test" "$output_dir/simd-fp16-guard.test" "$output_dir/pixel-optional.txt" "$root" "$(git rev-parse HEAD)" "$previous_commit" "$previous_dir"
 fi
 
 # Keep artifacts compact; raw text/JSON and environment details are sufficient
