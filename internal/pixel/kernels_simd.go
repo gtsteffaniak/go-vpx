@@ -684,6 +684,62 @@ func FillBlock(dst []byte, ds, w, h int, value byte) {
 		FillBlockScalar(dst, ds, w, h, value)
 		return
 	}
+
+	// Prove the full fixed-width window before stores. Declining retains
+	// the original row-by-row bounds and partial-write panic behavior.
+	if fillFixedRows && h > 1 && h <= 64 && uint(ds)>>30 == 0 && (w == 4 || w == 8 || w == 16) && (h-1)*ds+w <= len(dst) {
+		p := unsafe.Pointer(unsafe.SliceData(dst))
+		v := archsimd.BroadcastUint8x16(value)
+		if h&3 == 0 {
+			d2, d3 := 2*ds, 3*ds
+			switch w {
+			case 16:
+				for row := 0; row < h; row += 4 {
+					at := unsafe.Add(p, row*ds)
+					v.StoreArray((*[16]byte)(at))
+					v.StoreArray((*[16]byte)(unsafe.Add(at, ds)))
+					v.StoreArray((*[16]byte)(unsafe.Add(at, d2)))
+					v.StoreArray((*[16]byte)(unsafe.Add(at, d3)))
+				}
+			case 8:
+				word := v.ReshapeToUint64s().GetElem(0)
+				for row := 0; row < h; row += 4 {
+					at := unsafe.Add(p, row*ds)
+					*(*uint64)(at) = word
+					*(*uint64)(unsafe.Add(at, ds)) = word
+					*(*uint64)(unsafe.Add(at, d2)) = word
+					*(*uint64)(unsafe.Add(at, d3)) = word
+				}
+			case 4:
+				word := v.ReshapeToUint32s().GetElem(0)
+				for row := 0; row < h; row += 4 {
+					at := unsafe.Add(p, row*ds)
+					*(*uint32)(at) = word
+					*(*uint32)(unsafe.Add(at, ds)) = word
+					*(*uint32)(unsafe.Add(at, d2)) = word
+					*(*uint32)(unsafe.Add(at, d3)) = word
+				}
+			}
+			return
+		}
+		switch w {
+		case 16:
+			for row := range h {
+				v.StoreArray((*[16]byte)(unsafe.Add(p, row*ds)))
+			}
+		case 8:
+			word := v.ReshapeToUint64s().GetElem(0)
+			for row := range h {
+				*(*uint64)(unsafe.Add(p, row*ds)) = word
+			}
+		case 4:
+			word := v.ReshapeToUint32s().GetElem(0)
+			for row := range h {
+				*(*uint32)(unsafe.Add(p, row*ds)) = word
+			}
+		}
+		return
+	}
 	v := archsimd.BroadcastUint8x16(value)
 	for y := range h {
 		v.StorePart(dst[y*ds : y*ds+w])
