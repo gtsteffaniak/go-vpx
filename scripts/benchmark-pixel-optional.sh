@@ -9,6 +9,7 @@ output=${3:?usage: benchmark-pixel-optional.sh PARENT_PIXEL_TEST CURRENT_PIXEL_T
 source_dir=${4:-$(pwd)}
 head_commit=${5:-$(git rev-parse HEAD)}
 base_commit=${6:-}
+parent_source_dir=${7:-}
 export GOMAXPROCS=1 GOVPX_REQUIRE_SIMD=1
 {
  printf '# additive component API only; qnil has no actual encoder caller claim\n'
@@ -79,3 +80,28 @@ assert names[('preflight','parent')]==names[('preflight','current')]
 assert names[('timed','parent')]==names[('timed','current')]
 print('optional pixel inventory PASS:132 excluded one-shots; timed samples=%d; actual selected512=%s; all0B/0alloc'%(12*expected,sys.argv[2]))
 PY
+
+# Native code/layout capture is strictly AFTER every optional timer and parser.
+# Source directories are explicit in both full and focused callers.
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+capture_dir="${output%.txt}-stats-codegen"
+if [ -n "$parent_source_dir" ] && [ -n "$base_commit" ]; then
+ for variant in parent current; do
+  case "$variant" in
+   parent) binary=$parent; variant_source=$parent_source_dir; variant_commit=$base_commit ;;
+   current) binary=$current; variant_source=$source_dir; variant_commit=$head_commit ;;
+  esac
+  mkdir -p "$capture_dir/$variant"
+  python3 "$script_dir/capture-stats-codegen.py" --variant "$variant" --binary "$binary" \
+   --output-dir "$capture_dir/$variant" --source-dir "$variant_source" \
+   --common-source-dir "$source_dir" --source-commit "$variant_commit" \
+   --head-commit "$head_commit" --base-commit "$base_commit" \
+   --protocol-log "$output" --go-wrapper "$script_dir/go.sh" \
+   > "$capture_dir/$variant/capture.log" 2>&1
+ done
+else
+ # Historical direct 3-argument invocations have no bound baseline source.
+ # Do not invent a source/layout proof for those old callers.
+ mkdir -p "$capture_dir"
+ printf 'UNAVAILABLE: explicit baseline source directory/commit missing\n' > "$capture_dir/UNAVAILABLE.txt"
+fi
