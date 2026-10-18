@@ -53,7 +53,7 @@ fi
  scripts/go.sh env GOOS GOARCH GOAMD64 GOEXPERIMENT GOTOOLCHAIN GOCACHE GOFLAGS
  uname -a
  lscpu
- sha256sum "$driver_path" "$root/scripts/go.sh" "$root/.github/workflows/sse8-amd64-bench.yml"
+ sha256sum "$driver_path" "$root/scripts/go.sh" "$root/.github/workflows/sse8-amd64-bench.yml" "$root/scripts/capture-sse8-codegen.py"
 } > "$output_dir/environment.txt"
 printf '{"head":"%s","base":"%s","assembly":"%s"}\n' "$head_commit" "$base_commit" "$assembly_commit" > "$output_dir/commits.json"
 
@@ -117,6 +117,14 @@ for round in 1 2 3 4 5 6; do
   printf 'round %s: %s\n' "$round" "$variant"
   GOVPX_REQUIRE_SIMD=1 "$scratch/$variant.test" -test.run '^$' -test.bench "$benchmarks" -test.benchtime=80ms -test.count=1 -test.cpu=1 -test.benchmem > "$output_dir/$variant-round-$round.txt" 2>&1
  done
+done
+
+# Preserve only relevant native code after every timed process has finished.
+# Wrapper functions may be inlined/dead-stripped; keep actual B.Loop caller
+# plus current helper or old lowercase/variance assembly symbols instead.
+phase=codegen
+for variant in head base assembly; do
+ python3 "$root/scripts/capture-sse8-codegen.py" "$variant" "$scratch/$variant.test" "$output_dir"
 done
 
 phase=summary

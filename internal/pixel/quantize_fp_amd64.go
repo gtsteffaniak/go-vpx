@@ -106,27 +106,29 @@ func quantizeFPBlockSIMD(coeff, iscan, qcoeff, dqcoeff []int16, n int, r, q, d [
 // The public entry has already checked every required length; n is bounded.
 // Even read-only input aliases decline, keeping this specialization conservative.
 func fp16WindowsDisjoint(coeff, iscan, qcoeff, dqcoeff []int16, classes []byte, n int) bool {
-	type span struct{ p, bytes uintptr }
-	spans := [5]span{
-		{uintptr(unsafe.Pointer(unsafe.SliceData(coeff))), uintptr(n) * 2},
-		{uintptr(unsafe.Pointer(unsafe.SliceData(iscan))), uintptr(n) * 2},
-		{uintptr(unsafe.Pointer(unsafe.SliceData(dqcoeff))), uintptr(n) * 2},
+	c := uintptr(unsafe.Pointer(unsafe.SliceData(coeff)))
+	i := uintptr(unsafe.Pointer(unsafe.SliceData(iscan)))
+	d := uintptr(unsafe.Pointer(unsafe.SliceData(dqcoeff)))
+	bytes := uintptr(n) * 2
+	sameLimit := bytes + bytes - 1
+	if i-c+bytes-1 < sameLimit || d-c+bytes-1 < sameLimit || d-i+bytes-1 < sameLimit {
+		return false
 	}
-	count := 3
 	if qcoeff != nil {
-		spans[count] = span{uintptr(unsafe.Pointer(unsafe.SliceData(qcoeff))), uintptr(n) * 2}
-		count++
+		q := uintptr(unsafe.Pointer(unsafe.SliceData(qcoeff)))
+		if q-c+bytes-1 < sameLimit || q-i+bytes-1 < sameLimit || q-d+bytes-1 < sameLimit {
+			return false
+		}
 	}
 	if classes != nil {
-		spans[count] = span{uintptr(unsafe.Pointer(unsafe.SliceData(classes))), uintptr(n)}
-		count++
-	}
-	for i := 0; i < count; i++ {
-		for j := 0; j < i; j++ {
-			a, b := spans[i], spans[j]
-			if a.p <= b.p && b.p-a.p < a.bytes || b.p < a.p && a.p-b.p < b.bytes {
-				return false
-			}
+		cl := uintptr(unsafe.Pointer(unsafe.SliceData(classes)))
+		classBytes := uintptr(n)
+		classLimit := classBytes + bytes - 1
+		if cl-c+classBytes-1 < classLimit || cl-i+classBytes-1 < classLimit || cl-d+classBytes-1 < classLimit {
+			return false
+		}
+		if qcoeff != nil && cl-uintptr(unsafe.Pointer(unsafe.SliceData(qcoeff)))+classBytes-1 < classLimit {
+			return false
 		}
 	}
 	return true
