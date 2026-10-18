@@ -110,6 +110,9 @@ func sadBlock8x8(src []byte, srcStride int, ref []byte, refStride int) int {
 }
 
 func sadBlock4x4(src []byte, srcStride int, ref []byte, refStride int) int {
+	if sum, ok := sad4RowsGo(src, srcStride, ref, refStride); ok {
+		return sum
+	}
 	return pixel.SAD(src, srcStride, ref, refStride, 4, 4)
 }
 
