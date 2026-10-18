@@ -18,9 +18,14 @@ func pixelDiffAcc(sse, sum archsimd.Int32x4, a, b archsimd.Uint8x16) (archsimd.I
 	return sse, sum
 }
 
-func reducePixelAcc(sse, sum archsimd.Int32x4) (total, signed int64) {
-	total = int64(sse.GetElem(0)) + int64(sse.GetElem(1)) + int64(sse.GetElem(2)) + int64(sse.GetElem(3))
-	signed = int64(sum.GetElem(0)) + int64(sum.GetElem(1)) + int64(sum.GetElem(2)) + int64(sum.GetElem(3))
+func reducePixelAcc(sse, sum archsimd.Int32x4) (total, signed pixelStatsReduction) {
+	// ARM reduces before crossing to scalar registers. Keep the original
+	// scalar extraction on amd64, where native short-row measurements win.
+	if vectorPixelAccReduction {
+		return pixelStatsReduction(sum32(sse)), pixelStatsReduction(sum32(sum))
+	}
+	total = pixelStatsReduction(sse.GetElem(0)) + pixelStatsReduction(sse.GetElem(1)) + pixelStatsReduction(sse.GetElem(2)) + pixelStatsReduction(sse.GetElem(3))
+	signed = pixelStatsReduction(sum.GetElem(0)) + pixelStatsReduction(sum.GetElem(1)) + pixelStatsReduction(sum.GetElem(2)) + pixelStatsReduction(sum.GetElem(3))
 	return total, signed
 }
 
@@ -48,8 +53,8 @@ func pixelStatsPairs8(src []byte, srcStride int, ref []byte, refStride int, h in
 	total, signed := reducePixelAcc(sseAcc, sumAcc)
 	if r < h {
 		t, sg := pixelStatsPureGo(src[r*srcStride:], srcStride, ref[r*refStride:], refStride, 8, 1)
-		total += int64(t)
-		signed += int64(sg)
+		total += pixelStatsReduction(t)
+		signed += pixelStatsReduction(sg)
 	}
 	return uint32(total), int32(signed)
 }

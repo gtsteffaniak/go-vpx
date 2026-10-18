@@ -12,6 +12,9 @@ var fpClassLUT = [16]byte{0, 1, 2, 3, 3, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5}
 func quantizeFPBlockSIMD(coeff, iscan, qcoeff, dqcoeff []int16, n int, r, q, d [2]int16, classes []byte) int {
 
 	if n >= 64 && n <= 1024 && n&15 == 0 && Enabled && archsimd.X86.AVX2() && fp16WindowsDisjoint(coeff, iscan, qcoeff, dqcoeff, classes, n) {
+		if n >= 256 && n&31 == 0 && archsimd.X86.AVX512() {
+			return quantizeFPBlock32AVX512(coeff, iscan, qcoeff, dqcoeff, n, r, q, d, classes)
+		}
 		cp, ip, qp, dp := unsafe.Pointer(unsafe.SliceData(coeff)), unsafe.Pointer(unsafe.SliceData(iscan)), unsafe.Pointer(unsafe.SliceData(qcoeff)), unsafe.Pointer(unsafe.SliceData(dqcoeff))
 		clp := unsafe.Pointer(unsafe.SliceData(classes))
 		max16 := archsimd.BroadcastUint16x16(32767)

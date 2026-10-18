@@ -37,6 +37,16 @@ func DCOnlyIDCT4x4AddInt32(inputDC int32, pred []byte, predStride int, dst []byt
 	dcOnlyIDCT4x4AddSIMD(int16(a1<<3), pred, predStride, dst, dstStride)
 }
 
+// DCOnlyIDCT4x4AddPairInPlaceInt32 mirrors libvpx v1.16.0's paired DC-only
+// reconstruction when prediction and destination are the same full window.
+func DCOnlyIDCT4x4AddPairInPlaceInt32(c0, c1 int32, b []byte, stride int) {
+	if pixel.DCPairNative && pixel.Enabled {
+		pixel.DCPairInPlaceInt32Native(c0, c1, b, stride)
+		return
+	}
+	DCOnlyIDCT4x4AddPairInt32(c0, c1, b, stride, b, stride)
+}
+
 // DCOnlyIDCT4x4AddPairInt32 adds two horizontally adjacent DC-only 4x4 blocks.
 // It is used by chroma residual paths that mirror libvpx's paired U/V block
 // dispatch.

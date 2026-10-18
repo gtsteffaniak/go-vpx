@@ -7,6 +7,10 @@ import (
 	"unsafe"
 )
 
+type pixelStatsReduction = int32
+
+const vectorPixelAccReduction = true
+
 // pixelStats16Narrow handles sixteen columns and 1..64 rows. Each signed
 // sum lane receives two differences per row: |sum| <= 2*255*64 = 32640.
 // Keeping sums in int16 eliminates widening in every row. Squared errors

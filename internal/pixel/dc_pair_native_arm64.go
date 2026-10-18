@@ -3,7 +3,6 @@
 package pixel
 
 import (
-	"encoding/binary"
 	"simd/archsimd"
 	"unsafe"
 )
@@ -31,20 +30,10 @@ fast:
 		if !exact && !disjoint {
 			break fast
 		}
-		// This is the original byte kernel: preserve two-row read/store packets.
-		pattern := func(lo, hi int16) archsimd.Uint8x16 {
-			a, b := uint32(byte(lo))*0x01010101, uint32(byte(hi))*0x01010101
-			return archsimd.BroadcastUint64x2(uint64(a) | uint64(b)<<32).ReshapeToUint8s()
-		}
-		plus := pattern(max(d0, 0), max(d1, 0))
-		minus := pattern(max(-d0, 0), max(-d1, 0))
-		rows := func(y int) {
-			v := packRows8(pred, y*ps, ps).AddSaturated(plus).SubSaturated(minus).ReshapeToUint64s()
-			binary.LittleEndian.PutUint64(dst[y*ds:], v.GetElem(0))
-			binary.LittleEndian.PutUint64(dst[(y+1)*ds:], v.GetElem(1))
-		}
-		rows(0)
-		rows(2)
+		delta := dcPairSignedDelta8(d0, d1)
+		sp, out := unsafe.Pointer(unsafe.SliceData(pred)), unsafe.Pointer(unsafe.SliceData(dst))
+		dcPairSignedRows2(sp, ps, out, ds, delta)
+		dcPairSignedRows2(unsafe.Add(sp, 2*ps), ps, unsafe.Add(out, 2*ds), ds, delta)
 		return
 	}
 	// Exact enabled fallback: block0 is complete before slicing block1.

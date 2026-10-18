@@ -7,6 +7,10 @@ import (
 	"unsafe"
 )
 
+type pixelStatsReduction = int64
+
+const vectorPixelAccReduction = false
+
 // A full 16-byte row becomes one AVX2 packet. At 1..64 rows, signed
 // differences stay within 16320 per int16 lane; squares accumulate in int32.
 func pixelStats16Narrow(src []byte, ss int, ref []byte, rs, h int) (uint32, int32) {
