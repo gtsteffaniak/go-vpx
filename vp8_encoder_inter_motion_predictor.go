@@ -318,6 +318,11 @@ func improvedInterFrameMVMedian(slots [8]improvedInterFrameMVSlot, count int) vp
 	if count <= 0 {
 		return vp8enc.MotionVector{}
 	}
+
+	if count == 3 {
+		a, b, c := slots[0].mv, slots[1].mv, slots[2].mv
+		return vp8enc.MotionVector{Row: max(min(a.Row, b.Row), min(max(a.Row, b.Row), c.Row)), Col: max(min(a.Col, b.Col), min(max(a.Col, b.Col), c.Col))}
+	}
 	var rows [8]int
 	var cols [8]int
 	// limit ∈ [0, 8] by construction (min with array length); using
