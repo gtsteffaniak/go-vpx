@@ -72,7 +72,7 @@ jobs:
 
       - name: Root ML stream correctness
         if: ${{ env.GOVPX_FULL_CI != 'true' }}
-        run: scripts/go.sh test -pgo=off . -run '^Test(MLCacheStreamNative|VP9ScratchLiveEdgeReads56)$' -count=1 -v
+        run: scripts/go.sh test -pgo=off . -run '^Test(VP8Algorithm2|MLCacheStreamNative|VP9ScratchLiveEdgeReads56)' -count=1 -v
 
       - name: Optional selected pure-Go math
         if: ${{ env.GOVPX_FULL_CI != 'true' && inputs.purego_math }}

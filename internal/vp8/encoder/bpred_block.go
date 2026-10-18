@@ -52,3 +52,23 @@ func CopyBPredBlock(src []byte, dst []byte, dstStride int, block int) {
 		copy(dst[(y+row)*dstStride+x:], src[row*4:row*4+4])
 	}
 }
+
+// BPredBlockStats preserves the selected predictor statistics for macroblock variance.
+func BPredBlockStats(src SourceImage, mbRow int, mbCol int, block int, pred []byte, predStride int) (int, int) {
+	baseY := mbRow*16 + (block>>2)*4
+	baseX := mbCol*16 + (block&3)*4
+	if src.Width >= 4 && src.Height >= 4 && uint(baseX) <= uint(src.Width-4) && uint(baseY) <= uint(src.Height-4) && src.YStride >= src.Width && predStride >= 4 && len(src.Y) >= baseX+4 && len(pred) >= 4 && baseY+3 <= (len(src.Y)-baseX-4)/src.YStride && predStride <= (len(pred)-4)/3 {
+		return dsp.PixelStats4x4(src.Y[baseY*src.YStride+baseX:], src.YStride, pred, predStride)
+	}
+	sum, sse := 0, 0
+	for row := range 4 {
+		srcY := clampEncodeCoord(baseY+row, src.Height)
+		for col := range 4 {
+			srcX := clampEncodeCoord(baseX+col, src.Width)
+			diff := int(src.Y[srcY*src.YStride+srcX]) - int(pred[row*predStride+col])
+			sum += diff
+			sse += diff * diff
+		}
+	}
+	return sum, sse
+}

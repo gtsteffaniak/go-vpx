@@ -220,7 +220,10 @@ func (e *VP8Encoder) ssimActivityMeasure(src vp8enc.SourceImage, mbRow int, mbCo
 		var dequantTables vp8common.FrameDequantTables
 		var dequant vp8common.MacroblockDequant
 		quantDeltas := libvpxFrameQuantDeltas(qIndex, e.opts.ScreenContentMode)
-		vp8common.BuildFrameDequantTables(quantDeltas, &dequantTables)
+		q := vp8common.ClampQIndex(qIndex)
+		dequantTables.Y1[q] = [2]int16{int16(vp8common.DCQuant(q, quantDeltas.Y1DC)), int16(vp8common.ACYQuant(q))}
+		dequantTables.Y2[q] = [2]int16{int16(vp8common.DC2Quant(q, quantDeltas.Y2DC)), int16(vp8common.AC2Quant(q, quantDeltas.Y2AC))}
+		dequantTables.UV[q] = [2]int16{int16(vp8common.DCUVQuant(q, quantDeltas.UVDC)), int16(vp8common.ACUVQuant(q, quantDeltas.UVAC))}
 		vp8common.InitMacroblockDequant(&dequantTables, qIndex, &dequant)
 		_ = reconstructAnalysisMacroblock(img, mbRow, mbCol, &mode, &tokens, &dequant, &e.reconstructScratch)
 	} else {

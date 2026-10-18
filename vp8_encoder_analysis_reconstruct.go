@@ -425,3 +425,51 @@ func applyLibvpxY2EobAdjustToAnalysisMacroblock(tokens *vp8dec.MacroblockTokens,
 func clampEncodeCoord(v int, limit int) int {
 	return min(max(v, 0), limit-1)
 }
+
+func analysisBPredEdges(macroblock []byte, macroblockStride int, above []byte, left []byte, topLeft byte, block int) ([8]byte, [4]byte, byte) {
+	blockRow := block >> 2
+	blockCol := block & 3
+	y := blockRow * 4
+	x := blockCol * 4
+	var blockAbove [8]byte
+	var blockLeft [4]byte
+
+	if blockRow == 0 {
+		copy(blockAbove[:], above[x:x+8])
+	} else {
+		aboveOff := (y-1)*macroblockStride + x
+		copy(blockAbove[:4], macroblock[aboveOff:aboveOff+4])
+		if blockCol < 3 {
+			copy(blockAbove[4:], macroblock[aboveOff+4:aboveOff+8])
+		} else {
+			copy(blockAbove[4:], above[16:20])
+		}
+	}
+
+	if blockCol == 0 {
+		copy(blockLeft[:], left[y:y+4])
+	} else {
+		for i := range 4 {
+			blockLeft[i] = macroblock[(y+i)*macroblockStride+x-1]
+		}
+	}
+
+	blockTopLeft := topLeft
+	switch {
+	case blockRow == 0 && blockCol == 0:
+	case blockRow == 0:
+		blockTopLeft = above[x-1]
+	case blockCol == 0:
+		blockTopLeft = left[y-1]
+	default:
+		blockTopLeft = macroblock[(y-1)*macroblockStride+x-1]
+	}
+
+	return blockAbove, blockLeft, blockTopLeft
+}
+func predictAnalysisChromaWithRefs(img *vp8common.Image, row int, col int, uvMode vp8common.MBPredictionMode, refs vp8dec.IntraPredictorRefs) bool {
+	uOff := row*8*img.UStride + col*8
+	vOff := row*8*img.VStride + col*8
+	return vp8dec.PredictIntraUV8x8(uvMode, img.U[uOff:], img.UStride, refs.UAbove, refs.ULeft, refs.UTopLeft, refs.UpAvailable, refs.LeftAvailable) &&
+		vp8dec.PredictIntraUV8x8(uvMode, img.V[vOff:], img.VStride, refs.VAbove, refs.VLeft, refs.VTopLeft, refs.UpAvailable, refs.LeftAvailable)
+}
