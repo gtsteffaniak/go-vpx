@@ -513,6 +513,21 @@ func computeSkinMap(src vp8enc.SourceImage, rows int, cols int, consecZeroLast [
 	if count <= 0 || len(skinMap) < count || min(src.Width, src.Height) <= 0 {
 		return
 	}
+	// A fully static frame cannot contain an eligible skin block. Avoid
+	// rebuilding and smoothing a map whose complete result is known to be zero.
+	if len(consecZeroLast) >= count {
+		static := true
+		for _, consecutive := range consecZeroLast[:count] {
+			if consecutive <= 60 {
+				static = false
+				break
+			}
+		}
+		if static {
+			clear(skinMap[:count])
+			return
+		}
+	}
 	uvWidth := (src.Width + 1) >> 1
 	uvHeight := (src.Height + 1) >> 1
 	if src.Width*src.Height > skinDetectionMaxSmallFrame {
