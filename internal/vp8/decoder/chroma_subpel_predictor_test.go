@@ -3,8 +3,8 @@ package decoder
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
-	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/dsp"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 // TestChromaSubpelPredictorMatchesLibvpx pins the VP8 chroma inter predictor

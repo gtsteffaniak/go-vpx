@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/internal/vpx/geometry"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/geometry"
 )
 
 func TestSetRTCExternalRateControlRemainsEnabledAfterDisable(t *testing.T) {

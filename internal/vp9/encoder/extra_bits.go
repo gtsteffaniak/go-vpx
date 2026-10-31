@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/gtsteffaniak/govpx/internal/vp9/tables"
+import "github.com/gtsteffaniak/go-vpx/internal/vp9/tables"
 
 // VP9 token-extra-bit metadata. Ported from libvpx v1.16.0
 // vp9/encoder/vp9_tokenize.{h,c} — vp9_extra_bit and the

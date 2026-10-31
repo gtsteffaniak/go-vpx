@@ -1,4 +1,4 @@
-module github.com/gtsteffaniak/govpx
+module github.com/gtsteffaniak/go-vpx
 
 go 1.27.0
 

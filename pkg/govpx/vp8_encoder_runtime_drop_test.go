@@ -1,7 +1,7 @@
 package govpx
 
 import (
-	vpxrc "github.com/gtsteffaniak/govpx/internal/vpx/ratecontrol"
+	vpxrc "github.com/gtsteffaniak/go-vpx/internal/vpx/ratecontrol"
 	"testing"
 )
 

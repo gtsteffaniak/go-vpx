@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
-	vpxbuf "github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
+	vpxbuf "github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 type encoderValidationPattern int

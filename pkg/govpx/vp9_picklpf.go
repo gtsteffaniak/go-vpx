@@ -43,10 +43,10 @@ package govpx
 import (
 	"image"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	vp9enc "github.com/gtsteffaniak/govpx/internal/vp9/encoder"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	vp9enc "github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 // vp9PickLpfMaxFilterLevel mirrors libvpx vp9_picklpf.c:37-44 get_max_filter_level.

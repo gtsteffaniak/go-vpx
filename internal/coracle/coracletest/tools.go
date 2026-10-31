@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/coracle"
+	"github.com/gtsteffaniak/go-vpx/internal/coracle"
 )
 
 // SkipWithoutOracle skips t unless the slow oracle gates are explicitly

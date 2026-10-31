@@ -3,13 +3,13 @@ package govpx
 import (
 	"image"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	vp9dsp "github.com/gtsteffaniak/govpx/internal/vp9/dsp"
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
-	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
-	"github.com/gtsteffaniak/govpx/internal/vpx/arith"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	vp9dsp "github.com/gtsteffaniak/go-vpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/arith"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 // vp9EncoderBestInterRefMvs returns the per-ref MV that the bitstream MV coder

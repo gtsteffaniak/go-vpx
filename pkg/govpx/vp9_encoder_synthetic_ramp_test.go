@@ -6,7 +6,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // makeSyntheticRampFrame mirrors makeBenchmarkFrame from the govpx-bench

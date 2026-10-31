@@ -1,6 +1,6 @@
 // Command govpx is a small demo CLI for the govpx VP8/VP9 codec.
 //
-// Library import: github.com/gtsteffaniak/govpx/pkg/govpx
+// Library import: github.com/gtsteffaniak/go-vpx/pkg/govpx
 //
 // Usage:
 //
@@ -13,8 +13,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gtsteffaniak/govpx/internal/vpx/ivf"
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/ivf"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 type decoder interface {
@@ -108,7 +108,7 @@ func decode(hdr ivf.Header, frames []ivf.Frame, outPath string) error {
 func writeI420(w *bufio.Writer, img govpx.Image) error {
 	cw, ch := (img.Width+1)/2, (img.Height+1)/2
 	planes := []struct {
-		data          []byte
+		data         []byte
 		stride, w, h int
 	}{
 		{img.Y, img.YStride, img.Width, img.Height},

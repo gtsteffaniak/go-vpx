@@ -3,7 +3,7 @@ package govpx
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 )
 
 // TestRDPartitionCostMatchesLibvpx pins the full-RD partition-token rate cost

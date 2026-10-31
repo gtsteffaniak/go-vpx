@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/gtsteffaniak/govpx/internal/vp8/tables"
+import "github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 
 // Ported from libvpx v1.16.0 vpx_dsp/variance.c sub-pixel variance
 // primitives, specialised to width=16 for the inner-loop hot path used

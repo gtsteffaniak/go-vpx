@@ -1,6 +1,6 @@
 package govpx
 
-import "github.com/gtsteffaniak/govpx/internal/vpx/arith"
+import "github.com/gtsteffaniak/go-vpx/internal/vpx/arith"
 
 const (
 	// MaxTemporalLayers is the largest VP8 temporal-layer count exposed by

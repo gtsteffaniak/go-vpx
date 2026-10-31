@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 type decodeJSONReport struct {

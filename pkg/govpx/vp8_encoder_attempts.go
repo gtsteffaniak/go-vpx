@@ -1,12 +1,12 @@
 package govpx
 
 import (
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
-	vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
-	"github.com/gtsteffaniak/govpx/internal/vpx/geometry"
-	vpxrc "github.com/gtsteffaniak/govpx/internal/vpx/ratecontrol"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
+	vp8tables "github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/geometry"
+	vpxrc "github.com/gtsteffaniak/go-vpx/internal/vpx/ratecontrol"
 )
 
 func (e *VP8Encoder) encodeKeyFrameWithQuantizerFeedback(dst []byte, source vp8enc.SourceImage, rows int, cols int, required int, flags EncodeFlags, invisible bool, staticSegmentationAllowed bool) (keyFrameEncodeAttempt, error) {

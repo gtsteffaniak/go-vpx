@@ -3,10 +3,10 @@ package vp9test
 import (
 	"testing"
 
-	vp9bits "github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
-	vp9common "github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	vp9enc "github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	vp9bits "github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
+	vp9common "github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	vp9enc "github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
 )
 
 func ReadCompressedHeader(t testing.TB, packet []byte,

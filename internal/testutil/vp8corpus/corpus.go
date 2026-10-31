@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
 )
 
 const DefaultIVFTestDataDir = "internal/coracle/build/test-data/vp8"

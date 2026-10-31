@@ -4,8 +4,8 @@ import (
 	"math"
 	"math/bits"
 
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/tables"
 )
 
 const mvSADMax = (1 << (10 + 1 + 2)) - 1

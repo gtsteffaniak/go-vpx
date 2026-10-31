@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func TestNewVP9DecoderRejectsInvalidByteAlignment(t *testing.T) {

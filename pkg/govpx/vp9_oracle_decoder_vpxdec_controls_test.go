@@ -4,10 +4,10 @@ package govpx_test
 
 import (
 	"bytes"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9oracle"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9oracle"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 	"testing"
 )
 

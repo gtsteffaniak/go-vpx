@@ -2,7 +2,7 @@
 
 package govpx
 
-import "github.com/gtsteffaniak/govpx/internal/testutil"
+import "github.com/gtsteffaniak/go-vpx/internal/testutil"
 
 var vp8OracleRuntimeFullPermutationSeed = []byte{0xff, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
 

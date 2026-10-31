@@ -6,8 +6,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9oracle"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9oracle"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
 	"testing"
 )
 

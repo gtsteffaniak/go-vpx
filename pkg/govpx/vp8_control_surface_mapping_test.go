@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/controlsurface"
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/controlsurface"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 type vp8UpstreamControlCoverage struct {

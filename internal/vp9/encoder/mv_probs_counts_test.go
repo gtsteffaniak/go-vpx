@@ -3,8 +3,8 @@ package encoder
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
 )
 
 // TestUpdateMvEmitsLiteral plants counts heavily biased away from

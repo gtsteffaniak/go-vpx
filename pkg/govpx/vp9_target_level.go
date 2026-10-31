@@ -1,6 +1,6 @@
 package govpx
 
-import "github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+import "github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
 
 const (
 	// VP9TargetLevelUnspecified is the Go zero value and maps to libvpx's

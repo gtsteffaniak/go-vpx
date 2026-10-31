@@ -4,9 +4,9 @@ import (
 	"math/rand"
 	"testing"
 
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
 )
 
 // TestVP8FastPickerLumaIntraRefsMatchesBuilder pins the fast picker's

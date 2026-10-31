@@ -3,8 +3,8 @@ package encoder
 import (
 	"unsafe"
 
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
 )
 
 // Reconstruction conversion helpers bridge VP8 encoder decisions into the

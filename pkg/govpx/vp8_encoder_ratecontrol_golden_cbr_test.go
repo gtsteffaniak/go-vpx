@@ -1,7 +1,7 @@
 package govpx
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vpx/geometry"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/geometry"
 	"testing"
 )
 

@@ -3,8 +3,8 @@ package encoder_test
 import (
 	"testing"
 
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
-	vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
+	vp8tables "github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 // referenceCoefBlockTokenRate is a literal walk of libvpx's

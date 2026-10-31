@@ -4,8 +4,8 @@ import (
 	"image"
 	"math/rand"
 
-	"github.com/gtsteffaniak/govpx/internal/vpx/arith"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/arith"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 // NewYCbCr returns a full-frame 4:2:0 image filled with one Y/Cb/Cr sample.

@@ -5,9 +5,9 @@ import (
 	"math"
 	"testing"
 
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
-	vpxrc "github.com/gtsteffaniak/govpx/internal/vpx/ratecontrol"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
+	vpxrc "github.com/gtsteffaniak/go-vpx/internal/vpx/ratecontrol"
 )
 
 // newAutoAltRefTestEncoder constructs a small two-pass VBR encoder with the

@@ -7,7 +7,7 @@ import (
 	"image"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
 )
 
 func captureVP9RateTraceRows(t *testing.T, opts VP9EncoderOptions,

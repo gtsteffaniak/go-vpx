@@ -1,6 +1,6 @@
 package govpx
 
-import "github.com/gtsteffaniak/govpx/internal/vpx/arith"
+import "github.com/gtsteffaniak/go-vpx/internal/vpx/arith"
 
 // clampBitrateKbps applies the libvpx VP9 rc_min_bitrate / rc_max_bitrate
 // bounds to a requested kbps update. Zero bounds disable that side of the

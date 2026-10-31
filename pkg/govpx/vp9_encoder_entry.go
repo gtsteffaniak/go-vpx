@@ -3,7 +3,7 @@ package govpx
 import (
 	"image"
 
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 func (e *VP9Encoder) validateVP9EncoderSource(img *image.YCbCr) error {

@@ -1,8 +1,8 @@
 package govpx
 
 import (
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
 )
 
 func (e *VP8Encoder) interModeForRDLoopEntry(

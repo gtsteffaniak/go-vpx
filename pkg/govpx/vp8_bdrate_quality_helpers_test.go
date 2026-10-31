@@ -31,7 +31,7 @@ package govpx_test
 // a missing vpxenc binary; default is t.Skip the absolute assertion.
 
 import (
-	"github.com/gtsteffaniak/govpx/cmd/govpx-bench/benchcmd"
+	"github.com/gtsteffaniak/go-vpx/cmd/govpx-bench/benchcmd"
 	"math"
 	"testing"
 )

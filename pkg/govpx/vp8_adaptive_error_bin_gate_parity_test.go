@@ -3,7 +3,7 @@ package govpx
 import (
 	"testing"
 
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
 )
 
 // TestVP8AdaptiveErrorBinGateFollowsCPISpeed verifies that the adaptive

@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
 )
 
 // TestVP8ARNRPickerParity compares govpx and libvpx inter-candidate traces for

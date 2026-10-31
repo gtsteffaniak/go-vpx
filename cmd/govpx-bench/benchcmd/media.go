@@ -8,9 +8,9 @@ import (
 	"os"
 	"slices"
 
-	vpxbuf "github.com/gtsteffaniak/govpx/internal/vpx/buffers"
-	"github.com/gtsteffaniak/govpx/internal/vpx/ivf"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	vpxbuf "github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/ivf"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func makeBenchmarkFrame(width int, height int, index int) govpx.Image {

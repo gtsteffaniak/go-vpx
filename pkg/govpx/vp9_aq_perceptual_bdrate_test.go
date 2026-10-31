@@ -4,9 +4,9 @@ import (
 	"image"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/cmd/govpx-bench/benchcmd"
-	"github.com/gtsteffaniak/govpx/internal/testutil"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/cmd/govpx-bench/benchcmd"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // vp9PerceptualAQBDRateFullSweepEnv gates the 256x256 BD-rate diagnostic

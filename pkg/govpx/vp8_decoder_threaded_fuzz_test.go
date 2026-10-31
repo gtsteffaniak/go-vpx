@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // FuzzVP8DecoderThreaded drives concurrent VP8 decodes of a stream synthesised

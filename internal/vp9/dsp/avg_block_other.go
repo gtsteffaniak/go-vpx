@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/gtsteffaniak/govpx/internal/pixel"
+import "github.com/gtsteffaniak/go-vpx/internal/pixel"
 
 func avg8x8QuadAsm(src []uint8, off, stride int, out *[4]int32) bool {
 	if !pixel.Enabled {

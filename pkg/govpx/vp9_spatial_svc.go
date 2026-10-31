@@ -3,7 +3,7 @@ package govpx
 import (
 	"image"
 
-	vp9bits "github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
+	vp9bits "github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
 )
 
 // VP9SpatialSVCEncoderOptions configures a VP9 spatial-SVC access-unit

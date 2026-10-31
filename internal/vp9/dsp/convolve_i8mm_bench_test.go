@@ -3,11 +3,11 @@
 package dsp
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
 	"math/rand/v2"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/tables"
 )
 
 func benchConvolveSetup(w, h int) (src []byte, dst []byte, stride int) {

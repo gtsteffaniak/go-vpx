@@ -1,8 +1,8 @@
 package encoder
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
 )
 
 // VP9 tx-size probability update writer. Ported from libvpx v1.16.0

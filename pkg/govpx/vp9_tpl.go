@@ -4,7 +4,7 @@ import (
 	"image"
 	"math"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
 )
 
 // VP9TPLFrameDelta is the read-only per-SB TPL summary exposed to other

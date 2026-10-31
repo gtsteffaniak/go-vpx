@@ -13,8 +13,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
 )
 
 // VP8OracleReproducibleRuns is the default re-run count for the VP8 oracle

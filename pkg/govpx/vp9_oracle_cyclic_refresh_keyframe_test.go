@@ -5,8 +5,8 @@ package govpx_test
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9oracle"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9oracle"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
 )
 
 func TestVP9EncoderVpxencOracleCBRCyclicRefreshKeyframeByteParity(t *testing.T) {

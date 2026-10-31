@@ -1,10 +1,10 @@
 package encoder
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
 	"unsafe"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/dsp"
 )
 
 // Predicted residual gather helpers mirror libvpx v1.16.0

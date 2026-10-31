@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/gtsteffaniak/govpx/internal/pixel"
+import "github.com/gtsteffaniak/go-vpx/internal/pixel"
 
 // Pure-Go fallback for the 16x16 variance block on architectures
 // without a SIMD port. Mirrors libvpx v1.16.0 vpx_dsp/variance.c

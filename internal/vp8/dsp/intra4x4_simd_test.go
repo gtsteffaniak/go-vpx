@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/common"
 )
 
 // TestIntra4x4SIMDParity verifies that the dispatched (SIMD on amd64

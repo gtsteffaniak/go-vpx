@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	vpxerrors "github.com/gtsteffaniak/govpx/internal/vpx/errors"
+	vpxerrors "github.com/gtsteffaniak/go-vpx/internal/vpx/errors"
 )
 
 // FuzzParseSuperframe feeds arbitrary bytes to the VP9 superframe-index parser.

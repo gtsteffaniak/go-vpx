@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
 )
 
 // Compare the fused public kernel with the independent scalar libvpx v1.16.0

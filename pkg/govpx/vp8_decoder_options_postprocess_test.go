@@ -3,8 +3,8 @@ package govpx
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
 )
 
 func TestDecoderOptionsEffectivePostProcessFlags(t *testing.T) {

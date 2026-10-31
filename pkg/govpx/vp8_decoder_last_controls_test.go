@@ -3,9 +3,9 @@ package govpx_test
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // TestVP8DecoderLastControlsBeforeDecode asserts the libvpx-style getters

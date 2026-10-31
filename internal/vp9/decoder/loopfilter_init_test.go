@@ -3,7 +3,7 @@ package decoder
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 )
 
 // expectedThresh mirrors libvpx's update_sharpness exactly so the

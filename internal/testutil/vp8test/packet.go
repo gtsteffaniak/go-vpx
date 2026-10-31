@@ -1,8 +1,8 @@
 package vp8test
 
 import (
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8tables "github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 // KeyFramePacket builds a VP8 keyframe tag and keyframe header.

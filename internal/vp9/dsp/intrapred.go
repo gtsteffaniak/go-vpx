@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/gtsteffaniak/govpx/internal/pixel"
+import "github.com/gtsteffaniak/go-vpx/internal/pixel"
 
 // VP9 intra prediction kernels — DC / V / H / TM families and their DC
 // fall-back variants (dc_128, dc_left, dc_top). Ported from libvpx

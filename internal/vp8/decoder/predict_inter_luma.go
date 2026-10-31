@@ -1,8 +1,8 @@
 package decoder
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/dsp"
 )
 
 // PredictWholeMVInterLumaWithState writes the Y predictor without constructing

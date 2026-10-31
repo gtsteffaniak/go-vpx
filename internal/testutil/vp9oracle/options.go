@@ -3,7 +3,7 @@ package vp9oracle
 import (
 	"strconv"
 
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // NormalizeFuzzOptionsForLibvpxCLI rewrites VP9 options that do not have an

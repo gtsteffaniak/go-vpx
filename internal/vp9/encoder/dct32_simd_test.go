@@ -3,7 +3,7 @@
 package encoder
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
 	"math"
 	"math/rand"
 	"slices"

@@ -1,9 +1,9 @@
 package govpx_test
 
 import (
-	"github.com/gtsteffaniak/govpx/cmd/govpx-bench/benchcmd"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/cmd/govpx-bench/benchcmd"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 	"image"
 	"math"
 	"testing"

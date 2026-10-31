@@ -2,7 +2,7 @@
 
 package govpx
 
-import "github.com/gtsteffaniak/govpx/internal/testutil/vp8corpus"
+import "github.com/gtsteffaniak/go-vpx/internal/testutil/vp8corpus"
 
 func vp8SourceClipImages(clip vp8corpus.SourceClip) []Image {
 	frames := make([]Image, len(clip.Frames))

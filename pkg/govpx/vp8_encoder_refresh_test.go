@@ -3,8 +3,8 @@ package govpx
 import (
 	"testing"
 
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
-	"github.com/gtsteffaniak/govpx/internal/vpx/geometry"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/geometry"
 )
 
 // TestSuppressInterFrameCopyBuffersOnAltRefEdgesClearsCopyBuffer mirrors

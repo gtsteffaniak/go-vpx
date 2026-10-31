@@ -3,7 +3,7 @@ package decoder
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 )
 
 func TestMFQEDecisionMatchesLibvpx(t *testing.T) {

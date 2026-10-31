@@ -3,7 +3,7 @@ package govpx
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
 )
 
 func decodeIVFIntoChecksums(t *testing.T, ivf []byte) []testutil.FrameChecksum {

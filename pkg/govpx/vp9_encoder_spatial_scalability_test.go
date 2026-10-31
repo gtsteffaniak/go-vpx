@@ -3,7 +3,7 @@ package govpx
 import (
 	"bytes"
 	"errors"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
 	"testing"
 )
 

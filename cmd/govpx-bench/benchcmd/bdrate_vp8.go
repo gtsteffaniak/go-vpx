@@ -13,7 +13,7 @@ import (
 	"sort"
 	"strconv"
 
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // BDRateOptionsVP8 configures one VP8 BD-rate measurement run.

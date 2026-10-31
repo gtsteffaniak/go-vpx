@@ -1,8 +1,8 @@
 package encoder
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/pixel"
-	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 // Pure-Go fallback dispatchers for the FastQuantizeBlock, ForwardDCT4x4, and

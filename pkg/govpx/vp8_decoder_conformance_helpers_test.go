@@ -2,9 +2,9 @@ package govpx
 
 import (
 	"encoding/hex"
-	"github.com/gtsteffaniak/govpx/internal/testutil"
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
 	"testing"
 )
 

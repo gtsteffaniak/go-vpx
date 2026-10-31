@@ -1,6 +1,6 @@
 package govpx
 
-import vpxerrors "github.com/gtsteffaniak/govpx/internal/vpx/errors"
+import vpxerrors "github.com/gtsteffaniak/go-vpx/internal/vpx/errors"
 
 var (
 	// ErrInvalidData reports malformed or unsupported VP8 bitstream or RTP

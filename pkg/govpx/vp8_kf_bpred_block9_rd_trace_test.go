@@ -7,7 +7,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
 )
 
 // TestVP8KFBPredBlock9TraceLocalizesRDCostDrift compares govpx and libvpx

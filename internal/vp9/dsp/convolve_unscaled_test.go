@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/tables"
 )
 
 func refHoriz(src []byte, ss int, dst []byte, ds int, f *[tables.SubpelShifts][tables.SubpelTaps]int16, x0, step, w, h, off int) {

@@ -2,7 +2,7 @@
 
 package encoder
 
-import "github.com/gtsteffaniak/govpx/internal/vp9/common"
+import "github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 
 func blockYrdScore([]int16, int, int, common.TxSize, [2]int16, [2]int16,
 	[2]int16, uint64, []int16, bool,

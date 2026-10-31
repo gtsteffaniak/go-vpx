@@ -1,6 +1,6 @@
 package decoder
 
-import "github.com/gtsteffaniak/govpx/internal/vp9/common"
+import "github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 
 // VP9 per-plane shape helpers. Ported from libvpx v1.16.0
 // vp9/common/vp9_blockd.h — get_plane_block_size, get_uv_tx_size,

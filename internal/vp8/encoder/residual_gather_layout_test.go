@@ -3,8 +3,8 @@ package encoder_test
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/dsp"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
 )
 
 // TestUVResidualGatherMatchesLibvpxBlockLayout proves that the Go UV residual

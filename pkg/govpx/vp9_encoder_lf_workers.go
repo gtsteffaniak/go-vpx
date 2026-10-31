@@ -3,8 +3,8 @@ package govpx
 import (
 	"sync"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 // vp9LfSync mirrors libvpx's VP9LfSync (vp9/common/vp9_thread_common.c): a

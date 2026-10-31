@@ -14,7 +14,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
 )
 
 type SourceClip struct {

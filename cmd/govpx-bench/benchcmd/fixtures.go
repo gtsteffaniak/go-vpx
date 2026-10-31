@@ -1,7 +1,7 @@
 package benchcmd
 
 import (
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // makePanningFrame returns a deterministic 4:2:0 panning fixture that

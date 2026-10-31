@@ -1,6 +1,6 @@
 package decoder
 
-import "github.com/gtsteffaniak/govpx/internal/vp9/common"
+import "github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 
 // Loopfilter / quantization / tile-info parsers from the VP9
 // uncompressed header. Ported from libvpx v1.16.0

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	vpxerrors "github.com/gtsteffaniak/govpx/internal/vpx/errors"
-	"github.com/gtsteffaniak/govpx/internal/vpx/rtp"
+	vpxerrors "github.com/gtsteffaniak/go-vpx/internal/vpx/errors"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/rtp"
 )
 
 func TestPacketizeSpatialSVCFrameIntoOrdersLayerFrames(t *testing.T) {

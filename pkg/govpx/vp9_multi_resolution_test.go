@@ -5,9 +5,9 @@ import (
 	"image"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	vp9dsp "github.com/gtsteffaniak/govpx/internal/vp9/dsp"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	vp9dsp "github.com/gtsteffaniak/go-vpx/internal/vp9/dsp"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // newVP9MultiResLayerOptions returns a deterministic layer-options

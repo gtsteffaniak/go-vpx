@@ -5,7 +5,7 @@ package govpx
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
 	"path/filepath"
 	"strings"
 	"testing"

@@ -1,6 +1,6 @@
 package decoder
 
-import vpxerrors "github.com/gtsteffaniak/govpx/internal/vpx/errors"
+import vpxerrors "github.com/gtsteffaniak/go-vpx/internal/vpx/errors"
 
 // Stream-info fields are derived from the libvpx v1.16.0 VP8 frame tag
 // parsing path in vp8/decoder/decodeframe.c and vp8/vp8_dx_iface.c.

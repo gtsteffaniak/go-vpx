@@ -1,8 +1,8 @@
 package decoder
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	"github.com/gtsteffaniak/govpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/dsp"
 )
 
 // VP9 per-frame loopfilter init. Ported from libvpx v1.16.0

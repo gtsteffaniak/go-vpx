@@ -3,7 +3,7 @@ package govpx
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 )
 
 func TestVP9BlockCoeffOffsetCompactsEveryTxLayout(t *testing.T) {

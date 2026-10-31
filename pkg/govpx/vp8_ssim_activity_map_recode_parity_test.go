@@ -6,11 +6,11 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
 
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
-	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 // TestVP8SSIMActivityMapRecodeBestQualityParity pins the 128x128 BestQuality

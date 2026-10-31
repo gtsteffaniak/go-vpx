@@ -3,7 +3,7 @@ package govpx
 import (
 	"image"
 
-	vp9enc "github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	vp9enc "github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
 )
 
 func (e *VP9Encoder) vp9AutoAltRefSourceImage(center *vp9LookaheadEntry) *image.YCbCr {

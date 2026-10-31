@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
 )
 
 func TestEncoderSetReferenceFrameAffectsNextInterFrame(t *testing.T) {

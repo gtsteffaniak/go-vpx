@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/gtsteffaniak/govpx/internal/vpx/arith"
+import "github.com/gtsteffaniak/go-vpx/internal/vpx/arith"
 
 const (
 	sceneCutMinimumReferenceSSEPerMB = 16 * 16 * 64 * 64

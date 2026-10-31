@@ -1,6 +1,6 @@
 package decoder
 
-import "github.com/gtsteffaniak/govpx/internal/vp9/common"
+import "github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 
 // VP9 neighbor-context helpers. Ported from libvpx v1.16.0
 // vp9/common/vp9_pred_common.{h,c}. These small functions sample the

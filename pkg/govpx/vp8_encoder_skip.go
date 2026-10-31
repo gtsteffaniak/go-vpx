@@ -1,6 +1,6 @@
 package govpx
 
-import vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+import vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
 
 func (e *VP8Encoder) baseSkipFalseProb(qIndex int) uint8 {
 	qIndex = min(max(qIndex, 0), len(vp8enc.DefaultBaseSkipFalseProbs)-1)

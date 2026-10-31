@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/coracle"
-	"github.com/gtsteffaniak/govpx/internal/coracle/coracletest"
-	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/coracle"
+	"github.com/gtsteffaniak/go-vpx/internal/coracle/coracletest"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
 )
 
 type VpxdecOptions struct {

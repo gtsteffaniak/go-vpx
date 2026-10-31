@@ -4,7 +4,7 @@ import (
 	"math"
 	"testing"
 
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
 )
 
 // TestLibvpxEstimateMaxQReturnsMaxOnZeroBudget pins libvpx's

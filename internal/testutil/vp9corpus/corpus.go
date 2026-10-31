@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
 )
 
 func IVFRoot(t testing.TB) (string, bool) {

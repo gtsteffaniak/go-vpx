@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
 )
 
 func TestVP8OracleEncoderStreamByteParityRuntimeControls(t *testing.T) {

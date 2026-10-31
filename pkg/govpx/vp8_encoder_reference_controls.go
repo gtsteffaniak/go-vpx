@@ -3,9 +3,9 @@ package govpx
 import (
 	"slices"
 
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 // SetReferenceFrame replaces ref with src. ref must be ReferenceLast,

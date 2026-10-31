@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func TestVP9RTPPacketizeAssembleEncodedFrame(t *testing.T) {

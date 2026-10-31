@@ -1,6 +1,6 @@
 # Architecture
 
-govpx keeps `github.com/gtsteffaniak/govpx/pkg/govpx` as the only public import path. The
+govpx keeps `github.com/gtsteffaniak/go-vpx/pkg/govpx` as the only public import path. The
 `pkg/govpx` package is the caller-facing facade: constructors, options, errors, image
 buffers, RTP types, and codec handles live there. Codec-specific implementation
 belongs under `internal/vp8` and `internal/vp9`; shared code under

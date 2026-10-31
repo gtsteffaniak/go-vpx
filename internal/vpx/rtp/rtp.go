@@ -1,7 +1,7 @@
 // Package rtp holds shared mechanical helpers for RTP payload assembly.
 package rtp
 
-import vpxerrors "github.com/gtsteffaniak/govpx/internal/vpx/errors"
+import vpxerrors "github.com/gtsteffaniak/go-vpx/internal/vpx/errors"
 
 // PayloadFragment is one RTP payload body plus the RTP marker-bit value
 // the caller should put in the RTP header for that body.

@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
 )
 
 func TestDenoiserCompleteRuntimeFallback(t *testing.T) {

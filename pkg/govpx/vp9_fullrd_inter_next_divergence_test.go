@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 // vp9_fullrd_inter_next_divergence_test.go is an oracle-trace ANALYSIS probe (no

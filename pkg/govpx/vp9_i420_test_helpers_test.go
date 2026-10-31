@@ -1,6 +1,6 @@
 package govpx
 
-import "github.com/gtsteffaniak/govpx/internal/testutil"
+import "github.com/gtsteffaniak/go-vpx/internal/testutil"
 
 func appendVP9I420(out []byte, img Image) []byte {
 	return testutil.AppendI420Planes(out, img.Width, img.Height,

@@ -1,8 +1,8 @@
 package govpx
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 func (e *VP9Encoder) ensureVP9VarPartCopyState(miRows, miCols int) bool {

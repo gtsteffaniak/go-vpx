@@ -10,7 +10,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
 )
 
 // TestVP8OracleInterDecisionMatchRate captures per-MB picker decisions for govpx

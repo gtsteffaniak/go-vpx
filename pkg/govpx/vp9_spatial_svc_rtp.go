@@ -1,6 +1,6 @@
 package govpx
 
-import vp9rtp "github.com/gtsteffaniak/govpx/internal/vp9/rtp"
+import vp9rtp "github.com/gtsteffaniak/go-vpx/internal/vp9/rtp"
 
 // RTPPacketizationSize returns the RTP payload fragment count and payload-body
 // bytes needed to packetize every coded spatial layer in r at mtu bytes.

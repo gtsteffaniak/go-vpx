@@ -1,6 +1,6 @@
 # go-vpx — VP8 & VP9 in pure Go
 
-[![CI](https://github.com/gtsteffaniak/go-vpx/actions/workflows/ci.yml/badge.svg)](https://github.com/gtsteffaniak/govpx/actions/workflows/ci.yml)
+[![CI](https://github.com/gtsteffaniak/go-vpx/actions/workflows/ci.yml/badge.svg)](https://github.com/gtsteffaniak/go-vpx/actions/workflows/ci.yml)
 [![Go Reference](https://pkg.go.dev/badge/github.com/gtsteffaniak/go-vpx/pkg/govpx.svg)](https://pkg.go.dev/github.com/gtsteffaniak/go-vpx/pkg/govpx)
 [![Go Report Card](https://goreportcard.com/badge/github.com/gtsteffaniak/go-vpx)](https://goreportcard.com/report/github.com/gtsteffaniak/go-vpx)
 [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE)
@@ -46,7 +46,7 @@ Historical assembly baseline (before the Go 1.27 SIMD migration; see
 measured 2026-07-16 against libvpx v1.16.0's own reported encode times
 (identical output bytes and drop topology in every encode row):
 
-| Workload | govpx | libvpx (C + asm) | gap |
+| Workload | go-vpx | libvpx (C + asm) | gap |
 | --- | --- | --- | --- |
 | VP8 encode, 1 thread | 7.3 ms/frame | 5.4 ms/frame | 1.36× |
 | VP9 encode, 1 thread | 10.3 ms/frame | 5.5 ms/frame | 1.87× |
@@ -70,11 +70,11 @@ Go 1.27 or newer is required. The module pins the default toolchain to Go
 1.27.2 so local `go` commands use the same patch level as CI.
 
 ```sh
-go get github.com/gtsteffaniak/govpx
+go get github.com/gtsteffaniak/go-vpx
 ```
 
 ```go
-import "github.com/gtsteffaniak/govpx/pkg/govpx"
+import "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 ```
 
 This is a fork of [thesyncim/govpx](https://github.com/thesyncim/govpx) with a
@@ -168,7 +168,7 @@ returns no more data.
 
 ## Correctness and validation
 
-govpx treats libvpx v1.16.0 as a pinned oracle (`docs/upstream.md` is the
+go-vpx treats libvpx v1.16.0 as a pinned oracle (`docs/upstream.md` is the
 authoritative scope statement). The repository gates enforce:
 
 - **VP8 encoder byte parity** — pinned stream-SHA matrices across rate
@@ -185,7 +185,7 @@ authoritative scope statement). The repository gates enforce:
   across thread counts on the production option grid.
 - **Allocation discipline** — steady-state `EncodeInto` / `Decode` paths are
   enforced allocation-free by tests.
-- **Fuzzing** — differential fuzzers run govpx against libvpx for both
+- **Fuzzing** — differential fuzzers run go-vpx against libvpx for both
   decoders and the VP8 boolean coder; corpus regressions are pinned as seeds.
 
 Run `make ci` locally for the standard gate, `make verify-production` for the
@@ -223,7 +223,7 @@ full oracle/parity lane. See `docs/validation.md` for the complete gate map.
 
 ## RTP/WebRTC Compatibility
 
-govpx's RTP/WebRTC contract is codec-payload compatibility for VP8 and VP9
+go-vpx's RTP/WebRTC contract is codec-payload compatibility for VP8 and VP9
 Profile 0. VP8 and VP9 expose payload-descriptor helpers plus MTU-aware
 packetizers and assemblers for RFC 7741 and RFC 9628 payload bodies.
 Packetizers return payload bodies plus marker bits; assemblers consume ordered
@@ -256,9 +256,9 @@ succeeded, call `VP9WebRTCPacketizer.MarkAccessUnitUnsent`. Then force a
 keyframe before sending more VP9 RTP. That local pacing/backpressure drop does
 not show up as RTP loss, but later VP9 inter frames can otherwise reference a
 PictureID the receiver never saw. With pion/webrtc, write the payloads from
-`VP9WebRTCPacketizer` to a `TrackLocalStaticRTP`; do not pass govpx VP9 SVC
+`VP9WebRTCPacketizer` to a `TrackLocalStaticRTP`; do not pass go-vpx VP9 SVC
 superframes to `TrackLocalStaticSample`, because Pion's generic VP9 payloader
-cannot reconstruct govpx's temporal/spatial dependency metadata from raw VP9
+cannot reconstruct go-vpx's temporal/spatial dependency metadata from raw VP9
 bytes. The generic VP9 RTP packetizers remain available for callers that
 already own their full PictureID, dependency, recovery, and descriptor policy.
 They are not the production long-lived WebRTC sender path. The VP9 decoder also
@@ -334,11 +334,11 @@ enc, err := govpx.NewVP8Encoder(govpx.EncoderOptions{
   encoded frame is forced to be a key frame at the new size. Mirrors
   libvpx's `vpx_codec_enc_config_set` with a new width / height. The
   VP8 `SetScalingMode` writes keyframe scale bits and forces a keyframe, but
-  govpx does not run libvpx's internal source resampler or `rc_resize_*`
+  go-vpx does not run libvpx's internal source resampler or `rc_resize_*`
   watermarks. The decoder also handles key-frame resolution change; see
   `DecoderOptions.RejectResolutionChange`.
 
-See `examples/webrtc-vp8` for a VP8 separate-module demo that streams govpx
+See `examples/webrtc-vp8` for a VP8 separate-module demo that streams go-vpx
 VP8 through pion/webrtc to a browser.
 
 ## More
@@ -384,7 +384,7 @@ scripts/go.sh run ./cmd/govpx-bench \
 ```
 
 The plot path encodes the libvpx reference with `ffmpeg -c:v libvpx`,
-scores govpx and libvpx with ffmpeg's `libvmaf`, `psnr`, and `ssim`
+scores go-vpx and libvpx with ffmpeg's `libvmaf`, `psnr`, and `ssim`
 filters, and writes an SVG plus sibling CSV/JSON files.
 
 `cmd/govpx-bench/default.pgo` is checked in intentionally so `go build`'s

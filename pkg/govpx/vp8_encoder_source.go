@@ -1,6 +1,6 @@
 package govpx
 
-import vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+import vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
 
 func sourceImageFromImage(src Image) vp8enc.SourceImage {
 	return vp8enc.SourceImage{

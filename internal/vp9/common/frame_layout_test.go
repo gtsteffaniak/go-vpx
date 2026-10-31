@@ -3,7 +3,7 @@ package common
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 func TestNewDecoderFrameLayoutMatchesLibvpxBorderShape(t *testing.T) {

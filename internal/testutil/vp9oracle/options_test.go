@@ -4,7 +4,7 @@ import (
 	"slices"
 	"testing"
 
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func TestNormalizedPublicQuantizersMirrorsVP9Defaults(t *testing.T) {

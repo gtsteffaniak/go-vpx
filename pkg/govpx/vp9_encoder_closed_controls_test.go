@@ -5,7 +5,7 @@ import (
 	"image"
 	"testing"
 
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func TestVP9EncoderEncodeAfterCloseReturnsErrClosed(t *testing.T) {

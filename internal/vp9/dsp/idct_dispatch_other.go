@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/gtsteffaniak/govpx/internal/pixel"
+import "github.com/gtsteffaniak/go-vpx/internal/pixel"
 
 // Shared Idct/Iwht/Iht dispatchers use Go SIMD when available and
 // retain the independent scalar transforms for fallback builds.
