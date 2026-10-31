@@ -3,7 +3,7 @@ package encoder
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 )
 
 // libvpx v1.16.0 default tx_probs (vp9/common/vp9_entropymode.c:281-285):

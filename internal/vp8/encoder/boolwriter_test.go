@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp8/boolcoder"
+	"github.com/gtsteffaniak/govpx/internal/vp8/boolcoder"
 )
 
 func TestBoolWriterRoundTripsWithBoolDecoder(t *testing.T) {

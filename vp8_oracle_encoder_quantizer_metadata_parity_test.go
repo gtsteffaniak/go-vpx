@@ -10,8 +10,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
 )
 
 type frameFlagsQuantizerLogEntry struct {

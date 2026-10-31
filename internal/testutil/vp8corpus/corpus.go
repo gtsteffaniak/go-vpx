@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
 )
 
 const DefaultIVFTestDataDir = "internal/coracle/build/test-data/vp8"

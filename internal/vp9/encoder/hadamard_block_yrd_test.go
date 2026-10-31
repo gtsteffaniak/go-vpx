@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/pixel"
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 )
 
 // The canonical scalar butterflies are the pinned vpx_dsp/avg.c layout.

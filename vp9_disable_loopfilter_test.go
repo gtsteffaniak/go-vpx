@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
+	govpx "github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
 )
 
 func TestVP9EncoderRejectsInvalidDisableLoopfilter(t *testing.T) {

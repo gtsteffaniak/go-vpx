@@ -1,8 +1,8 @@
 package govpx
 
 import (
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8enc "github.com/thesyncim/govpx/internal/vp8/encoder"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
 )
 
 type fastInterRefSlot struct {

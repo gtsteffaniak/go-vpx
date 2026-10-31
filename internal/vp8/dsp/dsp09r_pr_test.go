@@ -2,8 +2,8 @@ package dsp
 
 import (
 	"fmt"
-	"github.com/thesyncim/govpx/internal/pixel"
-	"github.com/thesyncim/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/vp8/common"
 	"slices"
 	"testing"
 )

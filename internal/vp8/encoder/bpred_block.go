@@ -1,8 +1,8 @@
 package encoder
 
 import (
-	"github.com/thesyncim/govpx/internal/pixel"
-	"github.com/thesyncim/govpx/internal/vp8/dsp"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
 )
 
 // BPredBlockSSE returns the source-vs-predictor SSE for one VP8 B_PRED 4x4

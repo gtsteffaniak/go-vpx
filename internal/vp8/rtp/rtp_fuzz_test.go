@@ -3,8 +3,8 @@ package rtp
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/rtptest"
-	vpxrtp "github.com/thesyncim/govpx/internal/vpx/rtp"
+	"github.com/gtsteffaniak/govpx/internal/testutil/rtptest"
+	vpxrtp "github.com/gtsteffaniak/govpx/internal/vpx/rtp"
 )
 
 // FuzzRTPVP8RoundTrip exercises the VP8 RTP packetizer and depacketizer

@@ -3,7 +3,7 @@ package decoder
 import (
 	"unsafe"
 
-	"github.com/thesyncim/govpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
 )
 
 // VP9 motion-vector probability tables and the compressed-header walk

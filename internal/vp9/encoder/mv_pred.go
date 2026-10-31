@@ -1,8 +1,8 @@
 package encoder
 
 import (
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
 )
 
 // vp9_mv_pred.go ports libvpx v1.16.0's vp9_mv_pred candidate-set SAD scan

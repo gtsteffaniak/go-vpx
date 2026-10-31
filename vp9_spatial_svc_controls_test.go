@@ -5,8 +5,8 @@ import (
 	"image"
 	"testing"
 
-	"github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 )
 
 func requireVP9PictureGroups(t *testing.T, got, want []govpx.VP9RTPPictureGroup) {

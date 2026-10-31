@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
 )
 
 func TestVpxdecVP8ChecksumArgsParsesOracleJSONL(t *testing.T) {

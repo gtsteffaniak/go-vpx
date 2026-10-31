@@ -3,8 +3,8 @@ package encoder
 import (
 	"math"
 
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
 )
 
 // This file contains the VP9 choose_partitioning picker body from libvpx

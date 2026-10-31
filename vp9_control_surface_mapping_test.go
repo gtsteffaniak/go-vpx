@@ -3,8 +3,8 @@ package govpx_test
 import (
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/controlsurface"
+	govpx "github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/controlsurface"
 )
 
 func TestVP9EncoderPublicControlSurfaceHasParityMapping(t *testing.T) {

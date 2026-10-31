@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 // Ported from libvpx v1.16.0:

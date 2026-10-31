@@ -7,7 +7,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 )
 
 // TestVP8OracleRecodeRowParity gates the libvpx VP8 recode loop semantics by

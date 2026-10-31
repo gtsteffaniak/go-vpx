@@ -1,7 +1,7 @@
 package govpx
 
 import (
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 )
 
 // vp9DoTrellisOptInterY mirrors libvpx do_trellis_opt (vp9/encoder/vp9_encoder.h

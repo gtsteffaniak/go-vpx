@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
 )
 
 func TestReconstructFrameInvalidInterModeReturnsInvalidData(t *testing.T) {

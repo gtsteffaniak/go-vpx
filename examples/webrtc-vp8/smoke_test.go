@@ -15,7 +15,7 @@ import (
 
 	"github.com/pion/webrtc/v4"
 
-	"github.com/thesyncim/govpx"
+	"github.com/gtsteffaniak/govpx"
 )
 
 func TestHandleOfferRejectsOfferWithoutVP8Receive(t *testing.T) {

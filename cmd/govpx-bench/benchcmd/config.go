@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	govpx "github.com/thesyncim/govpx"
+	govpx "github.com/gtsteffaniak/govpx"
 )
 
 const benchThreadsDefault = -1

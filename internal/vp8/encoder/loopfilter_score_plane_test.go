@@ -3,7 +3,7 @@ package encoder
 import (
 	"testing"
 
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
 )
 
 // Keep the original column accumulation as an independent scalar oracle,

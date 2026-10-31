@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 )
 
 func vp9OracleTemporalConfig(mode TemporalLayeringMode, targetKbps int) TemporalScalabilityConfig {

@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 )
 
 // TestVP8InterCandidateStatePropagation compares libvpx VP8 picker traces at

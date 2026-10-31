@@ -3,7 +3,7 @@ package govpx
 import (
 	"image"
 
-	"github.com/thesyncim/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
 )
 
 // vp9_noise_estimate.go wires the internal VP9 noise-estimate value object into

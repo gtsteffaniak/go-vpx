@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
+	govpx "github.com/gtsteffaniak/govpx"
 )
 
 // TestVP9DecoderActiveMapNotExposed pins the libvpx-mirroring rule

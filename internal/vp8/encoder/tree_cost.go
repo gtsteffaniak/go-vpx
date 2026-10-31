@@ -3,7 +3,7 @@ package encoder
 import (
 	"unsafe"
 
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 // Ported from libvpx v1.16.0 VP8 token-tree cost mechanics.

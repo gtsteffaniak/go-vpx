@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/thesyncim/govpx/internal/pixel"
+import "github.com/gtsteffaniak/govpx/internal/pixel"
 
 // Pure-Go fallback for VP8 intra-prediction primitives. Mirrors
 // libvpx v1.16.0 vp8/common/reconintra.c and vpx_dsp/intrapred.c

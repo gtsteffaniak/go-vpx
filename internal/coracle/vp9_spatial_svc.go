@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	ivfstream "github.com/thesyncim/govpx/internal/vpx/ivf"
+	ivfstream "github.com/gtsteffaniak/govpx/internal/vpx/ivf"
 )
 
 // ErrVP9SpatialSVCEncoderNotBuilt is returned when the harness cannot find

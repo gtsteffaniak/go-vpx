@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 )
 
 func TestPeekVP8StreamInfoKeyFrame(t *testing.T) {

@@ -5,9 +5,9 @@ import (
 	"math"
 	"testing"
 
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
-	vpxrc "github.com/thesyncim/govpx/internal/vpx/ratecontrol"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
+	vpxrc "github.com/gtsteffaniak/govpx/internal/vpx/ratecontrol"
 )
 
 // newAutoAltRefTestEncoder constructs a small two-pass VBR encoder with the

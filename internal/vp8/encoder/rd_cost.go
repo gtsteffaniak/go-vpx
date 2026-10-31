@@ -7,7 +7,7 @@ import (
 	"math"
 	"math/bits"
 
-	common "github.com/thesyncim/govpx/internal/vp8/common"
+	common "github.com/gtsteffaniak/govpx/internal/vp8/common"
 )
 
 const rdCostSignShift = bits.UintSize - 1

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
+	govpx "github.com/gtsteffaniak/govpx"
 )
 
 func TestVP9EncoderAcceptsSourceExceedingTargetLevelGeometry(t *testing.T) {

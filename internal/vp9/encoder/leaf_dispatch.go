@@ -1,8 +1,8 @@
 package encoder
 
 import (
-	"github.com/thesyncim/govpx/internal/vp9/bitstream"
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 )
 
 // VP9 per-leaf dispatch — the natural cut point at write_modes_b.

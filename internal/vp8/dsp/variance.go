@@ -3,9 +3,9 @@ package dsp
 import (
 	"unsafe"
 
-	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
 
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 // Ported from libvpx v1.16.0 vp8/encoder/variance.c scalar variance

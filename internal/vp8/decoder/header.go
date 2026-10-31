@@ -3,7 +3,7 @@ package decoder
 import (
 	"errors"
 
-	"github.com/thesyncim/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vp8/common"
 )
 
 // Ported from libvpx v1.16.0:

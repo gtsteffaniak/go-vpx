@@ -3,7 +3,7 @@ package encoder
 import (
 	"testing"
 
-	common "github.com/thesyncim/govpx/internal/vp8/common"
+	common "github.com/gtsteffaniak/govpx/internal/vp8/common"
 )
 
 func TestRDConstantsMatchSinglePassInitializeRDConsts(t *testing.T) {

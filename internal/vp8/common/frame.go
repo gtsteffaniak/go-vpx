@@ -1,7 +1,7 @@
 package common
 
 import (
-	"github.com/thesyncim/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 // Ported frame-buffer layout concepts from libvpx v1.16.0

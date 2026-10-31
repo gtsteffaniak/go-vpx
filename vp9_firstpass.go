@@ -3,8 +3,8 @@ package govpx
 import (
 	"image"
 
-	"github.com/thesyncim/govpx/internal/vp9/encoder"
-	"github.com/thesyncim/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 // libvpx parity references for the VP9 first-pass collector:

@@ -3,7 +3,7 @@ package encoder
 import (
 	"testing"
 
-	vp8tables "github.com/thesyncim/govpx/internal/vp8/tables"
+	vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 func TestBlockPlaneRDMultiplierMatchesLibvpxPlaneTable(t *testing.T) {

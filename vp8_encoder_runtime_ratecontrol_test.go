@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	"github.com/thesyncim/govpx/internal/vpx/geometry"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vpx/geometry"
 )
 
 func TestSetRTCExternalRateControlRemainsEnabledAfterDisable(t *testing.T) {

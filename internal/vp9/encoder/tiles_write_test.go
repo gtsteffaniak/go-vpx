@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
 )
 
 // TestWriteTilesSingleTile: 1 tile case — no size prefix is

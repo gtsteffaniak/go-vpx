@@ -3,8 +3,8 @@
 package govpx
 
 import (
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8enc "github.com/thesyncim/govpx/internal/vp8/encoder"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
 )
 
 func (e *VP8Encoder) emitFastPickerIntraCandidateTrace(mbRow int, mbCol int, modeIndex int, threshold int, bestScoreBefore int, bestSSEBefore int, becameBest bool, score int, rate int, distortion int, sse int, mode *vp8enc.InterFrameMacroblockMode) {

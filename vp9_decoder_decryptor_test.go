@@ -3,9 +3,9 @@ package govpx_test
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
-	"github.com/thesyncim/govpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
 )
 
 func TestVP9DecoderDecryptorRoundTripsClearKeyFrame(t *testing.T) {

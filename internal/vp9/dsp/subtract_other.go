@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/thesyncim/govpx/internal/pixel"
+import "github.com/gtsteffaniak/govpx/internal/pixel"
 
 func subtractBlockNonZeroFast(src []uint8, srcOff, srcStride int,
 	pred []uint8, predOff, predStride int,

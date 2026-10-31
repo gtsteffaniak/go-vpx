@@ -1,8 +1,8 @@
 package govpx
 
 import (
-	vp8rtp "github.com/thesyncim/govpx/internal/vp8/rtp"
-	vpxrtp "github.com/thesyncim/govpx/internal/vpx/rtp"
+	vp8rtp "github.com/gtsteffaniak/govpx/internal/vp8/rtp"
+	vpxrtp "github.com/gtsteffaniak/govpx/internal/vpx/rtp"
 )
 
 // VP8RTPPayloadDescriptor describes the VP8 RTP payload descriptor from RFC

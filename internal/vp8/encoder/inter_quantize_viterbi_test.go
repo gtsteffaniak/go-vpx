@@ -1,7 +1,7 @@
 package encoder
 
 import (
-	vp8tables "github.com/thesyncim/govpx/internal/vp8/tables"
+	vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
 	"testing"
 )
 

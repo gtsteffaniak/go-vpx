@@ -6,9 +6,9 @@ import (
 	"math/bits"
 	"runtime"
 
-	"github.com/thesyncim/govpx/internal/vp8/common"
-	"github.com/thesyncim/govpx/internal/vp8/dsp"
-	"github.com/thesyncim/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 // intSignShiftDec is the right-shift count that splats an int's sign

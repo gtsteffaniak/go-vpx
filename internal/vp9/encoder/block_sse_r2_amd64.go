@@ -2,7 +2,7 @@
 
 package encoder
 
-import "github.com/thesyncim/govpx/internal/pixel"
+import "github.com/gtsteffaniak/govpx/internal/pixel"
 
 // The consumer needs only SSE, so avoid the variance kernel's signed sum.
 func blockSSEOnlyR2(src []byte, so, ss int, ref []byte, ro, rs, w, h int) (uint64, bool) {

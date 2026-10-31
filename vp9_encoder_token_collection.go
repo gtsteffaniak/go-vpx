@@ -1,10 +1,10 @@
 package govpx
 
 import (
-	"github.com/thesyncim/govpx/internal/vp9/bitstream"
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
-	"github.com/thesyncim/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
 )
 
 type vp9TokenCollectState struct {

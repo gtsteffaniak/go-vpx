@@ -1,9 +1,9 @@
 package encoder
 
 import (
-	"github.com/thesyncim/govpx/internal/vp9/bitstream"
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
 )
 
 // VP9 counts-driven compressed-header prob updates. Ported from

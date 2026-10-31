@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
 )
 
 // Compare the fused public kernel with the independent scalar libvpx v1.16.0

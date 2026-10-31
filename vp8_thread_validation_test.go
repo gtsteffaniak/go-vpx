@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 )
 
 // TestVP8ThreadsValidation validates that the breakoutSkip gate matches libvpx

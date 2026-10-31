@@ -4,7 +4,7 @@ package dsp
 
 import (
 	"encoding/binary"
-	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
 	"simd/archsimd"
 )
 

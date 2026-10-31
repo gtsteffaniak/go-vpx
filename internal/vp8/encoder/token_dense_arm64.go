@@ -5,7 +5,7 @@ package encoder
 // Token categories follow libvpx v1.16.0; record packing follows tokenpack.go.
 
 import (
-	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
 	"simd/archsimd"
 	"unsafe"
 )

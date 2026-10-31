@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
 )
 
 func IVFRoot(t testing.TB) (string, bool) {

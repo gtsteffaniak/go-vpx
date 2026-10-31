@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 // Reference scalar implementations of the three SIMD-accelerated

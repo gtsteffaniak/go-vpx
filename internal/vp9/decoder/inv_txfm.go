@@ -1,8 +1,8 @@
 package decoder
 
 import (
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	"github.com/thesyncim/govpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/dsp"
 )
 
 // VP9 inverse-transform dispatchers. Ported from libvpx v1.16.0

@@ -1,8 +1,8 @@
 package govpx
 
 import (
-	vp9rtp "github.com/thesyncim/govpx/internal/vp9/rtp"
-	vpxrtp "github.com/thesyncim/govpx/internal/vpx/rtp"
+	vp9rtp "github.com/gtsteffaniak/govpx/internal/vp9/rtp"
+	vpxrtp "github.com/gtsteffaniak/govpx/internal/vpx/rtp"
 )
 
 const (

@@ -4,8 +4,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp8/common"
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 // libvpxFastQuantizeBReference is a transliteration of

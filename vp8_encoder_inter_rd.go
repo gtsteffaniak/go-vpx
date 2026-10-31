@@ -3,9 +3,9 @@ package govpx
 import (
 	"unsafe"
 
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
-	vp8enc "github.com/thesyncim/govpx/internal/vp8/encoder"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
+	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
 )
 
 func (e *VP8Encoder) estimateInterResidualRDScoreWithReferenceRateAndSkip(src vp8enc.SourceImage, ref *vp8common.Image, mbRow int, mbCol int, mbRows int, mbCols int, mode *vp8enc.InterFrameMacroblockMode, above *vp8enc.InterFrameMacroblockMode, left *vp8enc.InterFrameMacroblockMode, aboveLeft *vp8enc.InterFrameMacroblockMode, aboveTok *vp8enc.TokenContextPlanes, leftTok *vp8enc.TokenContextPlanes, quant *vp8enc.MacroblockQuant, qIndex int, segmentID uint8, refRate int) (int, bool, bool) {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
+	govpx "github.com/gtsteffaniak/govpx"
 )
 
 // TestVP9EncoderGetActiveMapMirrorsLibvpx pins the libvpx-faithful

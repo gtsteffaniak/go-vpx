@@ -3,9 +3,9 @@ package govpx
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	"github.com/thesyncim/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 func assertCodedBordersExtended(t *testing.T, img *vp8common.Image) {

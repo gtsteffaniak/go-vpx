@@ -4,8 +4,8 @@ import (
 	"image"
 	"testing"
 
-	"github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 )
 
 // TestVP9EncodeIntoSteadyStateAllocFreeAtBenchParity pins the steady-state

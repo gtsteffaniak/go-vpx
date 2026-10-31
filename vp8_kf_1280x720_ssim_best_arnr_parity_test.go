@@ -7,7 +7,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 )
 
 // TestVP8KF1280x720SSIMBestARNRParity pins a high-resolution VP8 option mix

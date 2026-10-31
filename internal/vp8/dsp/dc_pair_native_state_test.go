@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
 )
 
 // Independent integer reference: explicitly wrap input+4 to signed32 before

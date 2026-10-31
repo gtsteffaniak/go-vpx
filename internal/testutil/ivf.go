@@ -1,6 +1,6 @@
 package testutil
 
-import "github.com/thesyncim/govpx/internal/vpx/ivf"
+import "github.com/gtsteffaniak/govpx/internal/vpx/ivf"
 
 const (
 	IVFFileHeaderSize  = ivf.FileHeaderSize

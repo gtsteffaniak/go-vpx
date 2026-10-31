@@ -6,7 +6,7 @@
 package dsp
 
 import (
-	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
 	"simd/archsimd"
 )
 

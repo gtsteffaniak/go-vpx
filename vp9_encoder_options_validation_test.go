@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/thesyncim/govpx"
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/govpx"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
 )
 
 func TestVP9EncoderAcceptsMinimalOptions(t *testing.T) {

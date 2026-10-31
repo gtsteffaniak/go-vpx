@@ -7,7 +7,7 @@ import (
 	"math"
 	"sort"
 
-	govpx "github.com/thesyncim/govpx"
+	govpx "github.com/gtsteffaniak/govpx"
 )
 
 // BDRateOptions configures one BD-rate measurement run.

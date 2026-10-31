@@ -5,8 +5,8 @@ package govpx
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 )
 
 // TestVP9FullRDUsePartitionSeed0_1_1_0_1Frame1ByteParity is the headline

@@ -1,4 +1,4 @@
-module github.com/thesyncim/govpx
+module github.com/gtsteffaniak/govpx
 
 go 1.27.0
 

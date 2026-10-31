@@ -4,8 +4,8 @@ import (
 	"image"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 )
 
 func TestTPLSBGridDims(t *testing.T) {

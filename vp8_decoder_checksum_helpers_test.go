@@ -3,7 +3,7 @@ package govpx
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
 )
 
 func assertFrameChecksumsEqual(t *testing.T, label string, got []testutil.FrameChecksum, want []testutil.FrameChecksum) {

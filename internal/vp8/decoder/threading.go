@@ -6,7 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/thesyncim/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vp8/common"
 )
 
 // Ported from libvpx v1.16.0 vp8/decoder/threading.c row-thread driver. The

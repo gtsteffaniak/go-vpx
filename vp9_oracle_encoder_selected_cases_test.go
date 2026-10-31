@@ -7,9 +7,9 @@ import (
 	"image"
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/vp9oracle"
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	govpx "github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9oracle"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 )
 
 func TestVP9OracleStreamSelectedCasesMatchLibvpx(t *testing.T) {

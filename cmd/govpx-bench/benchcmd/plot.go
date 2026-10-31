@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	govpx "github.com/thesyncim/govpx"
+	govpx "github.com/gtsteffaniak/govpx"
 )
 
 type plotOptions struct {

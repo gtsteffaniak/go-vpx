@@ -6,8 +6,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/pixel"
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 // Native-specific parity tests for the R11-B kernels (sixtap16x16, SAD,

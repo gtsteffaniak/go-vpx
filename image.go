@@ -1,6 +1,6 @@
 package govpx
 
-import "github.com/thesyncim/govpx/internal/vpx/buffers"
+import "github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 
 // Image is an I420/YV12-style planar 8-bit 4:2:0 image.
 //

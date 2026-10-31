@@ -54,8 +54,8 @@ import (
 	"image"
 	"testing"
 
-	"github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
 )
 
 // vp8480pVBRPerFrameRow pins one (frame_index, govpx_size, govpx_iQ) row

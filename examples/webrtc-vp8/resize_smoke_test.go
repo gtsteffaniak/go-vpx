@@ -4,7 +4,7 @@ import (
 	"image"
 	"testing"
 
-	"github.com/thesyncim/govpx"
+	"github.com/gtsteffaniak/govpx"
 )
 
 // TestResizeBigJump exercises the encoder over the full demo-supported

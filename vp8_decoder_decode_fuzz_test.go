@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/thesyncim/govpx"
+	"github.com/gtsteffaniak/govpx"
 )
 
 // FuzzVP8DecoderDecode is the non-oracle valid-input variant of the VP8

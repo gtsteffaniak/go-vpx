@@ -5,9 +5,9 @@ package govpx
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8enc "github.com/thesyncim/govpx/internal/vp8/encoder"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
 )
 
 // TestVP8NewMVPickerResidualQuantization inspects the BestQuality ARNR cohort

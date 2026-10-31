@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vp8/common"
 )
 
 func TestApplyPostProcessFiltersOutputWithoutChangingSource(t *testing.T) {

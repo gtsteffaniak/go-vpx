@@ -5,8 +5,8 @@ package govpx
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"github.com/thesyncim/govpx/internal/testutil"
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 	"testing"
 )
 

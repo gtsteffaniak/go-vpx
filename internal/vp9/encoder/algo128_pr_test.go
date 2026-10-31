@@ -3,8 +3,8 @@ package encoder
 import (
 	"bytes"
 	"fmt"
-	"github.com/thesyncim/govpx/internal/vp9/bitstream"
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
 	"testing"
 )
 

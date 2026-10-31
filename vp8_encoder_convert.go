@@ -1,6 +1,6 @@
 package govpx
 
-import "github.com/thesyncim/govpx/internal/vpx/geometry"
+import "github.com/gtsteffaniak/govpx/internal/vpx/geometry"
 
 func encoderMacroblockRows(height int) int {
 	return geometry.MacroblockRows(height)

@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/thesyncim/govpx/internal/vp9/common"
+import "github.com/gtsteffaniak/govpx/internal/vp9/common"
 
 // ConditionalSkipIntra mirrors the directional intra-mode pruning used by
 // libvpx's keyframe mode search.

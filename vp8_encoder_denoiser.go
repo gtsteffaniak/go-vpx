@@ -1,11 +1,11 @@
 package govpx
 
 import (
-	"github.com/thesyncim/govpx/internal/pixel"
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
-	"github.com/thesyncim/govpx/internal/vp8/dsp"
-	vp8enc "github.com/thesyncim/govpx/internal/vp8/encoder"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
 )
 
 // denoiserPickmodeMVBias returns the libvpx pickmode_mv_bias multiplier from

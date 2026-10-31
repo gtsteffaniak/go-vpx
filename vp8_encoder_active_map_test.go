@@ -2,9 +2,9 @@ package govpx
 
 import (
 	"errors"
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8enc "github.com/thesyncim/govpx/internal/vp8/encoder"
-	"github.com/thesyncim/govpx/internal/vpx/geometry"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+	"github.com/gtsteffaniak/govpx/internal/vpx/geometry"
 	"testing"
 )
 

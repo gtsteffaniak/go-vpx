@@ -3,7 +3,7 @@ package decoder
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
 )
 
 // TestDiffUpdateProbNoUpdate writes a boolean-coded "no update" bit

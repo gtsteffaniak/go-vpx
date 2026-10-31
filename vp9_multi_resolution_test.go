@@ -5,9 +5,9 @@ import (
 	"image"
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
-	vp9dsp "github.com/thesyncim/govpx/internal/vp9/dsp"
+	govpx "github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	vp9dsp "github.com/gtsteffaniak/govpx/internal/vp9/dsp"
 )
 
 // newVP9MultiResLayerOptions returns a deterministic layer-options

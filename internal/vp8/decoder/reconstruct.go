@@ -4,10 +4,10 @@ import (
 	"errors"
 	"unsafe"
 
-	"github.com/thesyncim/govpx/internal/pixel"
-	"github.com/thesyncim/govpx/internal/vp8/common"
-	"github.com/thesyncim/govpx/internal/vp8/dsp"
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 // Ported from libvpx v1.16.0:

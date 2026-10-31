@@ -5,8 +5,8 @@ package govpx
 import (
 	"sync/atomic"
 
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	"github.com/thesyncim/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
 )
 
 const vp9PhaseStatsEnabled = true

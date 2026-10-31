@@ -3,13 +3,13 @@ package govpx
 import (
 	"image"
 
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
-	vp9dsp "github.com/thesyncim/govpx/internal/vp9/dsp"
-	"github.com/thesyncim/govpx/internal/vp9/encoder"
-	"github.com/thesyncim/govpx/internal/vp9/tables"
-	"github.com/thesyncim/govpx/internal/vpx/arith"
-	"github.com/thesyncim/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	vp9dsp "github.com/gtsteffaniak/govpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/govpx/internal/vpx/arith"
+	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 // vp9EncoderBestInterRefMvs returns the per-ref MV that the bitstream MV coder

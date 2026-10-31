@@ -3,7 +3,7 @@ package decoder
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 )
 
 // helper constructors keep the test tables compact.

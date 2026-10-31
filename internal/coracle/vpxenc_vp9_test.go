@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
 )
 
 func TestVpxencVP9EncodeI420RejectsInvalidInputBeforePathLookup(t *testing.T) {

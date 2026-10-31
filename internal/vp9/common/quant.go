@@ -1,6 +1,6 @@
 package common
 
-import "github.com/thesyncim/govpx/internal/vp9/tables"
+import "github.com/gtsteffaniak/govpx/internal/vp9/tables"
 
 // Ported from libvpx v1.16.0 vp9/common/vp9_quant_common.{c,h}.
 //

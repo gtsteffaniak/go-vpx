@@ -4,8 +4,8 @@ import (
 	"crypto/md5"
 	"hash"
 
-	"github.com/thesyncim/govpx/internal/vpx/buffers"
-	"github.com/thesyncim/govpx/internal/vpx/conformance"
+	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/govpx/internal/vpx/conformance"
 )
 
 type PlaneMD5 = conformance.PlaneMD5

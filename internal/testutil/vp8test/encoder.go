@@ -3,7 +3,7 @@
 package vp8test
 
 import (
-	"github.com/thesyncim/govpx/internal/coracle"
+	"github.com/gtsteffaniak/govpx/internal/coracle"
 )
 
 // VpxencVP8Config is the root-independent VP8 vpxenc configuration used by

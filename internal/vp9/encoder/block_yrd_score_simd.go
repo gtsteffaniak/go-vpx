@@ -6,8 +6,8 @@ import (
 	"simd/archsimd"
 	"unsafe"
 
-	"github.com/thesyncim/govpx/internal/pixel"
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 )
 
 // blockYrdScore specializes the libvpx v1.16.0 vp9_pickmode.c:781-853

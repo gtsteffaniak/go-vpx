@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
-	"github.com/thesyncim/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 func decodeFrameSequence(t *testing.T, packets ...[]byte) []Image {

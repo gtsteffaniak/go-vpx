@@ -4,7 +4,7 @@ import (
 	"errors"
 	"unsafe"
 
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 // Ported from libvpx v1.16.0 vp8/encoder/boolhuff.c and

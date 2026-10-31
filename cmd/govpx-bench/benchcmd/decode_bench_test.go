@@ -3,7 +3,7 @@ package benchcmd
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx"
+	"github.com/gtsteffaniak/govpx"
 )
 
 // benchmarkVP9DecodePackets encodes the canonical decode-benchmark stream

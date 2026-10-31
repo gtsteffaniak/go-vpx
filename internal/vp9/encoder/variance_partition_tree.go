@@ -2,9 +2,9 @@ package encoder
 
 import (
 	"encoding/binary"
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
-	"github.com/thesyncim/govpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/dsp"
 )
 
 // This file contains the variance-tree data types, fill / aggregation helpers,

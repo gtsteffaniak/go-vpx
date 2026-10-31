@@ -1,6 +1,6 @@
 package decoder
 
-import "github.com/thesyncim/govpx/internal/vp9/common"
+import "github.com/gtsteffaniak/govpx/internal/vp9/common"
 
 // HeaderRenderSize returns the render dimensions signalled by the
 // uncompressed header, falling back to coded dimensions when no render size was

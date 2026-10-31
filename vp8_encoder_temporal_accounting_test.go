@@ -1,8 +1,8 @@
 package govpx
 
 import (
-	"github.com/thesyncim/govpx/internal/vpx/arith"
-	vpxrc "github.com/thesyncim/govpx/internal/vpx/ratecontrol"
+	"github.com/gtsteffaniak/govpx/internal/vpx/arith"
+	vpxrc "github.com/gtsteffaniak/govpx/internal/vpx/ratecontrol"
 	"testing"
 )
 

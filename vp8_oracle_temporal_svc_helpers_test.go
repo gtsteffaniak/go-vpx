@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 )
 
 // temporalSVCLayerSummary captures the per-layer rate-control parity

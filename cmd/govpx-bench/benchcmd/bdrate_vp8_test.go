@@ -4,7 +4,7 @@ import (
 	"image"
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
+	govpx "github.com/gtsteffaniak/govpx"
 )
 
 // TestComputeBDRateVP8Smoke is the VP8 counterpart of

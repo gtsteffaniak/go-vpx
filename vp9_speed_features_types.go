@@ -6,9 +6,9 @@ package govpx
 // `// libvpx: vp9_speed_features.{h,c}:<line>`.
 
 import (
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
-	"github.com/thesyncim/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
 )
 
 const (

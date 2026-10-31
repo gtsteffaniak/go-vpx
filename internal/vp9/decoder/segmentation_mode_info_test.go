@@ -3,8 +3,8 @@ package decoder
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp9/bitstream"
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 )
 
 // TestCopySegmentIdRect copies a 2×3 window with an offset and stride

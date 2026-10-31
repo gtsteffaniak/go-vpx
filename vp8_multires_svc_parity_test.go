@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
 )
 
 // vp8_multires_svc_parity_test.go exercises the previously

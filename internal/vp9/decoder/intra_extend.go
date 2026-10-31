@@ -1,6 +1,6 @@
 package decoder
 
-import "github.com/thesyncim/govpx/internal/vp9/common"
+import "github.com/gtsteffaniak/govpx/internal/vp9/common"
 
 // VP9 intra-prediction predictor-need flags. Ported from libvpx
 // v1.16.0 vp9/common/vp9_reconintra.c — the extend_modes[INTRA_MODES]

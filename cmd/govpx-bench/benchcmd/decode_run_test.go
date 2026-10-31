@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/vpx/ivf"
+	govpx "github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/vpx/ivf"
 )
 
 func TestRunDecodeBenchmarkOutputsJSONMetrics(t *testing.T) {

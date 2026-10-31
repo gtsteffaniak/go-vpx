@@ -7,8 +7,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 )
 
 // TestFuzzVP8DecoderAgainstLibvpxDimensionMismatchMatchesFrameSizes exercises the dimension-mismatch decoder path: synthesize the f4f81f7d2e022caf-family mutation (IVF

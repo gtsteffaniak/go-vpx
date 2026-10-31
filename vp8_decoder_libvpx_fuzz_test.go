@@ -8,9 +8,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
-	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
 )
 
 // FuzzVP8DecoderAgainstLibvpx feeds govpx and libvpx the same mutated

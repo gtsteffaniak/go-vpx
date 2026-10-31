@@ -1,6 +1,6 @@
 package common
 
-import "github.com/thesyncim/govpx/internal/vpx/buffers"
+import "github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 
 // FrameLayout describes the padded VP9 4:2:0 frame buffer layout.
 type FrameLayout struct {

@@ -5,9 +5,9 @@ package govpx_test
 import (
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/vp9oracle"
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	govpx "github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9oracle"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 )
 
 // TestVP9EncoderNonrdMlPartitionColorSensitivityByteParity pins the

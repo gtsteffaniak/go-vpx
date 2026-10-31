@@ -6,10 +6,10 @@ import (
 	"image"
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil"
-	"github.com/thesyncim/govpx/internal/testutil/vp9oracle"
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	govpx "github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9oracle"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 )
 
 // fullRDFrame1Block is one committed block of frame 1, SB0, in encode order, as

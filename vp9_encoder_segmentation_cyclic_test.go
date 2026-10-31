@@ -3,8 +3,8 @@ package govpx
 import (
 	"testing"
 
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
-	vp9enc "github.com/thesyncim/govpx/internal/vp9/encoder"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	vp9enc "github.com/gtsteffaniak/govpx/internal/vp9/encoder"
 )
 
 func TestVP9PrepareCyclicRefreshFrameUsesRefreshFlagsForRDMult(t *testing.T) {

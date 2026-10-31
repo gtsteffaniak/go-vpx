@@ -1,9 +1,9 @@
 package encoder
 
 import (
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	"github.com/thesyncim/govpx/internal/vp9/decoder"
-	"github.com/thesyncim/govpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/dsp"
 )
 
 // Integer projection motion search is used by the realtime /

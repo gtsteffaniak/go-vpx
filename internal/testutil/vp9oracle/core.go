@@ -5,10 +5,10 @@ import (
 	"strconv"
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil"
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
-	vpxbuffers "github.com/thesyncim/govpx/internal/vpx/buffers"
+	govpx "github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	vpxbuffers "github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 // AltRefRefreshMask is the VP9 refresh-frame mask bit for the ALTREF slot.

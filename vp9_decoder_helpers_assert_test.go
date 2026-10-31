@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
-	"github.com/thesyncim/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 func assertVP9NeutralFrame(t *testing.T, got Image, width, height int) {

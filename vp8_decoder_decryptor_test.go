@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 )
 
 // TestVP8DecoderDecryptorRoundTripsClearKeyFrame asserts that wiring a

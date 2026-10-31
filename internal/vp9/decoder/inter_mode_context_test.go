@@ -3,8 +3,8 @@ package decoder
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	"github.com/thesyncim/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
 )
 
 func TestInterModeContextNearestNeighbors(t *testing.T) {

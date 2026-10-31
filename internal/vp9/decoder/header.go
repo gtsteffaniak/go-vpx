@@ -3,7 +3,7 @@ package decoder
 import (
 	"errors"
 
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 )
 
 // Header parsing helpers for the VP9 uncompressed frame header.

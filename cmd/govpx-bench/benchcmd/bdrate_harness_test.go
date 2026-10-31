@@ -4,7 +4,7 @@ import (
 	"image"
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
+	govpx "github.com/gtsteffaniak/govpx"
 )
 
 // TestComputeBDRateSmoke drives the harness on a tiny synthetic source.

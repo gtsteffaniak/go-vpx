@@ -1,11 +1,11 @@
 package encoder
 
 import (
-	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
 	"math/rand"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 )
 
 // referenceTokenClass is the ground-truth energy class for one signed

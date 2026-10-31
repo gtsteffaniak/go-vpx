@@ -1,10 +1,10 @@
-module github.com/thesyncim/govpx/examples/webrtc-vp8
+module github.com/gtsteffaniak/govpx/examples/webrtc-vp8
 
 go 1.27.0
 
 require (
 	github.com/pion/webrtc/v4 v4.2.11
-	github.com/thesyncim/govpx v0.0.0
+	github.com/gtsteffaniak/govpx v0.0.0
 )
 
 require (
@@ -31,4 +31,4 @@ require (
 	golang.org/x/time v0.10.0 // indirect
 )
 
-replace github.com/thesyncim/govpx => ../..
+replace github.com/gtsteffaniak/govpx => ../..

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/thesyncim/govpx"
+	"github.com/gtsteffaniak/govpx"
 )
 
 func TestVP8SDPConstantsMatchRFC7741(t *testing.T) {

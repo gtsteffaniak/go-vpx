@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/thesyncim/govpx/internal/pixel"
+import "github.com/gtsteffaniak/govpx/internal/pixel"
 
 // Pure-Go fallback dispatchers for the IDCT SIMD entry points. They
 // mirror the libvpx v1.16.0 vp8/common/idctllm.c scalar references

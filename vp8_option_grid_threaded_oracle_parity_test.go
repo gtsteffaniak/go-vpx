@@ -5,7 +5,7 @@ package govpx
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 )
 
 // TestVP8ThreadedOptionGridSeedMatchesLibvpxOutput pins a threaded realtime

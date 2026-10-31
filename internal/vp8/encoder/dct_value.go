@@ -3,7 +3,7 @@ package encoder
 import (
 	"math/bits"
 
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 const dctValueSignShift = bits.UintSize - 1

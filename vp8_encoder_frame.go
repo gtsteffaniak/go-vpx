@@ -1,11 +1,11 @@
 package govpx
 
 import (
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8enc "github.com/thesyncim/govpx/internal/vp8/encoder"
-	"github.com/thesyncim/govpx/internal/vpx/arith"
-	"github.com/thesyncim/govpx/internal/vpx/geometry"
-	vpxrc "github.com/thesyncim/govpx/internal/vpx/ratecontrol"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+	"github.com/gtsteffaniak/govpx/internal/vpx/arith"
+	"github.com/gtsteffaniak/govpx/internal/vpx/geometry"
+	vpxrc "github.com/gtsteffaniak/govpx/internal/vpx/ratecontrol"
 )
 
 // EncodeInto encodes one input frame into dst and returns one encoded

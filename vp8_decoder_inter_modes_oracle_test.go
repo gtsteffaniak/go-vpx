@@ -5,11 +5,11 @@ package govpx
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	"github.com/thesyncim/govpx/internal/vp8/dsp"
-	vp8enc "github.com/thesyncim/govpx/internal/vp8/encoder"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
 )
 
 func TestVP8OracleLibvpxChecksumMatchesEncodeIntoResidualInterFrame(t *testing.T) {

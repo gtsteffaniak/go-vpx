@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
-	"github.com/thesyncim/govpx"
+	"github.com/gtsteffaniak/govpx"
 	"testing"
 )
 

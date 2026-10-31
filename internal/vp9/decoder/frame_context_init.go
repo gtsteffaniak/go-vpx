@@ -1,6 +1,6 @@
 package decoder
 
-import "github.com/thesyncim/govpx/internal/vp9/tables"
+import "github.com/gtsteffaniak/govpx/internal/vp9/tables"
 
 // VP9 default frame-context seeder. Ported from libvpx v1.16.0
 // vp9/common/vp9_entropymode.c — init_mode_probs + the equivalent

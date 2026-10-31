@@ -1,6 +1,6 @@
 package govpx
 
-import vp9bits "github.com/thesyncim/govpx/internal/vp9/bitstream"
+import vp9bits "github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
 
 // VP9SuperframeSize returns the number of bytes needed to pack frames into a
 // VP9 superframe packet, including the trailing superframe index.

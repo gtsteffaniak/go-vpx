@@ -3,9 +3,9 @@ package govpx
 
 import (
 	"fmt"
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	"github.com/thesyncim/govpx/internal/vp8/dsp"
-	vp8enc "github.com/thesyncim/govpx/internal/vp8/encoder"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
 	"testing"
 )
 

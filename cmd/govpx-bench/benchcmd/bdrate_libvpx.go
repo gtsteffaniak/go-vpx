@@ -11,9 +11,9 @@ import (
 	"path/filepath"
 	"strconv"
 
-	govpx "github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/coracle"
-	vpxbuf "github.com/thesyncim/govpx/internal/vpx/buffers"
+	govpx "github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/coracle"
+	vpxbuf "github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 // encodeBDLibvpxCurve drives the libvpx vpxenc-vp9-frameflags helper

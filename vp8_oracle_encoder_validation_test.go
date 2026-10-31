@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
-	vpxbuf "github.com/thesyncim/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
+	vpxbuf "github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 type encoderValidationPattern int

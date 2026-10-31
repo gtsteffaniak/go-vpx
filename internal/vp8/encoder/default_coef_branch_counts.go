@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/thesyncim/govpx/internal/vp8/tables"
+import "github.com/gtsteffaniak/govpx/internal/vp8/tables"
 
 // defaultKeyFrameIndependentCoefficientBranchCounts is derived from
 // libvpx v1.16.0 vp8/encoder/defaultcoefcounts.h. For key frames,

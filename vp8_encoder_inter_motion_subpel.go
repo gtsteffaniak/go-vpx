@@ -3,10 +3,10 @@ package govpx
 import (
 	"unsafe"
 
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	"github.com/thesyncim/govpx/internal/vp8/dsp"
-	vp8enc "github.com/thesyncim/govpx/internal/vp8/encoder"
-	vp8tables "github.com/thesyncim/govpx/internal/vp8/tables"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+	vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 type interFrameSubpixelSearch struct {

@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 )
 
 // TestVP9RowMTValidation pins the constructor-time gating on the RowMT option.

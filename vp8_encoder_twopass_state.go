@@ -1,6 +1,6 @@
 package govpx
 
-import vp8common "github.com/thesyncim/govpx/internal/vp8/common"
+import vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
 
 type twoPassState struct {
 	stats      []FirstPassFrameStats

@@ -4,8 +4,8 @@ import (
 	"image"
 	"sync"
 
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
-	"github.com/thesyncim/govpx/internal/vpx/buffers"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 // vp9FrameParallelScheduler owns the encoder-side concurrent-frame state

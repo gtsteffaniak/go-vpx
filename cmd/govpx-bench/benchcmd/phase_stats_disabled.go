@@ -2,7 +2,7 @@
 
 package benchcmd
 
-import govpx "github.com/thesyncim/govpx"
+import govpx "github.com/gtsteffaniak/govpx"
 
 const phaseTimingEnabled = false
 

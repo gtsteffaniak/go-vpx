@@ -1,6 +1,6 @@
 package vp9test
 
-import "github.com/thesyncim/govpx/internal/vpx/geometry"
+import "github.com/gtsteffaniak/govpx/internal/vpx/geometry"
 
 // ActiveMap returns a VP9 active-map fixture and its macroblock dimensions.
 func ActiveMap(width int, height int, pattern string) ([]uint8, int, int) {

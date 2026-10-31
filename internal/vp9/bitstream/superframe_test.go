@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	vpxerrors "github.com/thesyncim/govpx/internal/vpx/errors"
+	vpxerrors "github.com/gtsteffaniak/govpx/internal/vpx/errors"
 )
 
 func TestPackSuperframeIndexInto(t *testing.T) {

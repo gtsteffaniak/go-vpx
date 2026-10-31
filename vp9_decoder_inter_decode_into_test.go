@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 )
 
 func TestVP9DecoderDecodeIntoScaledZeroMvInterFrame(t *testing.T) {

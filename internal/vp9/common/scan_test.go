@@ -3,7 +3,7 @@ package common
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
 )
 
 // TestScanIsPermutation checks that every forward scan in DefaultScanOrders

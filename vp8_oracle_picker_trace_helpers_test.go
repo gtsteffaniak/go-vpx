@@ -2,7 +2,7 @@
 
 package govpx
 
-import "github.com/thesyncim/govpx/internal/testutil/vp8test"
+import "github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 
 func vp8OracleTraceConfig(vpxencOracle string, opts EncoderOptions, frames int, targetKbps int, extraEnv []string, extraArgs []string) vp8test.VpxencVP8Config {
 	if targetKbps == 0 {

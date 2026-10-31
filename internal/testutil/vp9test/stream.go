@@ -9,7 +9,7 @@ import (
 	"image"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
 )
 
 func BuildVP9IVF(width, height int, packets ...[]byte) []byte {

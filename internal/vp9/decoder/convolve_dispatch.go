@@ -1,8 +1,8 @@
 package decoder
 
 import (
-	"github.com/thesyncim/govpx/internal/vp9/dsp"
-	"github.com/thesyncim/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
 )
 
 // VP9 subpel-convolve dispatch for inter prediction. Ported from

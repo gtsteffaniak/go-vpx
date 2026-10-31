@@ -1,8 +1,8 @@
 package encoder
 
 import (
-	"github.com/thesyncim/govpx/internal/vp9/bitstream"
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 )
 
 // VP9 tile-level SB walker. Ported from libvpx v1.16.0

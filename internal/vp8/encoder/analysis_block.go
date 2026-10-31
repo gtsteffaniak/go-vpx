@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/thesyncim/govpx/internal/vp8/dsp"
+import "github.com/gtsteffaniak/govpx/internal/vp8/dsp"
 
 // Analysis block helpers mirror libvpx v1.16.0 VP8 encoder transform-error
 // and inverse-transform add flows used by rdopt.c / encodemb.c.

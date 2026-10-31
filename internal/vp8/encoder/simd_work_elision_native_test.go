@@ -3,7 +3,7 @@ package encoder
 import (
 	"bytes"
 	"fmt"
-	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
 	"testing"
 	"unsafe"
 )

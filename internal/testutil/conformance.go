@@ -1,6 +1,6 @@
 package testutil
 
-import "github.com/thesyncim/govpx/internal/vpx/conformance"
+import "github.com/gtsteffaniak/govpx/internal/vpx/conformance"
 
 var ErrInvalidOracleOutput = conformance.ErrInvalidOracleOutput
 

@@ -10,9 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/coracle"
-	"github.com/thesyncim/govpx/internal/coracle/coracletest"
-	"github.com/thesyncim/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/coracle"
+	"github.com/gtsteffaniak/govpx/internal/coracle/coracletest"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
 )
 
 type VpxdecOptions struct {

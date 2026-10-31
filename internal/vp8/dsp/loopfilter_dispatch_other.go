@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/thesyncim/govpx/internal/pixel"
+import "github.com/gtsteffaniak/govpx/internal/pixel"
 
 // Pure-Go fallback for VP8 loop-filter apply paths (libvpx v1.16.0 baseline).
 

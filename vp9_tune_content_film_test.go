@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
+	govpx "github.com/gtsteffaniak/govpx"
 )
 
 // TestVP9ScreenContentConstants pins the numeric values to libvpx's

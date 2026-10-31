@@ -4,10 +4,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp8/boolcoder"
-	"github.com/thesyncim/govpx/internal/vp8/common"
-	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/boolcoder"
+	"github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 func TestWriteZeroMacroblockTokensRoundTripsWholeBlock(t *testing.T) {

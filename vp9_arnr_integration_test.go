@@ -3,7 +3,7 @@ package govpx
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 )
 
 func syntheticVP9PanningFirstPassStats(n int) []VP9FirstPassFrameStats {

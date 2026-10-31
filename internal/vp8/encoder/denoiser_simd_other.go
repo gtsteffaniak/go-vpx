@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/thesyncim/govpx/internal/pixel"
+import "github.com/gtsteffaniak/govpx/internal/pixel"
 
 // Arithmetic follows libvpx v1.16.0 vp8/encoder/denoising.c.
 func denoiserFilterYFirstPassSIMD(mc []byte, ms int, avg []byte, as int, sig []byte, ss int, motion uint32, increase bool) (int, bool) {

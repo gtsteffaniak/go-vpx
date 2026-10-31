@@ -4,7 +4,7 @@ package govpx
 
 import (
 	"bytes"
-	"github.com/thesyncim/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
 	"testing"
 )
 

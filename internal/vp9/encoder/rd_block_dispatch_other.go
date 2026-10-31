@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/thesyncim/govpx/internal/pixel"
+import "github.com/gtsteffaniak/govpx/internal/pixel"
 
 func transformBlockEnergyDispatch(coeffs []int16) uint64 {
 	if pixel.Enabled {

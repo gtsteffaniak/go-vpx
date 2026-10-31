@@ -3,8 +3,8 @@ package encoder
 import (
 	"math/bits"
 
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	vp9dsp "github.com/thesyncim/govpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	vp9dsp "github.com/gtsteffaniak/govpx/internal/vp9/dsp"
 )
 
 // vp9_block_yrd.go ports the libvpx v1.16.0 substrate the realtime nonrd

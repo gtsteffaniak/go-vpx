@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp8/boolcoder"
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/boolcoder"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 func TestDecodeBlockCoeffsImmediateEOB(t *testing.T) {

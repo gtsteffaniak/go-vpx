@@ -3,7 +3,7 @@ package decoder
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vp8/common"
 )
 
 func TestTransformMacroblockTokens4x4YAndUV(t *testing.T) {

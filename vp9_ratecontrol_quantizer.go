@@ -3,7 +3,7 @@ package govpx
 import (
 	"math"
 
-	"github.com/thesyncim/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
 )
 
 func (rc *vp9RateControlState) keyFrameTargetBits(frameIndex int) int {

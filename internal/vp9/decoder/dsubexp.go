@@ -1,6 +1,6 @@
 package decoder
 
-import "github.com/thesyncim/govpx/internal/vp9/bitstream"
+import "github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
 
 // Probability-update sub-exponential helpers from the VP9 compressed
 // header. Ported from libvpx v1.16.0 vp9/decoder/vp9_dsubexp.c.

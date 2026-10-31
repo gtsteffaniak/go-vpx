@@ -1,10 +1,10 @@
 package govpx
 
 import (
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
-	vp8enc "github.com/thesyncim/govpx/internal/vp8/encoder"
-	"github.com/thesyncim/govpx/internal/vpx/geometry"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
+	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+	"github.com/gtsteffaniak/govpx/internal/vpx/geometry"
 )
 
 // vp8ActivityAvgMin is the libvpx activity floor used by SSIM activity

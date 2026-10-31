@@ -7,7 +7,7 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	govpx "github.com/thesyncim/govpx"
+	govpx "github.com/gtsteffaniak/govpx"
 )
 
 func formatEncodeReport(r benchReport) string {

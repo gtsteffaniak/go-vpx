@@ -3,7 +3,7 @@ package encoder
 import (
 	"bytes"
 
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
 )
 
 // Source image views follow libvpx v1.16.0 VP8 YV12_BUFFER_CONFIG /

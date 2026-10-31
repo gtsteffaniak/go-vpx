@@ -6,9 +6,9 @@ import (
 	"math"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
-	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
 )
 
 type oracleOutputParityCase struct {

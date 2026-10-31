@@ -37,8 +37,8 @@ func TestCoracleImportsStayInOracleTraceBuild(t *testing.T) {
 			t.Fatalf("Glob(%q): %v", pattern, err)
 		}
 		for _, path := range files {
-			if !testFileImports(t, path, "github.com/thesyncim/govpx/internal/coracle") &&
-				!testFileImports(t, path, "github.com/thesyncim/govpx/internal/coracle/coracletest") {
+			if !testFileImports(t, path, "github.com/gtsteffaniak/govpx/internal/coracle") &&
+				!testFileImports(t, path, "github.com/gtsteffaniak/govpx/internal/coracle/coracletest") {
 				continue
 			}
 			if !testFileHasBuildTag(t, path, "govpx_oracle_trace") {
@@ -55,8 +55,8 @@ func TestRootOracleTestsUseCodecHarnessPackages(t *testing.T) {
 	}
 	for _, path := range files {
 		for _, importPath := range []string{
-			"github.com/thesyncim/govpx/internal/coracle",
-			"github.com/thesyncim/govpx/internal/coracle/coracletest",
+			"github.com/gtsteffaniak/govpx/internal/coracle",
+			"github.com/gtsteffaniak/govpx/internal/coracle/coracletest",
 		} {
 			assertTestFileDoesNotImport(t, path, importPath,
 				"root tests should use internal/testutil/vp8test or internal/testutil/vp9test")
@@ -89,12 +89,12 @@ func TestDefaultBuildProductionFilesAvoidTestHarnessImports(t *testing.T) {
 				if !strings.HasPrefix(path, "internal/testutil/") {
 					t.Fatalf("%s imports testing in the default production build", path)
 				}
-			case "github.com/thesyncim/govpx/internal/testutil":
+			case "github.com/gtsteffaniak/govpx/internal/testutil":
 				if !strings.HasPrefix(path, "internal/testutil/") {
 					t.Fatalf("%s imports %q in the default production build",
 						path, importPath)
 				}
-			case "github.com/thesyncim/govpx/internal/coracle/coracletest":
+			case "github.com/gtsteffaniak/govpx/internal/coracle/coracletest":
 				t.Fatalf("%s imports %q in the default production build",
 					path, importPath)
 			}

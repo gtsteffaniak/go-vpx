@@ -3,7 +3,7 @@
 package dsp
 
 import (
-	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
 	"math/rand/v2"
 	"testing"
 )

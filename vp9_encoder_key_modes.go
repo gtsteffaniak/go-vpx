@@ -3,12 +3,12 @@ package govpx
 import (
 	"math"
 
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
-	"github.com/thesyncim/govpx/internal/vp9/encoder"
-	"github.com/thesyncim/govpx/internal/vp9/tables"
-	"github.com/thesyncim/govpx/internal/vpx/arith"
-	"github.com/thesyncim/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/govpx/internal/vpx/arith"
+	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 func (e *VP9Encoder) pickVP9KeyframeMode(key *vp9KeyframeEncodeState,

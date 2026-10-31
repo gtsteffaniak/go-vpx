@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/thesyncim/govpx/internal/vp9/tables"
+import "github.com/gtsteffaniak/govpx/internal/vp9/tables"
 
 const (
 	bPerMBNormBits = 9

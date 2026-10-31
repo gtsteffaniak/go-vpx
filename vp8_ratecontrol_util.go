@@ -1,6 +1,6 @@
 package govpx
 
-import vp8common "github.com/thesyncim/govpx/internal/vp8/common"
+import vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
 
 func (rc *rateControlState) applyPass2CBRBufferAdjustment(targetBits int, keyFrame bool) int {
 	if rc.mode != RateControlCBR || keyFrame || targetBits <= 0 || rc.bufferOptimalBits <= 0 {

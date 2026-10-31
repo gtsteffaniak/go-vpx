@@ -1,7 +1,7 @@
 package encoder
 
 import (
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 )
 
 // Full-RD transform-size search support, ported verbatim from libvpx

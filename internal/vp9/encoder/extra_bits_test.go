@@ -3,7 +3,7 @@ package encoder
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
 )
 
 // TestVP9ExtraBitsShape: every CAT* token's Len matches its Prob

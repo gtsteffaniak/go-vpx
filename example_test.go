@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image"
 
-	"github.com/thesyncim/govpx"
+	"github.com/gtsteffaniak/govpx"
 )
 
 func ExamplePeekVP8StreamInfo() {

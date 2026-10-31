@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	ivfstream "github.com/thesyncim/govpx/internal/vpx/ivf"
+	ivfstream "github.com/gtsteffaniak/govpx/internal/vpx/ivf"
 )
 
 // VpxencVP8Config describes a VP8 vpxenc-family run over raw I420 frames.

@@ -4,7 +4,7 @@ package encoder
 
 // Complete luma decisions follow libvpx v1.16.0 vp8/encoder/denoising.c.
 
-import "github.com/thesyncim/govpx/internal/pixel"
+import "github.com/gtsteffaniak/govpx/internal/pixel"
 
 func denoiserFilterYCompleteSIMD(mc []byte, ms int, avg []byte, as int, sig []byte, ss int, motion uint32, increase bool) (int, bool) {
 	return denoiserFilterYCompleteSIMDWork(mc, ms, avg, as, sig, ss, motion, increase, true)

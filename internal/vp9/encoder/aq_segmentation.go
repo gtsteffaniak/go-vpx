@@ -1,6 +1,6 @@
 package encoder
 
-import vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
+import vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
 
 func VarianceAQSegmentationParams(baseQIndex int, filmContent bool) vp9dec.SegmentationParams {
 	seg := vp9dec.SegmentationParams{

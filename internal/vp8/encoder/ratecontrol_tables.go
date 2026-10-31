@@ -1,6 +1,6 @@
 package encoder
 
-import vp8common "github.com/thesyncim/govpx/internal/vp8/common"
+import vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
 
 // VP8 rate-control table helpers are ported from libvpx v1.16.0
 // vp8/encoder/ratectrl.c and vp8/encoder/onyx_if.c.

@@ -1,6 +1,6 @@
 package govpx
 
-import vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
+import vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
 
 // WebRTCRTPPayloadDescriptor returns a WebRTC-friendly VP9 RTP descriptor for
 // r. It always carries a 15-bit PictureID, preserves temporal-layer metadata,

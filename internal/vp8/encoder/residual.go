@@ -3,8 +3,8 @@ package encoder
 import (
 	"unsafe"
 
-	"github.com/thesyncim/govpx/internal/vp8/common"
-	"github.com/thesyncim/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 // Ported from libvpx v1.16.0 vp8/encoder/encodeframe.c and

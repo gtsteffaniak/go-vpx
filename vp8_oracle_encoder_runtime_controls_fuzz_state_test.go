@@ -2,7 +2,7 @@
 
 package govpx
 
-import vp8common "github.com/thesyncim/govpx/internal/vp8/common"
+import vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
 
 func vp8OracleRuntimeCurrentDropConfig(e *VP8Encoder) (bool, int) {
 	if e == nil || !e.opts.DropFrameAllowed {

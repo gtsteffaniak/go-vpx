@@ -3,8 +3,8 @@ package govpx_test
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 )
 
 func FuzzVP8DecoderMalformedPackets(f *testing.F) {

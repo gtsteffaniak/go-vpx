@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 )
 
 // TestVP9EncoderFullRDFrame1SB0FullPelMvParity pins the first landed step of

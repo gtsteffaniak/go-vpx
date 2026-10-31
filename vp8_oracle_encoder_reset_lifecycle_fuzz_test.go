@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 )
 
 // FuzzEncoderResetLifecycle surfaces Reset state-leak bugs of the

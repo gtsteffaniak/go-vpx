@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/thesyncim/govpx/internal/pixel"
+import "github.com/gtsteffaniak/govpx/internal/pixel"
 
 // Shared VP8 4x4 intra-prediction dispatch mirrors libvpx v1.16.0
 // vp8/common/reconintra4x4.c, using Go SIMD when enabled.

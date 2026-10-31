@@ -3,12 +3,12 @@
 package govpx_test
 
 import (
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 	"reflect"
 	"testing"
 
-	govpx "github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/vp9oracle"
+	govpx "github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9oracle"
 )
 
 func TestVP9OracleCopyReferenceFrameParity(t *testing.T) {

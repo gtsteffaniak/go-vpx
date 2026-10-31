@@ -8,8 +8,8 @@ import (
 
 	"github.com/pion/rtp/codecs"
 
-	"github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 )
 
 const vp9WebRTCRefFinderMaxTemporalLayersForTest = 8

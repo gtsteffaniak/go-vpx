@@ -4,9 +4,9 @@ import (
 	"image"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
-	vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
-	"github.com/thesyncim/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 func NewYCbCr(width, height int, y, u, v byte) *image.YCbCr {

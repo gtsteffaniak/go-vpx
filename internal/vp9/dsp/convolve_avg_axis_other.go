@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/thesyncim/govpx/internal/vp9/tables"
+import "github.com/gtsteffaniak/govpx/internal/vp9/tables"
 
 func vpxConvolve8AvgHoriz(src []byte, srcStride int, dst []byte, dstStride int,
 	filter *[tables.SubpelShifts][tables.SubpelTaps]int16,

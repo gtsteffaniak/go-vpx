@@ -4,7 +4,7 @@ import (
 	"image"
 	"math/rand"
 
-	"github.com/thesyncim/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
 )
 
 // NewBDRateTexturedNoiseYCbCr builds a textured, slowly translating 4:2:0

@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/thesyncim/govpx/internal/pixel"
+import "github.com/gtsteffaniak/govpx/internal/pixel"
 
 // Scalar fallback for the libvpx v1.16.0 vp8_block_error kernel on
 // architectures without a SIMD port.

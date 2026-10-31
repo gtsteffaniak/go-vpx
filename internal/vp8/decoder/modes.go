@@ -3,9 +3,9 @@ package decoder
 import (
 	"errors"
 
-	"github.com/thesyncim/govpx/internal/vp8/boolcoder"
-	"github.com/thesyncim/govpx/internal/vp8/common"
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/boolcoder"
+	"github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 // Ported from libvpx v1.16.0 vp8/decoder/decodemv.c mode probability

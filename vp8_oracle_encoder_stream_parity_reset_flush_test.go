@@ -3,7 +3,7 @@
 package govpx
 
 import (
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 	"strings"
 	"testing"
 )

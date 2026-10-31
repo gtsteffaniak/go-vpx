@@ -3,7 +3,7 @@ package benchcmd
 import (
 	"flag"
 	"fmt"
-	govpx "github.com/thesyncim/govpx"
+	govpx "github.com/gtsteffaniak/govpx"
 	"io"
 	"runtime"
 	"slices"

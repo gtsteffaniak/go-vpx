@@ -3,8 +3,8 @@ package decoder
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp9/dsp"
-	"github.com/thesyncim/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
 )
 
 // TestInterPredictorCopyFresh: subpel offsets both zero + ref=0 →

@@ -1,7 +1,7 @@
 package govpx
 
 import (
-	"github.com/thesyncim/govpx/internal/vpx/geometry"
+	"github.com/gtsteffaniak/govpx/internal/vpx/geometry"
 	"testing"
 )
 

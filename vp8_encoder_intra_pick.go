@@ -1,11 +1,11 @@
 package govpx
 
 import (
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
-	"github.com/thesyncim/govpx/internal/vp8/dsp"
-	vp8enc "github.com/thesyncim/govpx/internal/vp8/encoder"
-	vp8tables "github.com/thesyncim/govpx/internal/vp8/tables"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+	vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 func predictBestKeyFrameIntraMode(src vp8enc.SourceImage, qIndex int, mbRow int, mbCol int, above *vp8enc.KeyFrameMacroblockMode, left *vp8enc.KeyFrameMacroblockMode, aboveTok *vp8enc.TokenContextPlanes, leftTok *vp8enc.TokenContextPlanes, quant *vp8enc.MacroblockQuant, pred *vp8common.Image, scratch *vp8dec.IntraReconstructionScratch, fastQuant bool) (vp8enc.KeyFrameMacroblockMode, int, bool) {

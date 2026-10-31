@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	vpxrtp "github.com/thesyncim/govpx/internal/vpx/rtp"
+	vpxrtp "github.com/gtsteffaniak/govpx/internal/vpx/rtp"
 )
 
 type testDescriptor byte

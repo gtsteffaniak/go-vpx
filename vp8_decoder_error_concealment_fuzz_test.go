@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/thesyncim/govpx"
+	"github.com/gtsteffaniak/govpx"
 )
 
 // FuzzVP8DecoderErrorConcealment builds a tiny VP8 stream from the fuzz []byte

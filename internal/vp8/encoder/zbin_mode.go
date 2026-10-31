@@ -1,6 +1,6 @@
 package encoder
 
-import vp8common "github.com/thesyncim/govpx/internal/vp8/common"
+import vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
 
 // Zbin mode boosts mirror libvpx v1.16.0 VP8 vp8/encoder/encodeframe.c
 // zbin_mode_boost setup for inter-frame macroblock coding.

@@ -5,7 +5,7 @@ package dsp
 // Adapters preserve the original seeded assembly differential cases while
 // testing the new production Go dispatch against the independent scalar port.
 import (
-	"github.com/thesyncim/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
 	"unsafe"
 )
 

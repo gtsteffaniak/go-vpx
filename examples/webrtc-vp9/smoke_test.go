@@ -20,7 +20,7 @@ import (
 	"github.com/pion/sdp/v3"
 	"github.com/pion/webrtc/v4"
 
-	"github.com/thesyncim/govpx"
+	"github.com/gtsteffaniak/govpx"
 )
 
 // TestDemoEndToEnd boots the demo HTTP server, opens a pion peer that does

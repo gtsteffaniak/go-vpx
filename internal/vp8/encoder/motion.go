@@ -4,7 +4,7 @@ import (
 	"math"
 	"math/bits"
 
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 // intSignShift splats an int's sign bit across every position when used

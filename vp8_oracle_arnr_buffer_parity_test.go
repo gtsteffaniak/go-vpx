@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 )
 
 // TestVP8OracleARNRBufferAdler instruments the ARNR alt-ref buffer parity gap.

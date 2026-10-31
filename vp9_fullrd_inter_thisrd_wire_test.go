@@ -3,7 +3,7 @@ package govpx
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 )
 
 // withVP9InterDeepRDThisRDScore routes pickVP9InterModeWithOrder's candidate

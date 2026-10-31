@@ -1,8 +1,8 @@
 package encoder
 
 import (
-	"github.com/thesyncim/govpx/internal/pixel"
-	vp9dsp "github.com/thesyncim/govpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
+	vp9dsp "github.com/gtsteffaniak/govpx/internal/vp9/dsp"
 )
 
 // SourceSADSceneSamplesResult reports the sampled 64x64 source-SAD summary

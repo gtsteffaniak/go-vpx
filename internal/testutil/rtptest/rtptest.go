@@ -5,8 +5,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
-	vpxrtp "github.com/thesyncim/govpx/internal/vpx/rtp"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
+	vpxrtp "github.com/gtsteffaniak/govpx/internal/vpx/rtp"
 )
 
 type AssembleFunc func([]vpxrtp.PayloadFragment) ([]byte, error)

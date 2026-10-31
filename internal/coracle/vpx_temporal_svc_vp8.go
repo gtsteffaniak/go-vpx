@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	ivfstream "github.com/thesyncim/govpx/internal/vpx/ivf"
+	ivfstream "github.com/gtsteffaniak/govpx/internal/vpx/ivf"
 )
 
 // VpxTemporalSVCConfig describes libvpx's vpx_temporal_svc_encoder example

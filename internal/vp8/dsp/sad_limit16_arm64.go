@@ -2,7 +2,7 @@
 
 package dsp
 
-import "github.com/thesyncim/govpx/internal/pixel"
+import "github.com/gtsteffaniak/govpx/internal/pixel"
 
 // Limited SAD follows libvpx v1.16.0 vp8/encoder/mcomp.c row boundaries.
 

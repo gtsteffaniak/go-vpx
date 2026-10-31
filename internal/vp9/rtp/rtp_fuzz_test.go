@@ -3,8 +3,8 @@ package rtp
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/rtptest"
-	vpxrtp "github.com/thesyncim/govpx/internal/vpx/rtp"
+	"github.com/gtsteffaniak/govpx/internal/testutil/rtptest"
+	vpxrtp "github.com/gtsteffaniak/govpx/internal/vpx/rtp"
 )
 
 // FuzzRTPVP9RoundTrip mirrors FuzzRTPVP8RoundTrip for the VP9 RTP

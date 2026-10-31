@@ -5,7 +5,7 @@ package vp8test
 import (
 	"io"
 
-	"github.com/thesyncim/govpx/internal/coracle"
+	"github.com/gtsteffaniak/govpx/internal/coracle"
 )
 
 // CompareOptions configures oracle trace comparison.

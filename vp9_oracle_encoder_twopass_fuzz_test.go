@@ -5,13 +5,13 @@ package govpx_test
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	govpx "github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	govpx "github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 	"image"
 	"strconv"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
 )
 
 // FuzzVP9EncoderTwoPassByteParity exercises the libvpx vpxenc-vp9 two-pass

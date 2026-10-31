@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/thesyncim/govpx/internal/pixel"
+import "github.com/gtsteffaniak/govpx/internal/pixel"
 
 // Size-specialized subpixel variance dispatchers share Go SIMD and scalar
 // implementations through the pixel package.

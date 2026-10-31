@@ -3,8 +3,8 @@ package encoder
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp9/common"
-	"github.com/thesyncim/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/vp9/decoder"
 )
 
 // Pinning tests for get_estimated_pred. Reference values are

@@ -1,6 +1,6 @@
 package encoder
 
-import vp9dec "github.com/thesyncim/govpx/internal/vp9/decoder"
+import vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
 
 // equator360AQRateRatios mirrors libvpx's rate_ratio[] in
 // vp9_aq_360.c. The same per-segment ratio array as the Variance AQ

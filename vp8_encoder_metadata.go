@@ -1,6 +1,6 @@
 package govpx
 
-import vp8common "github.com/thesyncim/govpx/internal/vp8/common"
+import vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
 
 // LastQuantizer returns the public 0..63 quantizer and the internal VP8
 // qindex for the most recently committed encoded frame. ok is false on a

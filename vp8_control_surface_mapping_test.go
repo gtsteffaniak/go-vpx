@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/internal/testutil/controlsurface"
+	"github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/internal/testutil/controlsurface"
 )
 
 type vp8UpstreamControlCoverage struct {

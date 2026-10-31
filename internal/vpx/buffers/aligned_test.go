@@ -6,7 +6,7 @@ import (
 	"testing"
 	"unsafe"
 
-	vpxerrors "github.com/thesyncim/govpx/internal/vpx/errors"
+	vpxerrors "github.com/gtsteffaniak/govpx/internal/vpx/errors"
 )
 
 func TestNewAligned(t *testing.T) {

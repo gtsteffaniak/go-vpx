@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
 )
 
 func TestVP9WebRTCPacketizerConsumesCBRDroppedFrames(t *testing.T) {

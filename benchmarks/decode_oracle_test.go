@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/thesyncim/govpx/internal/coracle"
+	"github.com/gtsteffaniak/govpx/internal/coracle"
 )
 
 func BenchmarkDecodeLibvpxOracleSmoke(b *testing.B) {

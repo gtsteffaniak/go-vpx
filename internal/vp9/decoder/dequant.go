@@ -1,6 +1,6 @@
 package decoder
 
-import "github.com/thesyncim/govpx/internal/vp9/common"
+import "github.com/gtsteffaniak/govpx/internal/vp9/common"
 
 // VP9 dequantizer init. Ported from libvpx v1.16.0
 // vp9/common/vp9_quant_common.c (vp9_dc_quant, vp9_ac_quant,

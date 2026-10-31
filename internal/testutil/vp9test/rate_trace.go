@@ -8,7 +8,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil"
+	"github.com/gtsteffaniak/govpx/internal/testutil"
 )
 
 type RateTraceRow struct {

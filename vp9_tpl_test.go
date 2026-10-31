@@ -5,8 +5,8 @@ import (
 	"image"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/testutil/vp9test"
-	"github.com/thesyncim/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
 )
 
 // newVP9TPLBaseOpts returns the smallest VP9EncoderOptions configuration that

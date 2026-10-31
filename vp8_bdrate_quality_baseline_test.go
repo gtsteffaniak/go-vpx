@@ -1,9 +1,9 @@
 package govpx_test
 
 import (
-	govpx "github.com/thesyncim/govpx"
-	"github.com/thesyncim/govpx/cmd/govpx-bench/benchcmd"
-	"github.com/thesyncim/govpx/internal/testutil/vp8test"
+	govpx "github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/cmd/govpx-bench/benchcmd"
+	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
 	"image"
 	"math"
 	"testing"

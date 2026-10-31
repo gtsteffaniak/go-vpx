@@ -3,10 +3,10 @@ package govpx
 import (
 	"testing"
 
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
-	vp8tables "github.com/thesyncim/govpx/internal/vp8/tables"
-	"github.com/thesyncim/govpx/internal/vpx/buffers"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
+	vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
 )
 
 func newTestEncoder(tb testing.TB) *VP8Encoder {

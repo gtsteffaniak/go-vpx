@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/thesyncim/govpx/internal/vp9/tables"
+import "github.com/gtsteffaniak/govpx/internal/vp9/tables"
 
 // Shared convolution entry points select Go SIMD for supported filter
 // shapes and retain scalar handling of scaled coordinates.

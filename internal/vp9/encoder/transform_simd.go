@@ -3,8 +3,8 @@
 package encoder
 
 import (
-	"github.com/thesyncim/govpx/internal/pixel"
-	"github.com/thesyncim/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/vp9/common"
 	"simd/archsimd"
 )
 

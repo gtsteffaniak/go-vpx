@@ -4,7 +4,7 @@ import (
 	"io"
 	"unsafe"
 
-	vpxerrors "github.com/thesyncim/govpx/internal/vpx/errors"
+	vpxerrors "github.com/gtsteffaniak/govpx/internal/vpx/errors"
 )
 
 // NewAligned returns a byte slice whose first element is aligned to align.

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vp8/common"
 )
 
 // TestReconstructInterFrameGridFastMatchesSlow verifies that the

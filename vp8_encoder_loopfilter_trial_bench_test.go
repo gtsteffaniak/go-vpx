@@ -3,9 +3,9 @@ package govpx
 import (
 	"testing"
 
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	vp8dec "github.com/thesyncim/govpx/internal/vp8/decoder"
-	vp8enc "github.com/thesyncim/govpx/internal/vp8/encoder"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
+	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
 )
 
 // BenchmarkVP8LoopFilterPickTrial720p pins the production-geometry cost of one

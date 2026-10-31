@@ -5,8 +5,8 @@ package encoder
 
 import (
 	"encoding/binary"
-	"github.com/thesyncim/govpx/internal/pixel"
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 	"simd/archsimd"
 	"unsafe"
 )

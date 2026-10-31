@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 // planeTypeUV mirrors libvpx vp8/common/blockd.h:47 `#define PLANE_TYPE_UV 2`.

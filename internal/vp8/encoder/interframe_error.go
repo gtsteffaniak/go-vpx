@@ -1,9 +1,9 @@
 package encoder
 
 import (
-	vp8common "github.com/thesyncim/govpx/internal/vp8/common"
-	"github.com/thesyncim/govpx/internal/vp8/dsp"
-	"github.com/thesyncim/govpx/internal/vpx/arith"
+	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	"github.com/gtsteffaniak/govpx/internal/vpx/arith"
 )
 
 // MacroblockChromaSSE returns the combined U/V SSE for the visible chroma

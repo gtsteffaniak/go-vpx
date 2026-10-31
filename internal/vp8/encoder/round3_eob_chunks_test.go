@@ -2,7 +2,7 @@ package encoder
 
 import (
 	"fmt"
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 	"testing"
 )
 

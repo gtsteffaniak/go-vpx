@@ -3,8 +3,8 @@ package decoder
 import (
 	"unsafe"
 
-	"github.com/thesyncim/govpx/internal/vp8/boolcoder"
-	"github.com/thesyncim/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp8/boolcoder"
+	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
 )
 
 // Ported from libvpx v1.16.0:

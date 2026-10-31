@@ -3,7 +3,7 @@ package govpx_test
 import (
 	"testing"
 
-	"github.com/thesyncim/govpx"
+	"github.com/gtsteffaniak/govpx"
 )
 
 // TestCodecStringMapping confirms each Codec value renders to the

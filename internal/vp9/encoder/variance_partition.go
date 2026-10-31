@@ -1,7 +1,7 @@
 package encoder
 
 import (
-	"github.com/thesyncim/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
 )
 
 // This file contains the libvpx VP9 VAR_BASED_PARTITION threshold
