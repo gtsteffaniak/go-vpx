@@ -1,6 +1,6 @@
 # Codec Status
 
-govpx is pinned to libvpx `v1.16.0` for oracle validation. See `UPSTREAM.md`
+govpx is pinned to libvpx `v1.16.0` for oracle validation. See `docs/upstream.md`
 for the exact tag object, commit, and compatibility scope.
 
 ## VP8

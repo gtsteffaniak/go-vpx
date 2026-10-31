@@ -195,7 +195,7 @@ export GOTOOLCHAIN=local GOEXPERIMENT=simd GOAMD64=v1 GOMAXPROCS=1
 	sha256sum "$root/internal/pixel/copy16_rows_arm64_test.go"
 	sha256sum "$root/internal/vp8/dsp/recon.go"
 	sha256sum "$root/internal/vp8/dsp/copy16_rows_native_test.go"
-	sha256sum "$root/vp8_encoder_denoiser.go"
+	sha256sum "$root/pkg/govpx/vp8_encoder_denoiser.go"
 	sha256sum "$root/copy16_rows_native_test.go"
 	sha256sum "$root/internal/vp8/dsp/sse8_rows_native_test.go"
 	sha256sum "$root/internal/vp9/dsp/subpel_pointer_native_test.go"

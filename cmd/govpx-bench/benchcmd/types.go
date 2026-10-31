@@ -1,7 +1,7 @@
 package benchcmd
 
 import (
-	govpx "github.com/gtsteffaniak/govpx"
+	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
 )
 
 const quantizerHistogramBins = 128

@@ -10,8 +10,8 @@ import (
 	"runtime"
 	"time"
 
-	govpx "github.com/gtsteffaniak/govpx"
 	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
 )
 
 // runLibvpxVP9Benchmark drives vpxenc-vp9 on the same source corpus the

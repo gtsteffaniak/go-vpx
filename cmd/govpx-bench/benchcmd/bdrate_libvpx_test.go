@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	govpx "github.com/gtsteffaniak/govpx"
+	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
 )
 
 // TestLibvpxVP9FrameFlagsCLIArgsMapping exercises the govpx ->

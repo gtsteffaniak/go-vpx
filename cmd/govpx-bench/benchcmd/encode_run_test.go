@@ -3,7 +3,7 @@ package benchcmd
 import (
 	"encoding/json"
 	"flag"
-	govpx "github.com/gtsteffaniak/govpx"
+	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
 	"slices"
 	"strings"
 	"testing"

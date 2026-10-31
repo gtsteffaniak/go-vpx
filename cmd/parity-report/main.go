@@ -32,18 +32,18 @@ type baselineSpec struct {
 }
 
 var baselines = []baselineSpec{
-	{test: "TestVP8OracleInterDecisionMatchRate", path: "testdata/mb_match_rate_baseline.json"},
-	{test: "TestVP8OracleSplitMVDecisionMatchRate", path: "testdata/splitmv_match_rate_baseline.json"},
-	{test: "TestVP8OracleQuantizerHistogramParity", path: "testdata/q_histogram_baseline.json"},
-	{test: "TestVP8OracleTraceInterCandidateParity", path: "testdata/realtime_candidate_parity_baseline.json"},
-	{test: "TestVP8OracleInterQDriftParity", path: "testdata/qdrift_128_baseline.json"},
-	{test: "TestVP8OracleLoopFilterHeaderMatchRate", path: "testdata/loop_filter_match_rate_baseline.json"},
-	{test: "TestVP8OracleSecondPassAllocationParity", path: "testdata/second_pass_alloc_baseline.json"},
-	{test: "TestVP8OracleImprovedMVMatchParity", path: "testdata/improved_mv_match_rate_baseline.json"},
-	{test: "TestVP8OracleCBRDropFrameParity", path: "testdata/cbr_drop_parity_baseline.json"},
-	{test: "TestVP8OracleCandidateRateParity", path: "testdata/candidate_rate_parity_baseline.json"},
-	{test: "TestVP8OracleInterModeDistributionParity", path: "testdata/inter_mode_distribution_baseline.json"},
-	{test: "TestVP8OracleTemporalSVCParity", path: "testdata/temporal_svc_parity_baseline.json"},
+	{test: "TestVP8OracleInterDecisionMatchRate", path: "pkg/govpx/testdata/mb_match_rate_baseline.json"},
+	{test: "TestVP8OracleSplitMVDecisionMatchRate", path: "pkg/govpx/testdata/splitmv_match_rate_baseline.json"},
+	{test: "TestVP8OracleQuantizerHistogramParity", path: "pkg/govpx/testdata/q_histogram_baseline.json"},
+	{test: "TestVP8OracleTraceInterCandidateParity", path: "pkg/govpx/testdata/realtime_candidate_parity_baseline.json"},
+	{test: "TestVP8OracleInterQDriftParity", path: "pkg/govpx/testdata/qdrift_128_baseline.json"},
+	{test: "TestVP8OracleLoopFilterHeaderMatchRate", path: "pkg/govpx/testdata/loop_filter_match_rate_baseline.json"},
+	{test: "TestVP8OracleSecondPassAllocationParity", path: "pkg/govpx/testdata/second_pass_alloc_baseline.json"},
+	{test: "TestVP8OracleImprovedMVMatchParity", path: "pkg/govpx/testdata/improved_mv_match_rate_baseline.json"},
+	{test: "TestVP8OracleCBRDropFrameParity", path: "pkg/govpx/testdata/cbr_drop_parity_baseline.json"},
+	{test: "TestVP8OracleCandidateRateParity", path: "pkg/govpx/testdata/candidate_rate_parity_baseline.json"},
+	{test: "TestVP8OracleInterModeDistributionParity", path: "pkg/govpx/testdata/inter_mode_distribution_baseline.json"},
+	{test: "TestVP8OracleTemporalSVCParity", path: "pkg/govpx/testdata/temporal_svc_parity_baseline.json"},
 }
 
 type testEvent struct {

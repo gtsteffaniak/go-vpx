@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	govpx "github.com/gtsteffaniak/govpx"
+	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
 )
 
 func runBenchmark(cfg benchConfig) (benchReport, error) {

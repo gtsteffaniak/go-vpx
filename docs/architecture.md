@@ -1,13 +1,13 @@
 # Architecture
 
-govpx keeps `github.com/thesyncim/govpx` as the only public import path. The
-root package is the caller-facing facade: constructors, options, errors, image
+govpx keeps `github.com/gtsteffaniak/govpx/pkg/govpx` as the only public import path. The
+`pkg/govpx` package is the caller-facing facade: constructors, options, errors, image
 buffers, RTP types, and codec handles live there. Codec-specific implementation
 belongs under `internal/vp8` and `internal/vp9`; shared code under
 `internal/vpx` is limited to real cross-codec mechanics.
 
-Some encoder implementation still lives in the root package while the split is
-being completed. New codec-owned code should not be added to root.
+Some encoder implementation still lives in `pkg/govpx` while the split is
+being completed. New codec-owned code should not be added to `pkg/govpx`.
 
 ## Ownership
 

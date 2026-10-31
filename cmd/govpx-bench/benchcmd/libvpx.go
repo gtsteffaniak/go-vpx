@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	govpx "github.com/gtsteffaniak/govpx"
+	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
 )
 
 func runLibvpxBenchmark(cfg benchConfig, frames []govpx.Image, deadlineName string) (referenceReport, error) {

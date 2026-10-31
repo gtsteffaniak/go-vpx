@@ -69,7 +69,7 @@ Largest internal files:
 
 ## Public Surface Inventory
 
-The public import path remains `github.com/thesyncim/govpx`.
+The public import path is `github.com/gtsteffaniak/govpx/pkg/govpx`.
 
 Root public families currently exposed by `go doc -short .`:
 
@@ -195,7 +195,7 @@ Final integration gate: `make verify-production`.
 | Shared mechanics | `internal/vpx/**` | Only real cross-codec mechanics. No forced VP8/VP9 symmetry. |
 | Oracle harness | `internal/coracle/**`, root `*_oracle_test.go` harness call sites | New subprocess plumbing belongs in coracle. |
 | Test utilities | `internal/testutil/**`, `testdata/**` | No parity baseline update without an explicit baseline packet. |
-| Docs | `README.md`, `docs/**`, `UPSTREAM.md`, `plan.md` | User docs and parity engineering notes stay separate. |
+| Docs | `README.md`, `docs/**`, `docs/upstream.md`, `plan.md` | User docs and parity engineering notes stay separate. |
 
 ## Proposed Move Ledger
 

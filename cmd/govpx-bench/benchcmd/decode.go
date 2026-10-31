@@ -7,7 +7,7 @@ import (
 	"runtime"
 	"time"
 
-	govpx "github.com/gtsteffaniak/govpx"
+	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
 )
 
 func runDecodeBenchmark(cfg benchConfig) (decodeBenchReport, error) {

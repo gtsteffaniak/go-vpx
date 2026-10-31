@@ -6,7 +6,7 @@ import (
 	"github.com/pion/rtcp"
 	"github.com/pion/rtp"
 
-	"github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/pkg/govpx"
 )
 
 type captureRTPWriter struct {

@@ -1,6 +1,6 @@
 package main
 
-import "github.com/gtsteffaniak/govpx"
+import "github.com/gtsteffaniak/govpx/pkg/govpx"
 
 type vp9WebRTCTestPacketizerMode uint8
 

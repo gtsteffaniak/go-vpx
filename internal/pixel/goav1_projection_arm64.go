@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 // Integer-projection dataflow extracted from goav1 ff46346e73f063ff1ea3a8d7f06ee26cd9baaad4.
-// See UPSTREAM.md and ../../third_party/goav1/LICENSE.
+// See docs/pixel-upstream.md and third_party/goav1/LICENSE.
 //go:build goexperiment.simd && arm64 && !purego
 
 package pixel

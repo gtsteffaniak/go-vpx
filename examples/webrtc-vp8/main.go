@@ -30,7 +30,7 @@ import (
 	"github.com/pion/rtp"
 	"github.com/pion/webrtc/v4"
 
-	"github.com/gtsteffaniak/govpx"
+	"github.com/gtsteffaniak/govpx/pkg/govpx"
 )
 
 const (

@@ -1,7 +1,7 @@
 # Repository Tidy Plan
 
 The cleanup target is a Go-style codec library with
-`github.com/thesyncim/govpx` as the public import path and implementation
+`github.com/gtsteffaniak/govpx/pkg/govpx` as the public import path and implementation
 ownership under internal packages.
 
 ## Non-Negotiables
@@ -19,7 +19,7 @@ ownership under internal packages.
   allocation-free and absent from production hot loops.
 - Preserve hot-path inlining, escape behavior, and allocation profiles unless a
   measured tradeoff is approved.
-- Use the pinned libvpx version in `UPSTREAM.md` as the oracle source of truth.
+- Use the pinned libvpx version in `docs/upstream.md` as the oracle source of truth.
   Do not update baselines just to make a gate pass.
 
 ## Active Passes

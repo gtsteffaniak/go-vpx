@@ -1,8 +1,8 @@
 # govpx — VP8 & VP9 in pure Go
 
-[![CI](https://github.com/thesyncim/govpx/actions/workflows/ci.yml/badge.svg)](https://github.com/thesyncim/govpx/actions/workflows/ci.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/thesyncim/govpx.svg)](https://pkg.go.dev/github.com/thesyncim/govpx)
-[![Go Report Card](https://goreportcard.com/badge/github.com/thesyncim/govpx)](https://goreportcard.com/report/github.com/thesyncim/govpx)
+[![CI](https://github.com/gtsteffaniak/govpx/actions/workflows/ci.yml/badge.svg)](https://github.com/gtsteffaniak/govpx/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/gtsteffaniak/govpx/pkg/govpx.svg)](https://pkg.go.dev/github.com/gtsteffaniak/govpx/pkg/govpx)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gtsteffaniak/govpx)](https://goreportcard.com/report/github.com/gtsteffaniak/govpx)
 [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE)
 
 **A production-grade VP8 and VP9 Profile 0 encoder + decoder written entirely
@@ -41,7 +41,7 @@ encode/decode.
 ## Performance
 
 Historical assembly baseline (before the Go 1.27 SIMD migration; see
-[SIMD_PORT.md](SIMD_PORT.md) for current measurements and limitations):
+[docs/simd-port.md](docs/simd-port.md) for current measurements and limitations):
 720p realtime, 30 fps, 2.5 Mbps CBR, `cpu-used=8`, Apple M4 Max, Go 1.26.3,
 measured 2026-07-16 against libvpx v1.16.0's own reported encode times
 (identical output bytes and drop topology in every encode row):
@@ -70,14 +70,27 @@ Go 1.27 or newer is required. The module pins the default toolchain to Go
 1.27.2 so local `go` commands use the same patch level as CI.
 
 ```sh
-go get github.com/thesyncim/govpx
+go get github.com/gtsteffaniak/govpx
+```
+
+```go
+import "github.com/gtsteffaniak/govpx/pkg/govpx"
+```
+
+This is a fork of [thesyncim/govpx](https://github.com/thesyncim/govpx) with a
+VP9 frame-edge entropy-context fix (matching libvpx `get_ctx_shift`) and a
+`pkg/` + `internal/` layout. The repository root holds only a small demo CLI:
+
+```sh
+go run . info   clip.ivf
+go run . decode clip.ivf out.yuv   # raw I420, byte-identical to vpxdec --i420
 ```
 
 Use `GOEXPERIMENT=simd go build ./...` to enable Go's experimental
 `simd/archsimd` kernels. `make` targets and `scripts/go.sh` enable SIMD by
 default. On amd64, runtime AVX2 detection guards the SIMD kernels; arm64 uses
 mandatory ASIMD. Plain `go build` and `-tags purego` select scalar Go fallbacks.
-See [SIMD_PORT.md](SIMD_PORT.md) for migration and performance validation.
+See [docs/simd-port.md](docs/simd-port.md) for migration and performance validation.
 
 ## Decode
 
@@ -155,7 +168,7 @@ returns no more data.
 
 ## Correctness and validation
 
-govpx treats libvpx v1.16.0 as a pinned oracle (`UPSTREAM.md` is the
+govpx treats libvpx v1.16.0 as a pinned oracle (`docs/upstream.md` is the
 authoritative scope statement). The repository gates enforce:
 
 - **VP8 encoder byte parity** — pinned stream-SHA matrices across rate
@@ -337,7 +350,7 @@ VP8 through pion/webrtc to a browser.
   gates.
 - `docs/perf-phase3-structural-plan.md`: the live speed-vs-libvpx engineering
   program with per-change measurements.
-- `UPSTREAM.md`: pinned libvpx baseline and compatibility scope.
+- `docs/upstream.md`: pinned libvpx baseline and compatibility scope.
 
 ## Benchmarking
 
@@ -388,7 +401,9 @@ make pre-commit
 ## Repository layout
 
 ```text
-.                         public govpx package
+main.go                   demo CLI (info / decode IVF to I420)
+pkg/govpx                 public govpx package (import path .../pkg/govpx)
+pkg/govpx/testdata        oracle parity baselines and fuzz corpora
 internal/vp8/common       VP8 shared state, headers, loop filter, quant tables
 internal/vp8/decoder      VP8 decoder internals
 internal/vp8/encoder      VP8 packet, token, transform, quant, motion helpers
@@ -404,7 +419,7 @@ cmd/govpx-bench           encode/decode benchmark CLI
 cmd/govpx-oracle          oracle wrapper command
 cmd/parity-report         oracle parity report runner
 examples/webrtc-vp8       separate-module WebRTC example
-testdata                  oracle parity baselines
+docs                      all project documentation
 ```
 
 ## Contributing
@@ -420,4 +435,4 @@ testdata                  oracle parity baselines
 ## License
 
 BSD-3-Clause. See `LICENSE`, `NOTICE`, `LICENSE.libvpx`, `PATENTS.libvpx`,
-and `UPSTREAM.md`.
+and `docs/upstream.md`.
