@@ -3,8 +3,8 @@ package encoder
 import (
 	"bytes"
 	"fmt"
-	"github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 	"math/bits"
 	"testing"
 	"unsafe"

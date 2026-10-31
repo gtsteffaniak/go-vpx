@@ -5,7 +5,7 @@ package dsp
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
 )
 
 func TestDCPairInPlaceDisabledState(t *testing.T) {

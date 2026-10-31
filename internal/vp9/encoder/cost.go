@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/gtsteffaniak/govpx/internal/vp9/tables"
+import "github.com/gtsteffaniak/go-vpx/internal/vp9/tables"
 
 // VP9 cost-of-bits tables and helpers. Ported from libvpx v1.16.0
 // vp9/encoder/vp9_cost.{h,c}. The encoder uses these to compute the

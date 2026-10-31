@@ -7,7 +7,7 @@ import (
 	"image"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
 )
 
 func vp9OracleLibvpxFrameFlags(flags uint32) uint32 {

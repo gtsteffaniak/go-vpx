@@ -1,8 +1,8 @@
 package rtp
 
 import (
-	vpxerrors "github.com/gtsteffaniak/govpx/internal/vpx/errors"
-	vpxrtp "github.com/gtsteffaniak/govpx/internal/vpx/rtp"
+	vpxerrors "github.com/gtsteffaniak/go-vpx/internal/vpx/errors"
+	vpxrtp "github.com/gtsteffaniak/go-vpx/internal/vpx/rtp"
 )
 
 // SpatialSVCLayerFrame is one coded VP9 spatial-SVC layer and the RTP

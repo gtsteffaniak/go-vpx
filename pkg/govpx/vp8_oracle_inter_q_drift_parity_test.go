@@ -10,7 +10,7 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
 )
 
 // qdriftBaseline is the on-disk shape recorded by

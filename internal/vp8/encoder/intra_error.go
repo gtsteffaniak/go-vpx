@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/gtsteffaniak/govpx/internal/pixel"
+import "github.com/gtsteffaniak/go-vpx/internal/pixel"
 
 // MacroblockMeanLumaSSE mirrors the libvpx v1.16.0 VP8 first-pass fallback
 // intra_error estimate for a 16x16 macroblock.

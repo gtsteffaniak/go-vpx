@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func TestVP8SDPConstantsMatchRFC7741(t *testing.T) {

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
 )
 
 func TestVP9OracleTemporalPatternByteParity(t *testing.T) {

@@ -4,8 +4,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
 )
 
 // TestVP9SetGoodSpeedFeaturesCPUUsed0Verbatim pins the internal libvpx

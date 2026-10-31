@@ -1,8 +1,8 @@
 package govpx
 
 import (
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/internal/vpx/geometry"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/geometry"
 )
 
 // SetBitrateKbps changes the total encoder target bitrate, in kbps. The

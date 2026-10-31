@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 func assertVP9NeutralFrame(t *testing.T, got Image, width, height int) {

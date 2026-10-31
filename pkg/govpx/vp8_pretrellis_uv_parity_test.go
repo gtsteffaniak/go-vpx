@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
 )
 
 // TestVP8PretrellisUVParity compares govpx and libvpx pre-trellis UV block

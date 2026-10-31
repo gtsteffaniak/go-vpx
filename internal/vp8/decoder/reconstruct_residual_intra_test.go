@@ -3,8 +3,8 @@ package decoder
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/dsp"
 )
 
 func TestAddMacroblockResidualYDCOnly(t *testing.T) {

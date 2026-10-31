@@ -17,7 +17,7 @@ func TestCleanBodyStripsFrameworkLinesAndPrefix(t *testing.T) {
 		"    oracle_x_test.go:140: wrote baseline testdata/x.json with 3 fixtures",
 		"--- PASS: TestX (1.23s)",
 		"PASS",
-		"ok  	github.com/gtsteffaniak/govpx	1.234s",
+		"ok  	github.com/gtsteffaniak/go-vpx	1.234s",
 		"",
 	}, "\n")
 

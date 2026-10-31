@@ -4,10 +4,10 @@ import (
 	"errors"
 	"image"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
-	vpxbuffers "github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
+	vpxbuffers "github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 // Encode is the alloc-returning wrapper around EncodeInto.

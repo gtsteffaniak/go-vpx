@@ -1,8 +1,8 @@
 package dsp
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/pixel"
-	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 // Pure-Go fallback for the 16-wide first-pass bilinear filter on

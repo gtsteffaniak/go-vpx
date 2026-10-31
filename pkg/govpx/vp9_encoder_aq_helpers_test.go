@@ -1,6 +1,6 @@
 package govpx
 
-import vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+import vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
 
 func vp9SegmentCountsForGrid(grid []vp9dec.NeighborMi) [vp9dec.MaxSegments]int {
 	var counts [vp9dec.MaxSegments]int

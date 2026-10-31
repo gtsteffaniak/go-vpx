@@ -21,8 +21,8 @@ import (
 	"github.com/pion/rtp/codecs"
 	"github.com/pion/webrtc/v4"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func TestWebRTCEndToEndReceivedSVCStreamDecodesWithVpxdec(t *testing.T) {

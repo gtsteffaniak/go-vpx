@@ -3,9 +3,9 @@
 package govpx
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
 	"testing"
 )
 

@@ -1,6 +1,6 @@
 package govpx
 
-import vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+import vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
 
 // libvpx vp8/encoder/onyx_int.h DEFAULT_GF_INTERVAL.
 const autoAltRefDefaultSectionInterval = 7

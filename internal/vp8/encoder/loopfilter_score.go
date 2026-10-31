@@ -1,9 +1,9 @@
 package encoder
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/pixel"
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/dsp"
 )
 
 // Loop-filter score helpers mirror libvpx v1.16.0 VP8 picklpf.c and

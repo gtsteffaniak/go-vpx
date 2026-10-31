@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func TestVP8EncoderPublicHotPathAllocatesZero(t *testing.T) {

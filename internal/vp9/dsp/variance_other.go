@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/gtsteffaniak/govpx/internal/pixel"
+import "github.com/gtsteffaniak/go-vpx/internal/pixel"
 
 // Size-specialized variance helpers share Go SIMD and scalar kernels.
 

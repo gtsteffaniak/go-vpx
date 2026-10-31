@@ -4,12 +4,12 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/boolcoder"
-	"github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
-	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/boolcoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func TestWriteZeroKeyFrameDecodesWithPublicDecoder(t *testing.T) {

@@ -1,9 +1,9 @@
 package govpx
 
 import (
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 type vp9ROIMapState struct {

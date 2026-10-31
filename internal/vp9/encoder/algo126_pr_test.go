@@ -2,7 +2,7 @@ package encoder
 
 import (
 	"fmt"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
 	"testing"
 )
 

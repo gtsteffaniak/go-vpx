@@ -1,6 +1,6 @@
 package encoder
 
-import vp9dsp "github.com/gtsteffaniak/govpx/internal/vp9/dsp"
+import vp9dsp "github.com/gtsteffaniak/go-vpx/internal/vp9/dsp"
 
 // BlockDiffStats is the raw per-pixel error accumulation for a prediction
 // block.

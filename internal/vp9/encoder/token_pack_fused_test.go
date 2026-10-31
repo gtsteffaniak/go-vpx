@@ -6,9 +6,9 @@ import (
 	"testing"
 	"unsafe"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/tables"
 )
 
 // refPackTokenWindow is a per-bit reference for the staged coefficient pack

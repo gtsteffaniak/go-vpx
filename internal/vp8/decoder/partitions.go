@@ -3,7 +3,7 @@ package decoder
 import (
 	"errors"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/common"
 )
 
 // Ported from libvpx v1.16.0 vp8/decoder/decodeframe.c token partition

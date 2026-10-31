@@ -1,11 +1,11 @@
 package govpx
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
 	"image"
 	"testing"
 
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
 )
 
 // TestVP9MVHintMapSizing checks the SB64 dimension rounding: a 320x180

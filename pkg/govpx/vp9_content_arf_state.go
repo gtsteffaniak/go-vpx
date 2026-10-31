@@ -3,8 +3,8 @@ package govpx
 import (
 	"image"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 // VP9 per-SB content / ARF / RC state buffers ported verbatim from libvpx

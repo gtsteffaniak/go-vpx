@@ -4,7 +4,7 @@ import (
 	"image"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // TestResizeBigJump exercises the encoder over the full demo-supported

@@ -1,8 +1,8 @@
 package govpx
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
 )
 
 // vp9_fullrd_partition_cost.go ports the partition-type RATE COST and the

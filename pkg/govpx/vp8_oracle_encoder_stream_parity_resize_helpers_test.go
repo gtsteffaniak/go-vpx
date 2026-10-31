@@ -6,7 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
 	"testing"
 )
 

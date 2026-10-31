@@ -1,6 +1,6 @@
 package govpx
 
-import "github.com/gtsteffaniak/govpx/internal/pixel"
+import "github.com/gtsteffaniak/go-vpx/internal/pixel"
 
 func applyTemporalFilterSIMD(src []byte, ss int, pred []byte, ps, w, strength, weight int, acc, count []uint32) bool {
 	if !pixel.Enabled || (w != 8 && w != 16) || strength < 0 || strength > 6 {

@@ -3,7 +3,7 @@ package vp9test
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 )
 
 func TestSyntheticStubPacketHeaderAndTileStart(t *testing.T) {

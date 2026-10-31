@@ -3,7 +3,7 @@
 The public import path is:
 
 ```go
-import "github.com/gtsteffaniak/govpx/pkg/govpx"
+import "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 ```
 
 The root package exposes constructors, options, errors, image buffers, RTP

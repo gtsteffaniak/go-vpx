@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 // ErrVpxencVP9NotBuilt is returned when the harness can't find the

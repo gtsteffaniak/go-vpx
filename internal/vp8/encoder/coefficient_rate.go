@@ -1,6 +1,6 @@
 package encoder
 
-import vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
+import vp8tables "github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 
 // Coefficient rate and block RD helpers mirror libvpx v1.16.0 VP8
 // vp8/encoder/rdopt.c and vp8/encoder/encodemb.c mechanics.

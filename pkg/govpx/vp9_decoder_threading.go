@@ -6,10 +6,10 @@ import (
 	"sync/atomic"
 	"unsafe"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 type vp9LoopFilterPlane uint8

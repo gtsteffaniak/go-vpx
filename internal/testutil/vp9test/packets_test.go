@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	vp9bits "github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
+	vp9bits "github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
 )
 
 func TestBitPackerWritesMSBFirst(t *testing.T) {

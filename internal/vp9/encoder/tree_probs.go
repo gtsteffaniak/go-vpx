@@ -1,7 +1,7 @@
 package encoder
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
 )
 
 // VP9 tree-distribution conversion + multi-leaf prob update writer.

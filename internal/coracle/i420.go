@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 func validateI420Raw(codec string, raw []byte, width int, height int, frames int) error {

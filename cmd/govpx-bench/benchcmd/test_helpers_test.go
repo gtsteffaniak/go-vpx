@@ -3,7 +3,7 @@ package benchcmd
 import (
 	"encoding/binary"
 	"fmt"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 	"os"
 	"path/filepath"
 	"strconv"

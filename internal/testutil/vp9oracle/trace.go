@@ -7,8 +7,8 @@ import (
 	"image"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 type EncoderHook func(*govpx.VP9Encoder, int)

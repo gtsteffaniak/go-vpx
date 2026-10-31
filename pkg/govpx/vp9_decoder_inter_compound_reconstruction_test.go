@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/tables"
 )
 
 func TestVP9DecoderReconstructsCompoundInterSkipFrame(t *testing.T) {

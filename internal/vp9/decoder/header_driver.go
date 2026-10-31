@@ -1,6 +1,6 @@
 package decoder
 
-import "github.com/gtsteffaniak/govpx/internal/vp9/common"
+import "github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 
 // UncompressedHeader carries the full state the VP9 uncompressed
 // header emits. Mirrors the parser-visible subset of VP9_COMMON that

@@ -1,10 +1,10 @@
 package govpx
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
-	"github.com/gtsteffaniak/govpx/internal/vpx/arith"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/arith"
 )
 
 func (e *VP9Encoder) vp9NonrdSourceVariance(inter *vp9InterEncodeState,

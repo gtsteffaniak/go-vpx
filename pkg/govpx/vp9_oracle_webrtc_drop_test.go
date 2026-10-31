@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
 )
 
 func TestVP9WebRTCPreEncodeDropPacketizedStreamDecodesWithVpxdec(t *testing.T) {

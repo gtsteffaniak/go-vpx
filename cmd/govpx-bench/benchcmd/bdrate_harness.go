@@ -7,7 +7,7 @@ import (
 	"math"
 	"sort"
 
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // BDRateOptions configures one BD-rate measurement run.

@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/gtsteffaniak/govpx/internal/vpx/conformance"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/conformance"
 )
 
 var errOraclePathEmpty = errors.New("coracle: oracle path is empty")

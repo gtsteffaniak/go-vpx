@@ -1,9 +1,9 @@
 package govpx
 
 import (
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
-	vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
+	vp8tables "github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 func selectInterFrameMotionVectorWithSearch(src vp8enc.SourceImage, ref *vp8common.Image, mbRow int, mbCol int, mbRows int, mbCols int, bestRefMV vp8enc.MotionVector, qIndex int, search interAnalysisSearchConfig, mvProbs *[2][vp8tables.MVPCount]uint8) (vp8enc.MotionVector, int) {

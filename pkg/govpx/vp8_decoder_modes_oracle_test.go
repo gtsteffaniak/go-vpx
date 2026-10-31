@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
 )
 
 func TestVP8OracleVpxdecDecodesEncodeIntoKeyFrame(t *testing.T) {

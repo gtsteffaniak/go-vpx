@@ -6,8 +6,8 @@ import (
 	"image"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	vp9enc "github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	vp9enc "github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
 )
 
 // TestVP9EncoderEncodeIntoSteadyStateAlloc verifies that the

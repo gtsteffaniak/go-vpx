@@ -3,7 +3,7 @@ package dsp
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/common"
 )
 
 func TestIntra4x4PredictModes(t *testing.T) {

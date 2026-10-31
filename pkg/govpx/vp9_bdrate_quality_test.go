@@ -62,8 +62,8 @@ import (
 	"math"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/cmd/govpx-bench/benchcmd"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/cmd/govpx-bench/benchcmd"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // defaultLibvpxAbsoluteGate is the conservative starting threshold

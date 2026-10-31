@@ -4,7 +4,7 @@ import (
 	"math/bits"
 	"unsafe"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 // Coefficient token packing follows libvpx v1.16.0 vp8_pack_tokens: encode the

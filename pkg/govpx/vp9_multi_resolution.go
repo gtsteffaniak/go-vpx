@@ -4,7 +4,7 @@ import (
 	"image"
 	"sync"
 
-	vp9dsp "github.com/gtsteffaniak/govpx/internal/vp9/dsp"
+	vp9dsp "github.com/gtsteffaniak/go-vpx/internal/vp9/dsp"
 )
 
 // MaxMultiResLayers is the maximum number of resolutions supported by the

@@ -2,7 +2,7 @@
 
 package govpx
 
-import vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+import vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
 
 type predictedMacroblockCoefficientTrace struct {
 	pretrellisUVTrace     *VP8Encoder

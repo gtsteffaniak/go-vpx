@@ -1,8 +1,8 @@
 package decoder
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 )
 
 // Coefficient probability updates from the VP9 compressed header.

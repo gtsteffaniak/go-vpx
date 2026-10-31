@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func TestBuildNeutralPredictorKeyFrameCoefficientsDecodes(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 func TestReadLiteralDeterministic(t *testing.T) {

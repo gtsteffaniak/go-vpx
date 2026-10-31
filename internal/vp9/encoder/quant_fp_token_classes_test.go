@@ -1,11 +1,11 @@
 package encoder
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
 	"math/rand"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 )
 
 // referenceTokenClass is the ground-truth energy class for one signed

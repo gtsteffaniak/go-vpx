@@ -1,6 +1,6 @@
 package govpx
 
-import vpxrtp "github.com/gtsteffaniak/govpx/internal/vpx/rtp"
+import vpxrtp "github.com/gtsteffaniak/go-vpx/internal/vpx/rtp"
 
 // RTPPayloadFragment is one RTP payload body plus the RTP marker-bit value
 // the caller should put in the RTP header for that body.

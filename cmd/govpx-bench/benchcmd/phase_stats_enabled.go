@@ -2,7 +2,7 @@
 
 package benchcmd
 
-import govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+import govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 
 const phaseTimingEnabled = true
 

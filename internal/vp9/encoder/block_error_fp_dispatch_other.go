@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/gtsteffaniak/govpx/internal/pixel"
+import "github.com/gtsteffaniak/go-vpx/internal/pixel"
 
 func blockErrorFPDispatch(coeff, dqcoeff []int16, n int) uint64 {
 	if pixel.Enabled {

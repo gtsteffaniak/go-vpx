@@ -1,6 +1,6 @@
 package bitstream
 
-import vpxerrors "github.com/gtsteffaniak/govpx/internal/vpx/errors"
+import vpxerrors "github.com/gtsteffaniak/go-vpx/internal/vpx/errors"
 
 // SuperframeIndex describes the frame slices carried by a VP9 superframe
 // index. Count is zero when a packet is not a superframe.

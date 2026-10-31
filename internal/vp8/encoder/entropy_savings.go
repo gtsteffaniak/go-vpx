@@ -1,6 +1,6 @@
 package encoder
 
-import vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
+import vp8tables "github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 
 // ReferenceFrameCosts ports libvpx v1.16.0 vp8/encoder/bitstream.c
 // vp8_calc_ref_frame_costs. The four-entry result is indexed by libvpx's

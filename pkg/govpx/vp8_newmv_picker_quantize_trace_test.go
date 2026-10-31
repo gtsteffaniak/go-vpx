@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
 )
 
 // TestVP8NewMVPickerQuantizeTraceRows compares the libvpx-side NEWMV picker

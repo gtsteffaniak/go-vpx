@@ -2,8 +2,8 @@ package dsp
 
 import (
 	"fmt"
-	"github.com/gtsteffaniak/govpx/internal/pixel"
-	"github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/common"
 	"slices"
 	"testing"
 )

@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/gtsteffaniak/govpx/internal/vp8/tables"
+import "github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 
 // Ported from libvpx v1.16.0 vp8/common/treecoder.h token representation and
 // vp8/encoder/bitstream.c tree token writers.

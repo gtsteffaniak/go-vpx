@@ -4,7 +4,7 @@ package encoder
 
 import (
 	"fmt"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 	"testing"
 	"unsafe"
 )

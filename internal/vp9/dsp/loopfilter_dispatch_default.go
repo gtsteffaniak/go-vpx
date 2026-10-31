@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/gtsteffaniak/govpx/internal/pixel"
+import "github.com/gtsteffaniak/go-vpx/internal/pixel"
 
 func vpxLpfHorizontal4(plane []uint8, s, pitch int, blimit, limit, thresh uint8) {
 	if pixel.LoopFilter(plane, s, pitch, 1, 8, int(blimit), int(limit), int(thresh), 4) {

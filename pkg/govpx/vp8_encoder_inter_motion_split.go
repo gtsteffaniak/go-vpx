@@ -1,9 +1,9 @@
 package govpx
 
 import (
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
-	vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
+	vp8tables "github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 func selectInterFrameSplitBlockFullPixelMotionVectorFromCenter(src vp8enc.SourceImage, ref *vp8common.Image, mbRow int, mbCol int, block int, width int, height int, searchCenter vp8enc.MotionVector, bestRefMV vp8enc.MotionVector, qIndex int) (vp8enc.MotionVector, int) {

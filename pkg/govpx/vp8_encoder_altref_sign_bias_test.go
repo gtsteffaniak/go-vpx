@@ -2,7 +2,7 @@ package govpx
 
 import (
 	"errors"
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
 	"testing"
 )
 

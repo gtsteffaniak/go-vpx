@@ -3,9 +3,9 @@ package govpx
 import (
 	"math"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
 )
 
 func vp9SetRtSpeedFeatureFramesizeDependent(e *VP9Encoder, sf *SpeedFeatures, speed int, ctx vp9SpeedFrameContext) {

@@ -1,6 +1,6 @@
 package decoder
 
-import "github.com/gtsteffaniak/govpx/internal/vp8/common"
+import "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
 
 // Ported from libvpx v1.16.0:
 // - vp8/decoder/decodeframe.c vp8cx_init_de_quantizer

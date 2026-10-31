@@ -6,11 +6,11 @@ import (
 	"image"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 const vp9GoldenReferenceRefreshFlagForTest = uint8(1 << 1)

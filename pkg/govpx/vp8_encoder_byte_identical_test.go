@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
 )
 
 // TestEncoderByteIdenticalHash drives a deterministic 720p realtime cpu-used=8

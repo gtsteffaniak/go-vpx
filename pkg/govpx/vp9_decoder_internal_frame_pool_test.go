@@ -3,8 +3,8 @@ package govpx
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 )
 
 func TestVP9DecoderInternalRefreshAliasesDecodedFrame(t *testing.T) {

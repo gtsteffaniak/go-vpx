@@ -3,7 +3,7 @@ package dsp
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 // Benchmarks for the 16x16 second-pass bilinear hot path. The

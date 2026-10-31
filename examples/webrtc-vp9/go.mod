@@ -1,4 +1,4 @@
-module github.com/gtsteffaniak/govpx/examples/webrtc-vp9
+module github.com/gtsteffaniak/go-vpx/examples/webrtc-vp9
 
 go 1.27.0
 
@@ -6,7 +6,7 @@ require (
 	github.com/pion/rtcp v1.2.16
 	github.com/pion/rtp v1.10.1
 	github.com/pion/webrtc/v4 v4.2.11
-	github.com/gtsteffaniak/govpx v0.0.0
+	github.com/gtsteffaniak/go-vpx v0.0.0
 )
 
 require (
@@ -31,4 +31,4 @@ require (
 	golang.org/x/time v0.10.0 // indirect
 )
 
-replace github.com/gtsteffaniak/govpx => ../..
+replace github.com/gtsteffaniak/go-vpx => ../..

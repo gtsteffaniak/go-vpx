@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
 )
 
 // Independent integer reference: explicitly wrap input+4 to signed32 before

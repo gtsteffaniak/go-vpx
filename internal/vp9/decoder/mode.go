@@ -1,8 +1,8 @@
 package decoder
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 )
 
 // VP9 block-level mode decoders. Ported from libvpx v1.16.0

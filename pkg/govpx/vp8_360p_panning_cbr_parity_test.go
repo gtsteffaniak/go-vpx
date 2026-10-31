@@ -8,8 +8,8 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
 )
 
 // TestVP8Panning360pMBParity compares govpx and libvpx per-MB mode/ref/MV

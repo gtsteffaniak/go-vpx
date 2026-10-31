@@ -54,8 +54,8 @@ import (
 	"image"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // vp8480pVBRPerFrameRow pins one (frame_index, govpx_size, govpx_iQ) row

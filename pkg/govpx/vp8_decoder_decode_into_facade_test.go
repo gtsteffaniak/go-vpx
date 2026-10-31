@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func TestDecodeIntoRejectsNilImage(t *testing.T) {

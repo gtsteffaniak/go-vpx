@@ -6,10 +6,10 @@ import (
 	"os"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8corpus"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8corpus"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
 )
 
 func TestVP8OracleExternalIVFTestDataMatchesLibvpx(t *testing.T) {

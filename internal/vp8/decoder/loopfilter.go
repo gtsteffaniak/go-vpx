@@ -2,10 +2,10 @@ package decoder
 
 import (
 	"errors"
-	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/dsp"
 )
 
 // Ported from libvpx v1.16.0 vp8/common/vp8_loopfilter.c frame traversal and

@@ -5,8 +5,8 @@ package govpx
 import (
 	"sync/atomic"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
 )
 
 const vp9PhaseStatsEnabled = true

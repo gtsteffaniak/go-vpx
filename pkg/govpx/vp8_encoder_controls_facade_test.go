@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func TestVP8EncoderRejectsInvalidOptions(t *testing.T) {

@@ -1,8 +1,8 @@
 package govpx
 
 import (
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
 )
 
 // StreamInfo describes the VP8 frame-header fields that can be read

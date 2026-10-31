@@ -3,11 +3,11 @@ package govpx
 import (
 	"math"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	vp9dsp "github.com/gtsteffaniak/govpx/internal/vp9/dsp"
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	vp9dsp "github.com/gtsteffaniak/go-vpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 // vp9_nonrd_pick_partition.go ports the ML_BASED_PARTITION branch of libvpx

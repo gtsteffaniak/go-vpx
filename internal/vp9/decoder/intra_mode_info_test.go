@@ -3,9 +3,9 @@ package decoder
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/tables"
 )
 
 // seedDefaultModeProbs mirrors libvpx's seeding of y_mode_prob /

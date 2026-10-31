@@ -3,12 +3,12 @@ package govpx
 import (
 	"bytes"
 	"errors"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
 )
 
 func TestVP9EncoderSetROIMapValidationAndCopy(t *testing.T) {

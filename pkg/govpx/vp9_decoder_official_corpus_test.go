@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9corpus"
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9corpus"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func TestVP9DecoderDefaultProfile0WebMCorpusMinimumMatchesList(t *testing.T) {

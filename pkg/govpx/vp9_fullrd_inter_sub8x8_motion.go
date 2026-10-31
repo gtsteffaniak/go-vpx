@@ -3,10 +3,10 @@ package govpx
 import (
 	"math"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	vp9dsp "github.com/gtsteffaniak/govpx/internal/vp9/dsp"
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	vp9dsp "github.com/gtsteffaniak/go-vpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
 )
 
 // vp9_fullrd_inter_sub8x8_motion.go ports the per-sub-block single-reference

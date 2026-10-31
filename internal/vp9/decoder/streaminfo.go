@@ -1,9 +1,9 @@
 package decoder
 
 import (
-	vp9bits "github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vpxerrors "github.com/gtsteffaniak/govpx/internal/vpx/errors"
+	vp9bits "github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vpxerrors "github.com/gtsteffaniak/go-vpx/internal/vpx/errors"
 )
 
 // Stream-info peeking follows the uncompressed-header order in libvpx v1.16.0

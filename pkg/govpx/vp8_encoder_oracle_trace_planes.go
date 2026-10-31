@@ -2,7 +2,7 @@
 
 package govpx
 
-import vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+import vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
 
 func (e *VP8Encoder) emitOracleLFTrial(phase string, trialLevel int, trialYSSE int) {
 	if !e.oracleTraceEnabled() {

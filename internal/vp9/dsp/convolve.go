@@ -1,10 +1,10 @@
 package dsp
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
 	"runtime"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/tables"
 )
 
 // convolve8TempBuf is the intermediate-row buffer used by VpxConvolve8 /

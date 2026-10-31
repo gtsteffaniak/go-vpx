@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/boolcoder"
-	"github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
-	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/boolcoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 func TestWriteZeroReferenceInterFrameDecodesTokenPartitions(t *testing.T) {

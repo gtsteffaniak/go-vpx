@@ -5,8 +5,8 @@ package encoder
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/pixel"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 )
 
 func TestBlockYrdQuantScoreSignedDomain(t *testing.T) {

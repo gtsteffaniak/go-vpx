@@ -1,8 +1,8 @@
 package govpx
 
 import (
-	vp9rtp "github.com/gtsteffaniak/govpx/internal/vp9/rtp"
-	vpxrtp "github.com/gtsteffaniak/govpx/internal/vpx/rtp"
+	vp9rtp "github.com/gtsteffaniak/go-vpx/internal/vp9/rtp"
+	vpxrtp "github.com/gtsteffaniak/go-vpx/internal/vpx/rtp"
 )
 
 const (

@@ -3,7 +3,7 @@ package govpx
 import (
 	"testing"
 
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
 )
 
 // This test pins vp8_temporal_filter_iterate_c outer-loop plumbing.

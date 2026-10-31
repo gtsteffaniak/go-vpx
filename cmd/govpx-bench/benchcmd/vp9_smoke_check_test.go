@@ -3,7 +3,7 @@ package benchcmd
 import (
 	"testing"
 
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // TestVP9EncodeDecodeRoundtripsSolidColor verifies that the VP9

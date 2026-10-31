@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
 )
 
 // VP9 multi-tile output driver. Ported from libvpx v1.16.0

@@ -69,7 +69,7 @@ Largest internal files:
 
 ## Public Surface Inventory
 
-The public import path is `github.com/gtsteffaniak/govpx/pkg/govpx`.
+The public import path is `github.com/gtsteffaniak/go-vpx/pkg/govpx`.
 
 Root public families currently exposed by `go doc -short .`:
 

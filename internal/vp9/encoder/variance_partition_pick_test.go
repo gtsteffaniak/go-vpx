@@ -3,8 +3,8 @@ package encoder
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
 )
 
 // TestVP9MinMax8x8Flat exercises vpx_minmax_8x8_c (vpx_dsp/avg.c:389-401)

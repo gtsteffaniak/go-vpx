@@ -3,7 +3,7 @@ package common
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/tables"
 )
 
 // TestScanIsPermutation checks that every forward scan in DefaultScanOrders

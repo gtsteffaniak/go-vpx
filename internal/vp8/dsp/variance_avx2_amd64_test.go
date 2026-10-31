@@ -6,8 +6,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/pixel"
-	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 // Native-specific parity tests that bypass the runtime dispatch and call

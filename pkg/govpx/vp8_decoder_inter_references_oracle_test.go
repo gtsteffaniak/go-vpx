@@ -5,10 +5,10 @@ package govpx
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp8test"
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/internal/vpx/geometry"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp8test"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/geometry"
 )
 
 func TestVP8OracleLibvpxChecksumMatchesEncodeIntoBPredCandidateInterFrame(t *testing.T) {

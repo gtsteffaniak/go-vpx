@@ -1,6 +1,6 @@
 package encoder
 
-import common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+import common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
 
 // Ported from libvpx v1.16.0 vp8/encoder/bitstream.c
 // vp8cx_base_skip_false_prob. Entries are indexed by internal VP8 qindex.

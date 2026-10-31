@@ -1,10 +1,10 @@
 package govpx
 
 import (
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
-	"github.com/gtsteffaniak/govpx/internal/vpx/geometry"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/geometry"
 )
 
 // applyResolutionChange rebuilds the encoder's size-dependent state for

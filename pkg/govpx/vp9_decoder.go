@@ -3,14 +3,14 @@ package govpx
 import (
 	"errors"
 
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8dec "github.com/gtsteffaniak/govpx/internal/vp8/decoder"
-	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	"github.com/gtsteffaniak/govpx/internal/vp9/dsp"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
-	vpxerrors "github.com/gtsteffaniak/govpx/internal/vpx/errors"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8dec "github.com/gtsteffaniak/go-vpx/internal/vp8/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
+	vpxerrors "github.com/gtsteffaniak/go-vpx/internal/vpx/errors"
 )
 
 // VP9Decryptor mirrors libvpx v1.16.0 VPXD_SET_DECRYPTOR for VP9.

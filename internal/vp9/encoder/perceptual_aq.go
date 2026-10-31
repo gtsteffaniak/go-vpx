@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+import "github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 
 // VP9 perceptual adaptive quantization (AQ_MODE=PERCEPTUAL_AQ).
 //
@@ -33,7 +33,7 @@ import (
 	"slices"
 	"sort"
 
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
 )
 
 const (

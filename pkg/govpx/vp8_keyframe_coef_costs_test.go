@@ -2,8 +2,8 @@ package govpx
 
 import (
 	"fmt"
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
-	vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
+	vp8tables "github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 	"testing"
 )
 

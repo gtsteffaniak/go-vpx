@@ -3,8 +3,8 @@ package encoder
 import (
 	"errors"
 
-	"github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 // Ported from libvpx v1.16.0 vp8/encoder/bitstream.c keyframe mode writers.

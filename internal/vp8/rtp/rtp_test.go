@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/rtptest"
-	vpxerrors "github.com/gtsteffaniak/govpx/internal/vpx/errors"
-	vpxrtp "github.com/gtsteffaniak/govpx/internal/vpx/rtp"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/rtptest"
+	vpxerrors "github.com/gtsteffaniak/go-vpx/internal/vpx/errors"
+	vpxrtp "github.com/gtsteffaniak/go-vpx/internal/vpx/rtp"
 )
 
 func TestPayloadDescriptorMinimalRoundTrip(t *testing.T) {

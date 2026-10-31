@@ -1,8 +1,8 @@
 package govpx
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vpx/arith"
-	vpxrc "github.com/gtsteffaniak/govpx/internal/vpx/ratecontrol"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/arith"
+	vpxrc "github.com/gtsteffaniak/go-vpx/internal/vpx/ratecontrol"
 	"testing"
 )
 

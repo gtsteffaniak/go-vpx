@@ -1,7 +1,7 @@
 package govpx
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 // saveVP9CyclicRefreshMapsForCounts snapshots cyclic refresh maps after

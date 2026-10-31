@@ -4,7 +4,7 @@ import (
 	"hash/adler32"
 	"testing"
 
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
 )
 
 // arnrTestEncoder builds an encoder pre-wired for direct applyARNRFilter

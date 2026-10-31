@@ -3,7 +3,7 @@
 package dsp
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
 	"math/rand/v2"
 	"testing"
 )

@@ -1,6 +1,6 @@
 package dsp
 
-import "github.com/gtsteffaniak/govpx/internal/pixel"
+import "github.com/gtsteffaniak/go-vpx/internal/pixel"
 
 // Pure-Go fallback for the 16-wide second-pass bilinear filter on
 // architectures without a NEON port. Mirrors libvpx v1.16.0

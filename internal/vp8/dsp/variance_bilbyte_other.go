@@ -1,8 +1,8 @@
 package dsp
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/pixel"
-	"github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 // Ported from libvpx v1.16.0 vpx_dsp/arm/subpel_variance_neon.c

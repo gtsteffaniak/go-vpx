@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // TestVP9WorkerPoolNoGoroutineLeakOnClose spawns several VP9 encoders and

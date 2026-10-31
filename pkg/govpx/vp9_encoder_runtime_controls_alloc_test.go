@@ -1,9 +1,9 @@
 package govpx_test
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9oracle"
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9oracle"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 	"testing"
 )
 

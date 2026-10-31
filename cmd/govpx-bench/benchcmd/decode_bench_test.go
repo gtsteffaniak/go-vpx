@@ -3,7 +3,7 @@ package benchcmd
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // benchmarkVP9DecodePackets encodes the canonical decode-benchmark stream

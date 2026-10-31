@@ -4,7 +4,7 @@ package dsp
 
 import (
 	"bytes"
-	"github.com/gtsteffaniak/govpx/internal/pixel"
+	"github.com/gtsteffaniak/go-vpx/internal/pixel"
 	"testing"
 )
 

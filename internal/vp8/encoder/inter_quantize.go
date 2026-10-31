@@ -1,7 +1,7 @@
 package encoder
 
 import (
-	vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	vp8tables "github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 func QuantizeBlockWithZbin(coeff *[16]int16, quant *BlockQuant, zbinOverQuant int, zbinModeBoost int, qcoeff *[16]int16, dqcoeff *[16]int16) int {

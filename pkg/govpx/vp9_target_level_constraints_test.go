@@ -3,7 +3,7 @@ package govpx
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
 )
 
 func TestVP9TargetLevelClampsEffectiveRateControl(t *testing.T) {

@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
+import "github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
 
 // VP9 probability sub-exponential update writer. Ported from libvpx
 // v1.16.0 vp9/encoder/vp9_subexp.c — vp9_write_prob_diff_update and

@@ -6,9 +6,9 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	"github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
 )
 
 // TestVP9FullRDInterSuperBlockYRDFrame1SB0Parity pins the genuine inter

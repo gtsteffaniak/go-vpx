@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"time"
 
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // runVP9Benchmark runs the VP9 encode benchmark and (when a libvpx vpxenc-vp9

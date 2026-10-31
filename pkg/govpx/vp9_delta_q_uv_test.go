@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	vp9dec "github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	vp9dec "github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 func TestVP9EncoderRejectsOutOfRangeDeltaQUV(t *testing.T) {

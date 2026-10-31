@@ -2,7 +2,7 @@
 
 package govpx
 
-import "github.com/gtsteffaniak/govpx/internal/vp9/encoder"
+import "github.com/gtsteffaniak/go-vpx/internal/vp9/encoder"
 
 func (e *VP9Encoder) vp9PhaseAttachChoosePartitioningStats(
 	args *encoder.ChoosePartitioningArgs, stats *encoder.ChoosePartitioningStats,

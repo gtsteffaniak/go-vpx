@@ -1,10 +1,10 @@
 package encoder
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	"github.com/gtsteffaniak/govpx/internal/vp9/decoder"
-	"github.com/gtsteffaniak/govpx/internal/vp9/dsp"
-	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/decoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/tables"
 )
 
 // This file ports the get_estimated_pred orchestrator from libvpx v1.16.0

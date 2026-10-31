@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gtsteffaniak/govpx/internal/testutil/vp9test"
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/testutil/vp9test"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 )
 
 // TestVP9RowMTValidation pins the constructor-time gating on the RowMT option.

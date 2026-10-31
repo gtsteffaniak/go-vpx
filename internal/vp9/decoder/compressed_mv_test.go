@@ -3,7 +3,7 @@ package decoder
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/bitstream"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/bitstream"
 )
 
 // TestReadMvProbsNoUpdatesPreservesAll writes a bitstream of "no

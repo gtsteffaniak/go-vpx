@@ -1,7 +1,7 @@
 # Repository Tidy Plan
 
 The cleanup target is a Go-style codec library with
-`github.com/gtsteffaniak/govpx/pkg/govpx` as the public import path and implementation
+`github.com/gtsteffaniak/go-vpx/pkg/govpx` as the public import path and implementation
 ownership under internal packages.
 
 ## Non-Negotiables

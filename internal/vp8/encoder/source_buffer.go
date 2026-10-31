@@ -1,8 +1,8 @@
 package encoder
 
 import (
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/internal/vpx/buffers"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/buffers"
 )
 
 // Ported from libvpx v1.16.0 vp8/encoder/lookahead.c

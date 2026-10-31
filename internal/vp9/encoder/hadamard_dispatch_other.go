@@ -1,6 +1,6 @@
 package encoder
 
-import "github.com/gtsteffaniak/govpx/internal/pixel"
+import "github.com/gtsteffaniak/go-vpx/internal/pixel"
 
 func hadamard8x8Into(src []int16, stride int, coeff []int16) {
 	if !hadamardGo(src, stride, coeff, 8) {

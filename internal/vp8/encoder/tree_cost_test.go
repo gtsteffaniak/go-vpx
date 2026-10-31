@@ -3,8 +3,8 @@ package encoder
 import (
 	"testing"
 
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8tables "github.com/gtsteffaniak/govpx/internal/vp8/tables"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8tables "github.com/gtsteffaniak/go-vpx/internal/vp8/tables"
 )
 
 // TestTreeTokenCostMatchesSlowReference asserts that the precomputed-path

@@ -5,7 +5,7 @@ package govpx
 import (
 	"encoding/json"
 	"fmt"
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
 	"hash/adler32"
 	"io"
 )

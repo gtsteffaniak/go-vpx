@@ -1,8 +1,8 @@
 package encoder
 
 import (
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	"github.com/gtsteffaniak/govpx/internal/vp8/dsp"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp8/dsp"
 )
 
 // Static inter encode-breakout helpers mirror libvpx v1.16.0

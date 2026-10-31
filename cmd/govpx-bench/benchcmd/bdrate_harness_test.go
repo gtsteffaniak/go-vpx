@@ -4,7 +4,7 @@ import (
 	"image"
 	"testing"
 
-	govpx "github.com/gtsteffaniak/govpx/pkg/govpx"
+	govpx "github.com/gtsteffaniak/go-vpx/pkg/govpx"
 )
 
 // TestComputeBDRateSmoke drives the harness on a tiny synthetic source.

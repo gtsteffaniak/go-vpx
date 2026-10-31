@@ -1,6 +1,6 @@
 package encoder_test
 
-import vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
+import vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
 
 func setAllMacroblockEOBs(coeffs *vp8enc.MacroblockCoefficients, is4x4 bool) {
 	if !is4x4 {

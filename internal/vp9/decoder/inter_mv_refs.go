@@ -1,8 +1,8 @@
 package decoder
 
 import (
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	"github.com/gtsteffaniak/govpx/internal/vp9/tables"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/tables"
 )
 
 // MvRef stores the previous/current-frame reference and MV pair tracked by

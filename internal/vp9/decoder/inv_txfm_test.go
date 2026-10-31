@@ -3,8 +3,8 @@ package decoder
 import (
 	"testing"
 
-	"github.com/gtsteffaniak/govpx/internal/vp9/common"
-	"github.com/gtsteffaniak/govpx/internal/vp9/dsp"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/common"
+	"github.com/gtsteffaniak/go-vpx/internal/vp9/dsp"
 )
 
 // TestIdct4x4AddDispatchesByEob: eob==1 uses DC-only; eob>1 uses

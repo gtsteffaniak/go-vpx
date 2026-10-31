@@ -1,6 +1,6 @@
 package decoder
 
-import "github.com/gtsteffaniak/govpx/internal/vp9/common"
+import "github.com/gtsteffaniak/go-vpx/internal/vp9/common"
 
 const (
 	// MFQEPrecision mirrors libvpx vp9_postproc.h: weights live in 4-bit

@@ -1,10 +1,10 @@
 package govpx
 
 import (
-	vp8common "github.com/gtsteffaniak/govpx/internal/vp8/common"
-	vp8enc "github.com/gtsteffaniak/govpx/internal/vp8/encoder"
-	"github.com/gtsteffaniak/govpx/internal/vpx/arith"
-	vpxrc "github.com/gtsteffaniak/govpx/internal/vpx/ratecontrol"
+	vp8common "github.com/gtsteffaniak/go-vpx/internal/vp8/common"
+	vp8enc "github.com/gtsteffaniak/go-vpx/internal/vp8/encoder"
+	"github.com/gtsteffaniak/go-vpx/internal/vpx/arith"
+	vpxrc "github.com/gtsteffaniak/go-vpx/internal/vpx/ratecontrol"
 )
 
 type frameSizeRecodeState struct {
