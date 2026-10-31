@@ -145,6 +145,10 @@ func convolveHoriz(src []byte, srcStride int, dst []byte, dstStride int,
 	}
 
 	srcStart := srcOffset - (tables.SubpelTaps/2 - 1)
+	if xStepQ4 == 16 && w > 0 && h > 0 {
+		convolveHorizUnscaled(src, srcStride, dst, dstStride, &xFilters[x0Q4&tables.SubpelMask], w, h, srcStart+(x0Q4>>tables.SubpelBits), false)
+		return
+	}
 	for y := range h {
 		xQ4 := x0Q4
 		rowSrc := srcStart + y*srcStride
@@ -175,6 +179,10 @@ func convolveVert(src []byte, srcStride int, dst []byte, dstStride int,
 	}
 
 	srcStart := srcOffset - srcStride*(tables.SubpelTaps/2-1)
+	if yStepQ4 == 16 && w > 0 && h > 0 {
+		convolveVertUnscaled(src, srcStride, dst, dstStride, &yFilters[y0Q4&tables.SubpelMask], w, h, srcStart+(y0Q4>>tables.SubpelBits)*srcStride, false)
+		return
+	}
 	for x := range w {
 		yQ4 := y0Q4
 		for y := range h {
@@ -199,6 +207,10 @@ func convolveAvgHoriz(src []byte, srcStride int, dst []byte, dstStride int,
 	x0Q4, xStepQ4, w, h, srcOffset int,
 ) {
 	srcStart := srcOffset - (tables.SubpelTaps/2 - 1)
+	if xStepQ4 == 16 && w > 0 && h > 0 {
+		convolveHorizUnscaled(src, srcStride, dst, dstStride, &xFilters[x0Q4&tables.SubpelMask], w, h, srcStart+(x0Q4>>tables.SubpelBits), true)
+		return
+	}
 	for y := range h {
 		xQ4 := x0Q4
 		rowSrc := srcStart + y*srcStride
@@ -222,6 +234,10 @@ func convolveAvgVert(src []byte, srcStride int, dst []byte, dstStride int,
 	y0Q4, yStepQ4, w, h, srcOffset int,
 ) {
 	srcStart := srcOffset - srcStride*(tables.SubpelTaps/2-1)
+	if yStepQ4 == 16 && w > 0 && h > 0 {
+		convolveVertUnscaled(src, srcStride, dst, dstStride, &yFilters[y0Q4&tables.SubpelMask], w, h, srcStart+(y0Q4>>tables.SubpelBits)*srcStride, true)
+		return
+	}
 	for x := range w {
 		yQ4 := y0Q4
 		for y := range h {
