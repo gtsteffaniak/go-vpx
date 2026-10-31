@@ -1489,6 +1489,14 @@ func (d *VP9Decoder) readVP9ResidueBlock(r *bitstream.Reader,
 					leftCtx[6] = hasResidue
 					leftCtx[7] = hasResidue
 				}
+				// libvpx get_ctx_shift: entropy-context entries past the
+				// visible frame edge are written as zero.
+				for i := num4x4W - cc; i < step; i++ {
+					aboveCtx[i] = 0
+				}
+				for i := num4x4H - rr; i < step; i++ {
+					leftCtx[i] = 0
+				}
 				blockIdx += blockStep
 			}
 			blockIdx += extraStep
@@ -1595,6 +1603,14 @@ func (d *VP9Decoder) readVP9InterResiduePlane(
 					aCtx[cc+i] = hasResidue
 					lCtx[rr+i] = hasResidue
 				}
+			}
+			// libvpx get_ctx_shift: entropy-context entries past the
+			// visible frame edge are written as zero.
+			for i := num4x4W - cc; i < step; i++ {
+				aCtx[cc+i] = 0
+			}
+			for i := num4x4H - rr; i < step; i++ {
+				lCtx[rr+i] = 0
 			}
 		}
 	}

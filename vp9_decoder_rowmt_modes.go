@@ -1229,6 +1229,14 @@ func (d *VP9Decoder) parseVP9ResidueBlockRowMT(r *bitstream.Reader,
 					hasResidue = 1
 				}
 				vp9SetHasResidueContexts(aboveCtx, leftCtx, txSize, hasResidue)
+				// libvpx get_ctx_shift: entropy-context entries past the
+				// visible frame edge are written as zero.
+				for i := num4x4W - cc; i < step; i++ {
+					aboveCtx[i] = 0
+				}
+				for i := num4x4H - rr; i < step; i++ {
+					leftCtx[i] = 0
+				}
 				blockIdx += blockStep
 			}
 			blockIdx += extraStep
