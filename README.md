@@ -1,15 +1,15 @@
-# govpx — VP8 & VP9 in pure Go
+# go-vpx — VP8 & VP9 in pure Go
 
-[![CI](https://github.com/gtsteffaniak/govpx/actions/workflows/ci.yml/badge.svg)](https://github.com/gtsteffaniak/govpx/actions/workflows/ci.yml)
-[![Go Reference](https://pkg.go.dev/badge/github.com/gtsteffaniak/govpx/pkg/govpx.svg)](https://pkg.go.dev/github.com/gtsteffaniak/govpx/pkg/govpx)
-[![Go Report Card](https://goreportcard.com/badge/github.com/gtsteffaniak/govpx)](https://goreportcard.com/report/github.com/gtsteffaniak/govpx)
+[![CI](https://github.com/gtsteffaniak/go-vpx/actions/workflows/ci.yml/badge.svg)](https://github.com/gtsteffaniak/govpx/actions/workflows/ci.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/gtsteffaniak/go-vpx/pkg/govpx.svg)](https://pkg.go.dev/github.com/gtsteffaniak/go-vpx/pkg/govpx)
+[![Go Report Card](https://goreportcard.com/badge/github.com/gtsteffaniak/go-vpx)](https://goreportcard.com/report/github.com/gtsteffaniak/go-vpx)
 [![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE)
 
 **A production-grade VP8 and VP9 Profile 0 encoder + decoder written entirely
 in Go — validated byte-for-byte against libvpx, with no cgo and no runtime
 dependencies.**
 
-govpx is for Go programs that need real VP8/VP9 support — WebRTC senders,
+go-vpx is for Go programs that need real VP8/VP9 support — WebRTC senders,
 SFUs, media servers, transcoders, recorders — without linking C. It produces
 and consumes raw VP8 frame payloads and raw VP9 Profile 0 packets for
 RTP/WebRTC-compatible transport, and ships the full realtime toolbox libvpx
@@ -17,7 +17,7 @@ users expect: CBR rate control, frame dropping, temporal denoising, temporal
 and spatial SVC, ROI/active maps, two-pass encoding, and multithreaded
 encode/decode.
 
-## Why govpx
+## Why go-vpx
 
 - **Correct, provably.** Development is oracle-driven against pinned libvpx
   v1.16.0: VP8 encoder output is **byte-identical** to libvpx across the
